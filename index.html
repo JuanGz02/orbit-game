@@ -10,11 +10,12 @@
 <link rel="manifest" href="/manifest.json">
 <title>ORBIT</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea{user-select:text;-webkit-user-select:text}
 body{overflow:hidden;font-family:system-ui,sans-serif;touch-action:none;transition:background .6s,color .6s}
 canvas{display:block;position:absolute;inset:0;touch-action:none;z-index:0}
 #hud{position:absolute;top:0;left:0;width:100%;text-align:center;padding-top:26px;pointer-events:none;z-index:2}
-#sc{font-size:56px;font-weight:100;letter-spacing:-2px;display:none;pointer-events:all;cursor:pointer}
+#sc{font-size:56px;font-weight:100;letter-spacing:-2px;display:none;pointer-events:none;cursor:default}
 #co{font-size:12px;letter-spacing:4px;opacity:0;transition:opacity .4s;margin-top:2px}
 #coins-hud{position:absolute;top:26px;right:16px;font-size:13px;display:none;pointer-events:none;z-index:2}
 #pause-btn{position:absolute;top:22px;left:16px;width:36px;height:36px;border-radius:50%;display:none;align-items:center;justify-content:center;font-size:11px;cursor:pointer;border:none;z-index:2}
@@ -236,7 +237,7 @@ var I18N={
     statBest:'BEST',statCoins:'COINS',statGames:'GAMES',
     pauseTitle:'PAUSED',resume:'RESUME',menu:'MENU',
     score:'SCORE',best:'BEST',retry:'RETRY',newRec:'NEW RECORD!',crash:'CRASH',
-    revive:'WATCH AD — REVIVE',payHook:'Payment opens here',adHook:'Watch complete to revive',
+    revive:'WATCH AD — REVIVIR',payHook:'Payment opens here',adHook:'Watch complete to revive',
     resetDone:'Reset!',loggedOut:'Logged out',noData:'no games yet',
     seeMore:'▼ SEE MORE',seeLess:'▲ HIDE'},
   es:{tag:'toca · mantén para potencia',google:'Continuar con Google',fb:'Continuar con Facebook',or:'o',
@@ -255,9 +256,9 @@ var I18N={
 var lang='en';
 function t(k){return(I18N[lang]||I18N.en)[k]||k;}
 
-var TRAILS=[{id:'simple',name:'Classic',icon:'—',price:0},{id:'rainbow',name:'Rainbow',icon:'🌈',price:120},
-  {id:'stars',name:'Stars',icon:'✦',price:180},{id:'fire',name:'Fire',icon:'🔥',price:220},
-  {id:'ghost',name:'Ghost',icon:'◌',price:160},{id:'bubbles',name:'Bubbles',icon:'○',price:140}];
+var TRAILS=[{id:'simple',name:'Classic',icon:'—',price:0},{id:'rainbow',name:'Rainbow',icon:'🌈',price:300},
+  {id:'stars',name:'Stars',icon:'✦',price:250},{id:'fire',name:'Fire',icon:'🔥',price:200},
+  {id:'ghost',name:'Ghost',icon:'◌',price:280},{id:'bubbles',name:'Bubbles',icon:'🫧',price:200}];
 var PACKS=[{id:'noads',name:'No Ads',desc:'Remove all ads forever',price:'$1.99',col:'#4f46e5'},
   {id:'c300',name:'300 ★',desc:'Coin starter pack',price:'$0.99',col:'#d97706'},
   {id:'c1000',name:'1000 ★',desc:'Best value',price:'$2.99',col:'#b45309'}];
@@ -592,7 +593,7 @@ function renderShop(tab){
     html+='<div style="font-size:28px">🧲</div><div style="flex:1">';
     html+='<div style="font-size:13px;font-weight:500;color:'+T.text+'">Magnet <span style="color:'+T.textMuted+';font-weight:400">(x'+mc+')</span></div>';
     html+='<div style="font-size:11px;color:'+T.textMuted+';margin-top:2px">'+(lang==='es'?'Atrae monedas · 1 partida':'Pulls coins · 1 game')+'</div></div>';
-    html+='<div style="color:#fbbf24;font-size:13px;font-weight:600">★ 5</div></div>';
+    html+='<div style="color:#fbbf24;font-size:13px;font-weight:600">★ 10</div></div>';
     html+='<div style="font-size:10px;letter-spacing:3px;color:'+T.textMuted+';margin-bottom:8px">COIN PACKS</div>';
     for(var j=0;j<PACKS.length;j++){
       var p=PACKS[j];
@@ -724,12 +725,12 @@ function renderLbData(all){
     html+='<div style="font-size:'+(big?20:15)+'px">'+medals[i]+'</div>';
     html+='<div style="position:relative">'+avCircle(r.nick,r.avatar||avCol(r.nick),r.photo,big?50:38);
     if(r.isMe)html+='<div style="position:absolute;bottom:-2px;right:-2px;width:10px;height:10px;border-radius:50%;background:#fbbf24;border:2px solid '+T.bg+'"></div>';
-    html+='</div><div style="font-size:'+(big?13:11)+'px;font-weight:'+(big?600:400)+';max-width:56px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:'+T.text+'">'+r.nick+'</div>';
+    html+='</div><div style="font-size:'+(big?13:11)+'px;font-weight:'+(big?600:400)+';max-width:56px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:'+T.text+'">'+r.nick+' · '+(r.country || '??')+'</div>';
     html+='<div style="font-size:11px;color:#fbbf24;font-weight:600">'+r.score+'</div></div>';
   });
   document.getElementById('lb-medals').innerHTML=html;
-  var rest=all.slice(3),show=rest.slice(0,10);
-  if(myPos>=3&&!show.some(function(r){return r.isMe;}))show.push(all[myPos]);
+  var rest=all.slice(3),show=rest.slice(0,7);
+  if(myPos>=10&&!show.some(function(r){return r.isMe;})){show[show.length-1]=all[myPos];}
   var h2='';
   show.forEach(function(r){
     var pos=all.indexOf(r)+1;
@@ -841,16 +842,28 @@ function activateMagnet(){
   if(magnetActive||phase!=='playing')return;
   if(!S.ownedPowerups)S.ownedPowerups={};
   var total=S.coins+sesCoins;
+  var magnetCost=10+Math.floor(score*0.3);
   if(!(S.ownedPowerups.magnet>0)){
-    if(total<5){toast(t('notEnough'));return;}
-    var cost=5;
+    if(total<magnetCost){toast(t('notEnough'));return;}
+    var cost=magnetCost;
     if(sesCoins>=cost){sesCoins-=cost;}
     else{cost-=sesCoins;sesCoins=0;S.coins=Math.max(0,S.coins-cost);}
-    document.getElementById('cv').textContent=sesCoins;saveState();
-    animateCoinDeduction(5);
+    document.getElementById('cv').textContent=Math.floor(sesCoins);saveState();
+    animateCoinDeduction(magnetCost);
   }else{S.ownedPowerups.magnet--;saveState();}
   magnetActive=true;
+  magnetTimer=10;
   if(magnetBtn){magnetBtn.style.background='rgba(202,162,30,.35)';magnetBtn.style.border='1.5px solid rgba(202,162,30,.8)';magnetBtn.style.boxShadow='0 0 14px rgba(202,162,30,.4)';}
+  // Spawn absorption particles
+  for(var i=0;i<12;i++){var a=rnd(0,6.28),d=rnd(30,80);parts.push({wx:orb.wx+Math.cos(a)*d,wy:orb.wy+Math.sin(a)*d,vx:Math.cos(a)*-2,vy:Math.sin(a)*-2,life:1,col:'#caaa1e',r:rnd(2,4)});}
+}
+var magnetTimer=0;
+function updateMagnetTimer(dt){
+  if(magnetActive&&magnetTimer>0){
+    magnetTimer-=dt/60;
+    if(magnetBtn){magnetBtn.textContent='🧲'+Math.ceil(magnetTimer);}
+    if(magnetTimer<=0){magnetActive=false;magnetTimer=0;if(magnetBtn){magnetBtn.textContent='🧲';magnetBtn.style.background='rgba(251,191,36,.15)';magnetBtn.style.border='1.5px solid rgba(251,191,36,.5)';magnetBtn.style.boxShadow='none';}}
+  }
 }
 function animateCoinDeduction(amount){
   var hud=document.getElementById('coins-hud'),cvEl=document.getElementById('cv');
@@ -946,13 +959,13 @@ function update(dt){
       if(cn.done)return;
       var dx=orb.wx-cn.wx,dy=orb.wy-cn.wy,dist=Math.hypot(dx,dy);
       if(dist<280&&dist>0){var pull=6*(1-dist/280)*dt;cn.wx+=dx/dist*pull;cn.wy+=dy/dist*pull;}
-      if(dist<20){cn.done=true;sesCoins++;document.getElementById('cv').textContent=sesCoins;burst(cn.wx,cn.wy,'#fbbf24',7);}
+      if(dist<20){cn.done=true;var multiplier=1+combo*0.15;sesCoins+=1*multiplier;document.getElementById('cv').textContent=Math.floor(sesCoins);burst(cn.wx,cn.wy,'#fbbf24',7);if(magnetActive)burst(cn.wx,cn.wy,'#caaa1e',3);}
     });
     coins_arr=coins_arr.filter(function(c){return !c.done;});
   }else{
     coins_arr.forEach(function(cn){
       if(cn.done)return;
-      if(Math.hypot(orb.wx-cn.wx,orb.wy-cn.wy)<cn.r+20){cn.done=true;sesCoins++;document.getElementById('cv').textContent=sesCoins;burst(cn.wx,cn.wy,'#fbbf24',7);}
+      if(Math.hypot(orb.wx-cn.wx,orb.wy-cn.wy)<cn.r+20){cn.done=true;var multiplier=1+combo*0.15;sesCoins+=1*multiplier;document.getElementById('cv').textContent=Math.floor(sesCoins);burst(cn.wx,cn.wy,'#fbbf24',7);if(magnetActive)burst(cn.wx,cn.wy,'#caaa1e',3);}
     });
     coins_arr=coins_arr.filter(function(c){return !c.done;});
   }
@@ -996,6 +1009,7 @@ function update(dt){
   orb.trail.push({wx:orb.wx,wy:orb.wy});if(orb.trail.length>40)orb.trail.shift();
   parts.forEach(function(p){p.wx+=p.vx*dt;p.wy+=p.vy*dt;p.vx*=Math.pow(.91,dt);p.vy*=Math.pow(.91,dt);p.vy+=.07*dt;p.life-=.028*dt;});
   parts=parts.filter(function(p){return p.life>0;});
+  updateMagnetTimer(dt);
 }
 
 function drawTrail(){
