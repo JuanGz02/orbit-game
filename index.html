@@ -843,7 +843,7 @@ function spawnMagnetBtn(){
   if(magnetBtn)return;
   magnetBtn=document.createElement('button');
   magnetBtn.style.cssText='position:absolute;bottom:28px;right:16px;width:48px;height:48px;border-radius:50%;background:rgba(251,191,36,.15);border:1.5px solid rgba(251,191,36,.5);color:#fbbf24;font-size:22px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all .2s;pointer-events:all;z-index:3';
-  magnetBtn.innerHTML='<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center">🧲<svg id="magnet-ring" style="position:absolute;top:0;left:0;width:48px;height:48px;transform:rotate(-90deg)"><circle cx="24" cy="24" r="20" fill="none" stroke="rgba(251,191,36,0.3)" stroke-width="2"/><circle id="magnet-progress" cx="24" cy="24" r="20" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="125.6" stroke-dashoffset="0" stroke-linecap="round"/></svg></div>';
+  magnetBtn.innerHTML='<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center">🧲<div id="magnet-fill" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(251,191,36,.35);border-radius:50%;clip-path:polygon(0 0,100% 0,100% 100%,0 100%);transition:clip-path 0.1s linear"></div></div>';
   magnetBtn.onclick=activateMagnet;
   document.body.appendChild(magnetBtn);
 }
@@ -866,8 +866,8 @@ function activateMagnet(){
     magnetBtn.style.background='rgba(202,162,30,.35)';
     magnetBtn.style.border='1.5px solid rgba(202,162,30,.8)';
     magnetBtn.style.boxShadow='0 0 14px rgba(202,162,30,.4)';
-    // Create circular progress indicator
-    magnetBtn.innerHTML='<div style="position:relative;width:100%;height:100%">🧲<svg id="magnet-ring" style="position:absolute;top:-2px;left:-2px;width:36px;height:36px;transform:rotate(-90deg)"><circle cx="18" cy="18" r="15" fill="none" stroke="rgba(251,191,36,0.3)" stroke-width="2"/><circle id="magnet-progress" cx="18" cy="18" r="15" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="94.2" stroke-dashoffset="0" stroke-linecap="round"/></svg></div>';
+    var fill=document.getElementById('magnet-fill');
+    if(fill)fill.style.clipPath='polygon(0 0,100% 0,100% 100%,0 100%)';
   }
   // Spawn absorption particles
   for(var i=0;i<12;i++){var a=rnd(0,6.28),d=rnd(30,80);parts.push({wx:orb.wx+Math.cos(a)*d,wy:orb.wy+Math.sin(a)*d,vx:Math.cos(a)*-2,vy:Math.sin(a)*-2,life:1,col:'#caaa1e',r:rnd(2,4)});}
@@ -877,15 +877,15 @@ var magnetMaxTime=20;
 function updateMagnetTimer(dt){
   if(magnetActive&&magnetTimer>0){
     magnetTimer-=dt/60;
-    var progress=document.getElementById('magnet-progress');
-    if(progress){
-      var pct=1-(magnetTimer/magnetMaxTime);
-      progress.style.strokeDashoffset=125.6*(1-pct);
+    var fill=document.getElementById('magnet-fill');
+    if(fill){
+      var pct=magnetTimer/magnetMaxTime;
+      fill.style.clipPath='polygon(0 '+((1-pct)*100)+'%,100% '+((1-pct)*100)+'%,100% 100%,0 100%)';
     }
     if(magnetTimer<=0){
       magnetActive=false;magnetTimer=0;
       if(magnetBtn){
-        magnetBtn.innerHTML='<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center">🧲<svg id="magnet-ring" style="position:absolute;top:0;left:0;width:48px;height:48px;transform:rotate(-90deg)"><circle cx="24" cy="24" r="20" fill="none" stroke="rgba(251,191,36,0.3)" stroke-width="2"/><circle id="magnet-progress" cx="24" cy="24" r="20" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="125.6" stroke-dashoffset="0" stroke-linecap="round"/></svg></div>';
+        magnetBtn.innerHTML='<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center">🧲<div id="magnet-fill" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(251,191,36,.35);border-radius:50%;clip-path:polygon(0 100%,100% 100%,100% 100%,0 100%);transition:clip-path 0.1s linear"></div></div>';
         magnetBtn.style.background='rgba(251,191,36,.15)';
         magnetBtn.style.border='1.5px solid rgba(251,191,36,.5)';
         magnetBtn.style.boxShadow='none';
@@ -899,7 +899,7 @@ function animateCoinDeduction(amount){
   cvEl.textContent=saved;hud.style.transform='scale(1.15)';hud.style.textShadow='0 0 8px rgba(251,191,36,.6)';
   setTimeout(function(){cvEl.textContent=saved+' − '+amount;cvEl.style.color='#ef4444';},400);
   setTimeout(function(){cvEl.textContent=S.coins;cvEl.style.color='#fbbf24';},1000);
-  setTimeout(function(){cvEl.textContent=sesCoins;hud.style.transform='scale(1)';hud.style.textShadow='none';},1600);
+  setTimeout(function(){cvEl.textContent=Math.floor(sesCoins);hud.style.transform='scale(1)';hud.style.textShadow='none';},1600);
 }
 function showMagnetBtn(show){
   if(!magnetBtn)spawnMagnetBtn();
@@ -953,12 +953,12 @@ function startReviveCountdown(){
       btn.textContent="REVIVE ("+reviveTimer+")";
     }else{
       clearInterval(reviveInterval);
-      var phrases=["CONTINUE YOUR RUN","YOU WERE CLOSE","ALMOST THERE!"];
-      if(combo>=5)phrases.push("SAVE YOUR COMBO");
+      var phrases=lang==='es'?["CONTINÚA TU RUN","CASI LO LOGRAS","¡MUY CERCA!"]:["CONTINUE YOUR RUN","YOU WERE CLOSE","ALMOST THERE!"];
+      if(combo>=5)phrases.push(lang==='es'?"SALVA TU COMBO":"SAVE YOUR COMBO");
       btn.textContent=phrases[Math.floor(Math.random()*phrases.length)];
-      btn.style.background="rgba(239,68,68,0.8)";
-      btn.style.transform="scale(1.1)";
-      btn.style.boxShadow="0 0 20px rgba(239,68,68,0.8)";
+      btn.style.background="rgba(239,68,68,0.4)";
+      btn.style.transform="scale(1.05)";
+      btn.style.boxShadow="0 0 10px rgba(239,68,68,0.3)";
       btn.style.animation="pulse 0.6s infinite";
     }
   },1000);
