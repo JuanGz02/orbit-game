@@ -62,6 +62,7 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
   100% { transform: scale(1); }
 }
 .bk{animation:bk 2s ease-in-out infinite}
+@keyframes tutPulse{0%,100%{opacity:.7;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.08)}}
 </style>
 </head>
 <body>
@@ -283,7 +284,7 @@ function getPal(){return GAME_PAL;}
 // ══════════════════════════════════════════
 // 2. STATE
 // ══════════════════════════════════════════
-var DEF={user:null,nick:'',lang:'en',coins:0,best:0,noAds:false,themeMode:'auto',
+var DEF={user:null,nick:'',lang:'en',coins:0,best:0,noAds:false,themeMode:'auto',tutorial:false,
   trail:'simple',ownedTrails:['simple'],hist:[],photo:null,country:'',ownedPowerups:{magnet:0}};
 var S=Object.assign({},DEF);
 function loadState(){try{var d=localStorage.getItem('orb7');if(d)S=Object.assign({},DEF,JSON.parse(d));}catch(e){}}
@@ -363,6 +364,29 @@ function showCoinPopup(text,wx,wy){
   });
   setTimeout(function(){el.remove();},900);
 }
+function shouldShowTutorial(){return !S.tutorial&&S.best===0;}
+function startTutorial(){
+  if(!shouldShowTutorial()){tutStep=0;return;}
+  tutStep=1;showTutOverlay(lang==='es'?'TOCA PARA SALTAR':'TAP TO JUMP','👆');
+}
+function showTutOverlay(text,icon){
+  removeTutOverlay();
+  tutEl=document.createElement('div');
+  tutEl.id='tut-overlay';
+  tutEl.style.cssText='position:absolute;bottom:120px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;z-index:20;animation:tutPulse 1.2s ease-in-out infinite';
+  tutEl.innerHTML='<div style="font-size:36px">'+icon+'</div><div style="font-size:14px;letter-spacing:3px;font-weight:600;color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,.4)">'+text+'</div>';
+  document.body.appendChild(tutEl);
+}
+function advanceTutorial(){
+  if(tutStep===1){
+    tutStep=2;
+    showTutOverlay(lang==='es'?'¡MANTÉN PARA MÁS FUERZA!':'HOLD FOR MORE POWER!','💪');
+  }else if(tutStep===2){
+    tutStep=0;removeTutOverlay();
+    S.tutorial=true;saveState();
+  }
+}
+function removeTutOverlay(){if(tutEl){tutEl.remove();tutEl=null;}}
 
 var userCountry='Local';
 try{
@@ -813,6 +837,7 @@ window.addEventListener('resize',rsz);rsz();
 
 var phase='idle',score,combo,sesCoins,revived;
 var sesCoinsFrac=0;
+var tutStep=0,tutEl=null;
 var revivedThisRun=false;
 var reviveTimer=0;
 var reviveInterval=null;
@@ -957,7 +982,7 @@ function releaseJump(){
   orb.vx=Math.cos(ta)*sp;orb.vy=Math.sin(ta)*sp;
   orb.lastLaunched=orb.on;orb.graceFrames=10;orb.last=-1;orb.on=-1;
 }
-function startGame(){SCRS.forEach(function(s){document.getElementById('scr-'+s).classList.remove('on');});phase='playing';init();}
+function startGame(){SCRS.forEach(function(s){document.getElementById('scr-'+s).classList.remove('on');});phase='playing';init();startTutorial();}
 function togglePause(){
   if(phase==='playing'){phase='paused';document.getElementById('scr-pause').classList.add('on');document.getElementById('scr-pause').style.background=T.bg;document.getElementById('pause-btn').style.display='none';}
   else if(phase==='paused'){phase='playing';document.getElementById('scr-pause').classList.remove('on');document.getElementById('pause-btn').style.display='flex';}
@@ -1000,7 +1025,7 @@ function doRevive(){
   },function(){toast(lang==='es'?'Ve el anuncio completo':'Watch the full ad to revive');});
 }
 function die(){
-  if(phase==='dead')return;phase='dead';snd(false);
+  if(phase==='dead')return;phase='dead';snd(false);removeTutOverlay();tutStep=0;
   if(navigator.vibrate)navigator.vibrate([50,30,80]);
   S.coins+=sesCoins;if(score>S.best)S.best=score;
   S.hist.push({score:score,date:new Date().toLocaleDateString()});
@@ -1084,6 +1109,7 @@ if(Math.hypot(orb.wx-cn.wx,orb.wy-cn.wy)<cn.r+20){cn.done=true;var multiplier=1+
         hitIdx=i;hitT=1;hitAmt=ci.r*.18;ci.shockwave={r:ci.r*.3,a:.9};
         burst(orb.wx,orb.wy,ci.col,16);
         if(i===circles.length-1){
+          if(tutStep>0)advanceTutorial();
           score++;combo++;snd(true);screenShake(Math.min(2+score*.15,8));
           if(navigator.vibrate)navigator.vibrate(score>20?30:15);
           document.getElementById('sc').textContent=score;if(score>S.best)S.best=score;
