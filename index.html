@@ -54,7 +54,7 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
 .div-line{display:flex;align-items:center;gap:10px;width:100%;margin:10px 0}
 .div-line::before,.div-line::after{content:'';flex:1;height:1px;background:rgba(128,128,128,.2)}
 .div-line span{font-size:11px;letter-spacing:2px;opacity:.35}
-#scr-auth.on,#scr-shop.on,#scr-profile.on,#scr-dead.on,#scr-pause.on{background:var(--scr-bg,#f0ebe4)}
+#scr-auth.on,#scr-shop.on,#scr-profile.on,#scr-dead.on,#scr-pause.on,#scr-guest.on{background:var(--scr-bg,#e8e3db)}
 @keyframes bk{0%,100%{opacity:.2}50%{opacity:.5}}
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
 @keyframes tutBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
@@ -154,21 +154,13 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     <div class="sb" style="min-width:72px;border-radius:14px;padding:12px 16px"><div id="d-best" style="font-size:26px;font-weight:200;color:#fbbf24">0</div><div id="d-best-lbl" class="sl">BEST</div></div>
     <div class="sb" style="min-width:72px;border-radius:14px;padding:12px 16px"><div id="d-earned" style="font-size:26px;font-weight:200;color:#fbbf24">0</div><div style="font-size:10px;letter-spacing:3px;opacity:.4;margin-top:3px">★</div></div>
   </div>
-  <div id="revive-wrap" style="margin-bottom:10px;text-align:center">
-    <button class="btn bsm" id="d-revive" onclick="doRevive()" style="color:#fbbf24;border:1px solid #fbbf2488">WATCH AD — REVIVE</button>
-  </div>
-  <div style="display:flex;gap:10px;margin-bottom:18px">
-    <button class="btn" id="d-retry" style="padding:16px 48px;font-weight:700;font-size:14px" onclick="startGame()">RETRY</button>
-    <button class="btn bsm" id="d-menu" onclick="showScr('home')">MENU</button>
-  </div>
-  <button class="btn bsm" id="d-share" onclick="shareScore()" style="margin-bottom:14px;letter-spacing:2px;opacity:.7">↗ SHARE</button>
-  <div style="width:100%">
+  <div style="width:100%;margin-bottom:14px">
     <div style="display:flex;gap:12px;justify-content:center;margin-bottom:10px" id="lb-medals"></div>
     <div style="text-align:center;margin-bottom:6px">
       <button class="btn bsm" id="lb-more-btn" onclick="toggleLbMore()" style="font-size:10px;letter-spacing:2px;opacity:.55;width:100%">▼ SEE MORE</button>
     </div>
     <div id="lb-more-list" style="display:none;margin-bottom:8px"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-bottom:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
       <div class="lang-switch" id="lb-scope-sw" style="font-size:10px">
         <div class="lang-opt on" id="lbs-global" onclick="setLbScope('global',this)">🌍 GLOBAL</div>
         <div class="lang-opt" id="lbs-local" onclick="setLbScope('local',this)">📍 LOCAL</div>
@@ -176,6 +168,14 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
       <div id="lb-reset-lbl" style="font-size:10px;opacity:.4;color:#fbbf24"></div>
     </div>
   </div>
+  <div id="revive-wrap" style="margin-bottom:10px;text-align:center">
+    <button class="btn bsm" id="d-revive" onclick="doRevive()" style="color:#fbbf24;border:1px solid #fbbf2488">WATCH AD — REVIVE</button>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:12px">
+    <button class="btn" id="d-retry" style="padding:16px 48px;font-weight:700;font-size:14px" onclick="startGame()">RETRY</button>
+    <button class="btn bsm" id="d-menu" onclick="showScr('home')">MENU</button>
+  </div>
+  <button class="btn bsm" id="d-share" onclick="shareScore()" style="margin-bottom:14px;letter-spacing:2px;opacity:.7">↗ SHARE</button>
 </div>
 
 <!-- PAUSE -->
@@ -311,7 +311,7 @@ var TH_NIGHT={bg:'#0a0a14',text:'#fff',textMuted:'rgba(255,255,255,.35)',border:
   btn:'rgba(255,255,255,.1)',btnBorder:'rgba(255,255,255,.22)',
   btnP:'#fff',btnPT:'#0a0a14',input:'rgba(255,255,255,.07)',inputB:'rgba(255,255,255,.15)',
   langBg:'rgba(255,255,255,.08)',langOn:'rgba(255,255,255,.18)',orbCol:'#ffffff'};
-var TH_DAY={bg:'#f0ebe4',text:'#1a1a2e',textMuted:'rgba(20,20,40,.4)',border:'rgba(20,20,40,.1)',
+var TH_DAY={bg:'#e8e3db',text:'#1a1a2e',textMuted:'rgba(20,20,40,.4)',border:'rgba(20,20,40,.1)',
   card:'rgba(20,20,40,.05)',navBg:'rgba(20,20,40,.06)',navOn:'rgba(20,20,40,.12)',
   btn:'rgba(20,20,40,.06)',btnBorder:'rgba(20,20,40,.15)',
   btnP:'#1a1a2e',btnPT:'#fff',input:'rgba(20,20,40,.06)',inputB:'rgba(20,20,40,.15)',
@@ -463,15 +463,16 @@ function tutLanded(){
   }
 }
 
-// Ambient music — subtle generative ambient with Web Audio
-var musicNode=null,musicGain=null,musicPlaying=false;
+// Ambient music — chill lo-fi with Web Audio
+var musicNode=null,musicGain=null,musicPlaying=false,menuMusicPlaying=false;
 function startMusic(){
   if(musicPlaying||!AC)return;
+  stopMenuMusic();
   musicPlaying=true;
   musicGain=AC.createGain();
   musicGain.gain.value=0;
   musicGain.connect(AC.destination);
-  musicGain.gain.linearRampToValueAtTime(0.04,AC.currentTime+2);
+  musicGain.gain.linearRampToValueAtTime(0.12,AC.currentTime+2);
   playAmbientChord();
 }
 function playAmbientChord(){
@@ -481,7 +482,7 @@ function playAmbientChord(){
   var o=AC.createOscillator(),g=AC.createGain();
   o.type='sine';o.frequency.value=note*(Math.random()<.3?2:1);
   g.gain.setValueAtTime(0,AC.currentTime);
-  g.gain.linearRampToValueAtTime(.025,AC.currentTime+1.5);
+  g.gain.linearRampToValueAtTime(.06,AC.currentTime+1.5);
   g.gain.linearRampToValueAtTime(0,AC.currentTime+6);
   o.connect(g);g.connect(musicGain);
   o.start();o.stop(AC.currentTime+6.5);
@@ -490,6 +491,38 @@ function playAmbientChord(){
 function stopMusic(){
   musicPlaying=false;
   if(musicGain){musicGain.gain.linearRampToValueAtTime(0,AC.currentTime+1);}
+}
+// Menu lo-fi music
+var menuGain=null;
+function startMenuMusic(){
+  if(menuMusicPlaying||musicPlaying)return;
+  if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();
+  menuMusicPlaying=true;
+  menuGain=AC.createGain();
+  menuGain.gain.value=0;
+  menuGain.connect(AC.destination);
+  menuGain.gain.linearRampToValueAtTime(0.08,AC.currentTime+1.5);
+  playMenuChord();
+}
+function playMenuChord(){
+  if(!menuMusicPlaying||!AC)return;
+  var chords=[[196,246.94,293.66],[220,277.18,329.63],[174.61,220,261.63],[164.81,207.65,246.94]];
+  var chord=chords[Math.floor(Math.random()*chords.length)];
+  chord.forEach(function(freq){
+    var o=AC.createOscillator(),g=AC.createGain();
+    o.type=Math.random()<.5?'sine':'triangle';
+    o.frequency.value=freq;
+    g.gain.setValueAtTime(0,AC.currentTime);
+    g.gain.linearRampToValueAtTime(.035,AC.currentTime+1);
+    g.gain.linearRampToValueAtTime(0,AC.currentTime+5);
+    o.connect(g);g.connect(menuGain);
+    o.start();o.stop(AC.currentTime+5.5);
+  });
+  setTimeout(function(){playMenuChord();},3500+Math.random()*2500);
+}
+function stopMenuMusic(){
+  menuMusicPlaying=false;
+  if(menuGain){menuGain.gain.linearRampToValueAtTime(0,AC.currentTime+0.8);}
 }
 
 var userCountry='Local';
@@ -688,12 +721,12 @@ var SCRS=['auth','home','dead','pause','shop','profile','guest'];
 function showScr(name){
   SCRS.forEach(function(s){document.getElementById('scr-'+s).classList.remove('on');});
   var el=document.getElementById('scr-'+name);el.classList.add('on');
-  var menus=['auth','shop','profile','dead','pause'];
+  var menus=['auth','shop','profile','dead','pause','guest'];
   if(menus.indexOf(name)>=0)el.style.background=T.bg;else el.style.background='transparent';
   document.getElementById('pause-btn').style.display='none';
   document.getElementById('sc').style.display='none';
   document.getElementById('coins-hud').style.display='none';
-  if(name==='home')updateHomeUI();
+  if(name==='home'){updateHomeUI();startMenuMusic();}
   if(name==='shop'){document.getElementById('sh-coins').textContent=S.coins;renderShop('trail');}
   if(name==='profile')renderProfile();
   if(name==='home'&&phase==='playing')phase='idle';
@@ -861,16 +894,13 @@ function renderLb(){
 }
 function filterByCurrentWeek(data){
   var week=getWeekKey();
-
   var current = data.filter(function(r){
     return r.week === week;
   });
-
-  // Si no hay suficientes datos, muestra global histórico
-  if(current.length < 10){
-    return data; // fallback real global
+  // Always show all players if less than 5 this week
+  if(current.length < 5){
+    return data;
   }
-
   return current;
 }
 function renderLbData(all){
@@ -894,7 +924,7 @@ function renderLbData(all){
     h2+='<div style="display:flex;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid '+T.border+'">';
     h2+='<div style="width:18px;text-align:center;font-size:11px;color:'+T.textMuted+'">'+pos+'</div>';
     h2+=avCircle(r.nick,r.avatar||avCol(r.nick),r.photo,28,r.country);
-    h2+='<div style="flex:1;font-size:12px;color:'+T.text+';font-weight:'+(r.isMe?600:400)+'">'+getFlag(r.country)+' '+r.nick+(r.isMe?' ◀':'')+'</div>';
+    h2+='<div style="flex:1;font-size:12px;color:'+T.text+';font-weight:'+(r.isMe?600:400)+'">'+r.nick+(r.isMe?' ◀':'')+'</div>';
     h2+='<div style="color:#fbbf24;font-size:12px;font-weight:500">'+r.score+'</div></div>';
   });
   document.getElementById('lb-more-list').innerHTML=h2;
@@ -995,7 +1025,7 @@ function addNext(){
 function spawnMagnetBtn(){
   if(magnetBtn)return;
   magnetBtn=document.createElement('button');
-  magnetBtn.style.cssText='position:absolute;top:66px;left:16px;width:42px;height:42px;border-radius:50%;background:rgba(251,191,36,.15);border:1.5px solid rgba(251,191,36,.5);color:#fbbf24;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all .2s;pointer-events:all;z-index:3';
+  magnetBtn.style.cssText='position:absolute;bottom:44px;right:16px;width:48px;height:48px;border-radius:50%;background:rgba(251,191,36,.15);border:1.5px solid rgba(251,191,36,.5);color:#fbbf24;font-size:22px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all .2s;pointer-events:all;z-index:3';
   magnetBtn.innerHTML='<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center">🧲<div id="magnet-fill" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(251,191,36,.35);border-radius:50%;clip-path:polygon(0 0,100% 0,100% 100%,0 100%);transition:clip-path 0.1s linear"></div></div>';
   magnetBtn.onclick=activateMagnet;
   document.body.appendChild(magnetBtn);
