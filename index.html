@@ -1352,6 +1352,7 @@ function update(dt){
         if(closest>600)die();
       }
     }
+  }
   camX+=(tCamX-camX)*.07*dt;camY+=(tCamY-camY)*.07*dt;zoom+=(tZoom-zoom)*.06*dt;
   orb.trail.push({wx:orb.wx,wy:orb.wy});if(orb.trail.length>40)orb.trail.shift();
   parts.forEach(function(p){p.wx+=p.vx*dt;p.wy+=p.vy*dt;p.vx*=Math.pow(.91,dt);p.vy*=Math.pow(.91,dt);p.vy+=.07*dt;p.life-=.028*dt;});
