@@ -133,12 +133,9 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
   <div style="position:absolute;top:18px;right:16px;display:flex;align-items:center;gap:5px;border-radius:20px;padding:5px 12px">
     <span style="color:#fbbf24">★</span><span id="h-coins" style="color:#fbbf24;font-size:13px;font-weight:600">0</span>
   </div>
-  <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-      <div id="snd-toggle" onclick="toggleSound()" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;background:rgba(128,128,128,.12)">🔊</div>
-      <input type="range" id="vol-slider" min="0" max="100" value="60" oninput="setVolume(this.value)" style="width:80px;height:4px;accent-color:#fbbf24;cursor:pointer">
-    </div>
   <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:12px">
     <div id="theme-sw" style="display:flex;gap:6px;background:rgba(128,128,128,.12);border-radius:24px;padding:5px">
+      <div onclick="toggleSound()" id="snd-toggle" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;transition:all .2s;opacity:.6">♫</div>
       <div onclick="setThemeMode('light')" id="tm-light" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all .2s">☀️</div>
       <div onclick="setThemeMode('auto')" id="tm-auto" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all .2s">⚡</div>
       <div onclick="setThemeMode('dark')" id="tm-dark" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all .2s">🌙</div>
@@ -386,12 +383,52 @@ function showCoinPopup(text,wx,wy){
 
 // Share score
 function shareScore(){
-  var text='ORBIT — I scored '+score+'! Can you beat me? 🚀\n'+location.href;
-  if(navigator.share){
-    navigator.share({title:'ORBIT',text:'I scored '+score+' in ORBIT!',url:location.href}).catch(function(){});
-  }else{
-    navigator.clipboard.writeText(text).then(function(){toast(lang==='es'?'Copiado':'Copied!');}).catch(function(){});
+  // Generate a score card image
+  var can=document.createElement('canvas');
+  can.width=600;can.height=400;
+  var c=can.getContext('2d');
+  // Background
+  c.fillStyle='#0a0a14';c.fillRect(0,0,600,400);
+  // Decorative circles
+  var cols=['#a78bfa','#6ee7b7','#f9a8d4'];
+  for(var i=0;i<3;i++){
+    c.beginPath();c.arc(150+i*150,200,60,0,6.28);
+    c.strokeStyle=cols[i]+'66';c.lineWidth=2;c.stroke();
   }
+  // ORBIT title
+  c.fillStyle='#ffffff';c.font='100 48px system-ui,sans-serif';c.textAlign='center';
+  c.fillText('ORBIT',300,80);
+  // Score
+  c.fillStyle='#fbbf24';c.font='100 96px system-ui,sans-serif';
+  c.fillText(score,300,230);
+  // Labels
+  c.fillStyle='rgba(255,255,255,.4)';c.font='300 14px system-ui,sans-serif';c.letterSpacing='4px';
+  c.fillText('SCORE',300,270);
+  // Best
+  c.fillStyle='rgba(255,255,255,.6)';c.font='300 18px system-ui,sans-serif';
+  c.fillText('BEST: '+S.best,300,310);
+  // Challenge text
+  c.fillStyle='rgba(255,255,255,.3)';c.font='300 13px system-ui,sans-serif';
+  c.fillText(lang==='es'?'¿Puedes superarme?':'Can you beat me?',300,360);
+  c.fillText('juangz02.github.io/orbit-game',300,385);
+
+  can.toBlob(function(blob){
+    if(navigator.share&&navigator.canShare){
+      var file=new File([blob],'orbit-score.png',{type:'image/png'});
+      var shareData={
+        title:'ORBIT',
+        text:(lang==='es'?'¡Hice '+score+' en ORBIT! ¿Puedes superarme? 🚀':'I scored '+score+' in ORBIT! Can you beat me? 🚀')+'\n'+location.href,
+        files:[file]
+      };
+      if(navigator.canShare(shareData)){
+        navigator.share(shareData).catch(function(){});
+        return;
+      }
+    }
+    // Fallback: copy text
+    var text=(lang==='es'?'¡Hice '+score+' en ORBIT! ¿Puedes superarme? 🚀':'I scored '+score+' in ORBIT! Can you beat me? 🚀')+'\n'+location.href;
+    navigator.clipboard.writeText(text).then(function(){toast(lang==='es'?'Copiado':'Copied!');}).catch(function(){});
+  },'image/png');
 }
 
 // Milestones
@@ -487,14 +524,11 @@ var musicNode=null,musicGain=null,musicPlaying=false,menuMusicPlaying=false;
 var soundEnabled=true,masterVolume=0.6;
 function toggleSound(){
   soundEnabled=!soundEnabled;
-  document.getElementById('snd-toggle').textContent=soundEnabled?'🔊':'🔇';
+  var el=document.getElementById('snd-toggle');
+  el.style.opacity=soundEnabled?'.6':'.25';
+  el.textContent=soundEnabled?'♫':'✕';
   if(!soundEnabled){stopMusic();stopMenuMusic();}
   else if(phase==='idle'||phase==='dead')startMenuMusic();
-}
-function setVolume(v){
-  masterVolume=v/100;
-  if(musicGain)musicGain.gain.linearRampToValueAtTime(masterVolume*0.2,AC.currentTime+0.1);
-  if(menuGain)menuGain.gain.linearRampToValueAtTime(masterVolume*0.13,AC.currentTime+0.1);
 }
 function startMusic(){
   if(musicPlaying||!AC||!soundEnabled)return;
@@ -852,8 +886,8 @@ function buyMagnet(){
 }
 var STRIPE_LINKS={
   noads: 'https://buy.stripe.com/aFa3cxfDmbDofmJ8s68EM00',
-  c300:  'https://buy.stripe.com/4gM00l2QAgXIfmJfUy8EM01',
-  c1000: 'https://buy.stripe.com/7sY4gBfDm36S4I56jY8EM02'
+  c3000: 'https://buy.stripe.com/4gM00l2QAgXIfmJfUy8EM01',
+  c10000:'https://buy.stripe.com/7sY4gBfDm36S4I56jY8EM02'
 };
 function buyPack(id){
   var link=STRIPE_LINKS[id];
@@ -946,7 +980,7 @@ function renderLbData(all){
     html+='<div style="font-size:'+(big?20:15)+'px">'+medals[i]+'</div>';
     html+='<div style="position:relative">'+avCircle(r.nick,r.avatar||avCol(r.nick),r.photo,big?50:38,r.country);
     if(r.isMe)html+='<div style="position:absolute;top:-2px;right:-2px;width:10px;height:10px;border-radius:50%;background:#fbbf24;border:2px solid '+T.bg+'"></div>';
-    html+='</div><div style="font-size:'+(big?13:11)+'px;font-weight:'+(big?600:400)+';max-width:70px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:'+T.text+'">'+r.nick+'</div>';
+    html+='</div><div style="font-size:'+(big?12:10)+'px;font-weight:'+(big?600:400)+';width:'+(big?60:50)+'px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:'+T.text+'">'+r.nick+'</div>';
     html+='<div style="font-size:11px;color:#fbbf24;font-weight:600">'+r.score+'</div></div>';
   });
   document.getElementById('lb-medals').innerHTML=html;
@@ -1027,7 +1061,7 @@ function snd(ok){
   var o=AC.createOscillator(),g=AC.createGain();
   o.connect(g);g.connect(AC.destination);
   if(ok){o.type='sine';o.frequency.value=N[score%8];g.gain.setValueAtTime(.13,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.4);o.start();o.stop(AC.currentTime+.4);}
-  else{o.type='sawtooth';o.frequency.value=88;g.gain.setValueAtTime(.1,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.2);o.start();o.stop(AC.currentTime+.2);}
+  else{o.type='sine';o.frequency.value=180;g.gain.setValueAtTime(.05,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.1);o.start();o.stop(AC.currentTime+.1);}
 }
 function screenShake(amt){shakeX=(Math.random()-.5)*amt*2;shakeY=(Math.random()-.5)*amt*2;shakeD=amt;}
 function burst(wx,wy,col,n){for(var i=0;i<n;i++){var a=Math.PI*2*i/n+rnd(-.3,.3),s=rnd(2,5);parts.push({wx:wx,wy:wy,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1,col:col,r:rnd(2,4)});}}
@@ -1305,8 +1339,19 @@ function update(dt){
         landed=true;break;
       }
     }
-    if(!landed){var ss=toS(orb.wx,orb.wy);if(ss.x<-80||ss.x>W+80||ss.y<-80||ss.y>H+80)die();}
-  }
+    if(!landed){
+      var ss=toS(orb.wx,orb.wy);
+      if(ss.x<-80||ss.x>W+80||ss.y<-80||ss.y>H+80)die();
+      else{
+        var closest=Infinity;
+        for(var ci2=0;ci2<circles.length;ci2++){
+          if(ci2===orb.lastLaunched&&orb.graceFrames>0)continue;
+          var dd=Math.hypot(orb.wx-circles[ci2].wx,orb.wy-circles[ci2].wy)-circles[ci2].r;
+          if(dd<closest)closest=dd;
+        }
+        if(closest>600)die();
+      }
+    }
   camX+=(tCamX-camX)*.07*dt;camY+=(tCamY-camY)*.07*dt;zoom+=(tZoom-zoom)*.06*dt;
   orb.trail.push({wx:orb.wx,wy:orb.wy});if(orb.trail.length>40)orb.trail.shift();
   parts.forEach(function(p){p.wx+=p.vx*dt;p.wy+=p.vy*dt;p.vx*=Math.pow(.91,dt);p.vy*=Math.pow(.91,dt);p.vy+=.07*dt;p.life-=.028*dt;});
