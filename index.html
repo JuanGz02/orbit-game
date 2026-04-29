@@ -124,10 +124,11 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     <div id="h-best" style="font-size:34px;font-weight:100;color:#fbbf24">0</div>
   </div>
   <div style="display:flex;flex-direction:column;gap:11px;width:100%;max-width:280px">
-    <div id="mode-selector" style="display:flex;gap:0;border-radius:24px;overflow:hidden;margin-bottom:8px;width:100%;border:1px solid rgba(128,128,128,.2)">
-      <div id="mode-easy" onclick="setGameMode('easy')" style="flex:1;padding:10px;text-align:center;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all .2s;opacity:.45">EASY</div>
-      <div id="mode-normal" onclick="setGameMode('normal')" style="flex:1;padding:10px;text-align:center;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all .2s;opacity:1;font-weight:600">NORMAL</div>
+    <div id="mode-selector" style="display:flex;gap:0;border-radius:24px;overflow:hidden;width:100%;border:1px solid rgba(128,128,128,.2)">
+      <div id="mode-easy" onclick="setGameMode('easy')" style="flex:1;padding:10px;text-align:center;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all .2s;opacity:.45" id-label="modeNormal">NORMAL</div>
+      <div id="mode-normal" onclick="setGameMode('normal')" style="flex:1;padding:10px;text-align:center;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all .2s;opacity:1;font-weight:600" id-label="modeComp">COMPETITIVE</div>
     </div>
+    <div id="mode-desc" style="font-size:10px;letter-spacing:1px;opacity:.4;margin-bottom:8px;text-align:center;min-height:14px"></div>
     <button class="btn" id="h-play" style="font-size:16px;padding:17px;letter-spacing:6px" onclick="startGame()">PLAY</button>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <button class="btn bsm" id="h-shop" onclick="showScr('shop')">SHOP</button>
@@ -270,7 +271,9 @@ var I18N={
     resetDone:'Reset!',loggedOut:'Logged out',noData:'no games yet',
     seeMore:'▼ SEE MORE',seeLess:'▲ HIDE',share:'↗ SHARE',
     tutTap:'TAP',tutHold:'HOLD & RELEASE',tutNice:'NICE!',
-    ms10:'WARMING UP',ms20:'ON FIRE',ms30:'UNSTOPPABLE',ms50:'LEGENDARY',ms100:'GODLIKE',ms150:'TRANSCENDENT',ms300:'ETERNAL'},
+    ms10:'WARMING UP',ms20:'ON FIRE',ms30:'UNSTOPPABLE',ms50:'LEGENDARY',ms100:'GODLIKE',ms150:'TRANSCENDENT',ms300:'ETERNAL',
+    modeNormal:'NORMAL',modeComp:'COMPETITIVE',modeDescNormal:'Explore the galaxy in peace',modeDescComp:'Compete for your place in the league',
+    rankLabel:'Rank',},
   es:{tag:'toca · mantén para potencia',google:'Continuar con Google',fb:'Continuar con Facebook',or:'o',
     reg:'CREAR CUENTA',login:'INICIAR SESIÓN',guest:'Jugar como invitado',hint:'toca · mantén para potencia',
     bestLbl:'RÉCORD',play:'JUGAR',shop:'TIENDA',prof:'PERFIL',save:'GUARDAR',
@@ -284,7 +287,9 @@ var I18N={
     resetDone:'¡Reiniciado!',loggedOut:'Sesión cerrada',noData:'sin partidas aún',
     seeMore:'▼ VER MÁS',seeLess:'▲ OCULTAR',share:'↗ COMPARTIR',
     tutTap:'TOCA',tutHold:'MANTÉN Y SUELTA',tutNice:'¡GENIAL!',
-    ms10:'CALENTANDO',ms20:'EN LLAMAS',ms30:'IMPARABLE',ms50:'LEGENDARIO',ms100:'DIVINO',ms150:'TRANSCENDENTE',ms300:'ETERNO'}
+    ms10:'CALENTANDO',ms20:'EN LLAMAS',ms30:'IMPARABLE',ms50:'LEGENDARIO',ms100:'DIVINO',ms150:'TRANSCENDENTE',ms300:'ETERNO',
+    modeNormal:'NORMAL',modeComp:'COMPETITIVO',modeDescNormal:'Explora la galaxia en paz',modeDescComp:'Compite por tu lugar en la liga',
+    rankLabel:'Rango'}
 };
 var lang='en';
 function t(k){return(I18N[lang]||I18N.en)[k]||k;}
@@ -909,10 +914,14 @@ function updateHomeUI(){
   // Update mode selector
   var m=S.gameMode||'normal';
   var easy=document.getElementById('mode-easy'),norm=document.getElementById('mode-normal');
+  var desc=document.getElementById('mode-desc');
+  if(easy)easy.textContent=t('modeNormal');
+  if(norm)norm.textContent=t('modeComp');
   if(easy&&norm){
     if(m==='easy'){easy.style.opacity='1';easy.style.fontWeight='600';easy.style.background=T.navOn||'rgba(128,128,128,.15)';norm.style.opacity='.45';norm.style.fontWeight='400';norm.style.background='transparent';}
     else{norm.style.opacity='1';norm.style.fontWeight='600';norm.style.background=T.navOn||'rgba(128,128,128,.15)';easy.style.opacity='.45';easy.style.fontWeight='400';easy.style.background='transparent';}
   }
+  if(desc)desc.textContent=m==='easy'?t('modeDescNormal'):t('modeDescComp');
 }
 function setLang(l){
   lang=l;S.lang=l;saveState();
@@ -1006,7 +1015,7 @@ function renderProfile(){
   });
   // Add rank + streak row
   html+='</div><div style="display:flex;gap:8px;width:100%;margin-top:8px">';
-  html+='<div class="sb" style="background:'+T.card+';flex:1;padding:10px"><div style="font-size:18px">'+rank.icon+'</div><div class="sl" style="color:'+T.textMuted+'">'+rank.name.toUpperCase()+'</div></div>';
+  html+='<div class="sb" style="background:'+T.card+';flex:1;padding:10px"><div style="font-size:14px">'+rank.icon+' '+rank.name+'</div><div class="sl" style="color:'+T.textMuted+'">'+t('rankLabel')+' '+rank.min+'+</div></div>';
   html+='<div class="sb" style="background:'+T.card+';flex:1;padding:10px"><div style="font-size:18px;color:#fbbf24">🔥 '+S.streak+'</div><div class="sl" style="color:'+T.textMuted+'">'+(lang==='es'?'RACHA':'STREAK')+'</div></div>';
   document.getElementById('pr-stats').innerHTML=html;
   var hist=S.hist.slice().reverse().slice(0,8);
@@ -1052,11 +1061,11 @@ function toggleLbMore(){
   document.getElementById('lb-more-btn').textContent=lbMoreOpen?t('seeLess'):t('seeMore');
 }
 function renderLb(){
-  document.getElementById('lb-reset-lbl').textContent='⏱ '+fmtCountdown(getResetMs());
+  document.getElementById('lb-reset-lbl').textContent='';
   document.getElementById('lbs-local').textContent='📍 '+userCountry.toUpperCase();
   var me={nick:S.nick||'You',score:S.best,country:userCountry,avatar:avCol(S.nick),photo:S.photo,isMe:true,id:S.user&&S.user.uid};
   if(!db){renderLbData([me]);return;}
-  db.collection('leaderboard').orderBy('score','desc').limit(100).get()
+  db.collection('leaderboard').orderBy('score','desc').limit(10).get()
   .then(function(snap){
     var data=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
     data=filterByCurrentWeek(data);
@@ -1065,12 +1074,7 @@ function renderLb(){
     renderLbData(data.sort(function(a,b){return b.score-a.score;}));
   }).catch(function(){renderLbData([me]);});
 }
-function filterByCurrentWeek(data){
-  if(lbScope==='global')return data;
-  var week=getWeekKey();
-  var current=data.filter(function(r){return r.week===week;});
-  return current.length<3?data:current;
-}
+function filterByCurrentWeek(data){return data;}
 function renderLbData(all){
   var top3=all.slice(0,3),myPos=all.findIndex(function(e){return e.isMe;});
   var medals=['🥇','🥈','🥉'],order=[1,0,2].filter(function(i){return i<top3.length;}),html='';
@@ -1080,7 +1084,9 @@ function renderLbData(all){
     html+='<div style="font-size:'+(big?20:15)+'px">'+medals[i]+'</div>';
     html+='<div style="position:relative">'+avCircle(r.nick,r.avatar||avCol(r.nick),r.photo,big?50:38,r.country);
     if(r.isMe)html+='<div style="position:absolute;top:-2px;right:-2px;width:10px;height:10px;border-radius:50%;background:#fbbf24;border:2px solid '+T.bg+'"></div>';
-    html+='</div><div style="font-size:'+(big?12:10)+'px;font-weight:'+(big?600:400)+';width:'+(big?60:50)+'px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:'+T.text+'">'+r.nick+'</div>';
+    var rk2=getRank(r.score);
+    html+='</div><div style="font-size:'+(big?12:10)+'px;font-weight:'+(big?600:400)+';width:'+(big?70:55)+'px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:'+T.text+'">'+r.nick+'</div>';
+    html+='<div style="font-size:9px;opacity:.5;letter-spacing:1px">'+rk2.icon+rk2.name+'</div>';
     html+='<div style="font-size:11px;color:#fbbf24;font-weight:600">'+r.score+'</div></div>';
   });
   document.getElementById('lb-medals').innerHTML=html;
@@ -1092,7 +1098,8 @@ function renderLbData(all){
     h2+='<div style="display:flex;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid '+T.border+'">';
     h2+='<div style="width:18px;text-align:center;font-size:11px;color:'+T.textMuted+'">'+pos+'</div>';
     h2+=avCircle(r.nick,r.avatar||avCol(r.nick),r.photo,28,r.country);
-    h2+='<div style="flex:1;font-size:12px;color:'+T.text+';font-weight:'+(r.isMe?600:400)+'">'+getRank(r.score).icon+' '+r.nick+(r.isMe?' ◀':'')+'</div>';
+    var rk=getRank(r.score);
+    h2+='<div style="flex:1;font-size:11px;color:'+T.text+';font-weight:'+(r.isMe?600:400)+';line-height:1.3">'+r.nick+(r.isMe?' ◀':'')+'<br><span style="font-size:9px;opacity:.5;letter-spacing:1px">'+t('rankLabel')+': '+rk.icon+rk.name+' '+rk.min+'+</span></div>';
     h2+='<div style="color:#fbbf24;font-size:12px;font-weight:500">'+r.score+'</div></div>';
   });
   document.getElementById('lb-more-list').innerHTML=h2;
@@ -1291,7 +1298,7 @@ function init(){
   document.getElementById('sc').style.color=T.text;document.getElementById('co').style.opacity='0';
   document.getElementById('coins-hud').style.display='block';document.getElementById('cv').textContent='0';
   document.getElementById('pause-btn').style.display='flex';document.getElementById('revive-wrap').style.display='block';
-  showMagnetBtn(true);
+  showMagnetBtn(currentMode!=='easy');
 }
 function startCharge(){if(phase!=='playing'||orb.on===-1)return;if(tutFrozen){tutTap();return;}charging=true;chargeStart=Date.now();}
 function releaseJump(){
@@ -1309,8 +1316,16 @@ function releaseJump(){
 function setGameMode(m){
   S.gameMode=m;saveState();currentMode=m;
   var easy=document.getElementById('mode-easy'),norm=document.getElementById('mode-normal');
-  if(m==='easy'){easy.style.opacity='1';easy.style.fontWeight='600';easy.style.background=T.navOn||'rgba(128,128,128,.15)';norm.style.opacity='.45';norm.style.fontWeight='400';norm.style.background='transparent';}
-  else{norm.style.opacity='1';norm.style.fontWeight='600';norm.style.background=T.navOn||'rgba(128,128,128,.15)';easy.style.opacity='.45';easy.style.fontWeight='400';easy.style.background='transparent';}
+  var desc=document.getElementById('mode-desc');
+  if(m==='easy'){
+    easy.style.opacity='1';easy.style.fontWeight='600';easy.style.background=T.navOn||'rgba(128,128,128,.15)';
+    norm.style.opacity='.45';norm.style.fontWeight='400';norm.style.background='transparent';
+    if(desc)desc.textContent=t('modeDescNormal');
+  }else{
+    norm.style.opacity='1';norm.style.fontWeight='600';norm.style.background=T.navOn||'rgba(128,128,128,.15)';
+    easy.style.opacity='.45';easy.style.fontWeight='400';easy.style.background='transparent';
+    if(desc)desc.textContent=t('modeDescComp');
+  }
 }
 function startGame(){SCRS.forEach(function(s){document.getElementById('scr-'+s).classList.remove('on');});currentMode=S.gameMode||'normal';phase='playing';init();startTutorial();}
 function togglePause(){
@@ -1354,7 +1369,7 @@ function doRevive(){
     SCRS.forEach(function(s){document.getElementById('scr-'+s).classList.remove('on');});
     phase='playing';document.getElementById('sc').style.display='block';
     document.getElementById('coins-hud').style.display='block';document.getElementById('pause-btn').style.display='flex';
-    showMagnetBtn(true);
+    showMagnetBtn(currentMode!=='easy');
     toast('✓ Revived!');
   },function(){toast(lang==='es'?'Ve el anuncio completo':'Watch the full ad to revive');});
 }
@@ -1363,11 +1378,11 @@ function die(){
   hideTut();tutStep=0;tutFrozen=false;
   if(navigator.vibrate)navigator.vibrate([50,30,80]);
   S.coins+=sesCoins;
+  if(score>S.best)S.best=score;
+  S.hist.push({score:score,date:new Date().toLocaleDateString()});
+  if(S.hist.length>30)S.hist.shift();
   if(currentMode!=='easy'){
-    if(score>S.best)S.best=score;
     updateRank();
-    S.hist.push({score:score,date:new Date().toLocaleDateString()});
-    if(S.hist.length>30)S.hist.shift();
   }
   saveState();
   if(currentMode!=='easy')saveLbEntry();
@@ -1435,16 +1450,15 @@ function update(dt){
     orb.vy+=.22*dt;
     // Easy mode: gravitational pull toward nearest planet
     if(currentMode==='easy'){
-      var closestC=null,closestD=Infinity;
-      for(var gi=0;gi<circles.length;gi++){
-        if(gi===orb.lastLaunched&&orb.graceFrames>0)continue;
-        var gd=Math.hypot(orb.wx-circles[gi].wx,orb.wy-circles[gi].wy);
-        if(gd<closestD){closestD=gd;closestC=circles[gi];}
-      }
-      if(closestC&&closestD>0&&closestD<500){
-        var gStr=3.5*(1-closestD/500);
-        var gdx=(closestC.wx-orb.wx)/closestD,gdy=(closestC.wy-orb.wy)/closestD;
-        orb.vx+=gdx*gStr*dt;orb.vy+=gdy*gStr*dt;
+      // Only pull toward the NEXT planet (last in array), never the one we left
+      var gravTarget=circles[circles.length-1];
+      if(gravTarget){
+        var gd=Math.hypot(orb.wx-gravTarget.wx,orb.wy-gravTarget.wy);
+        if(gd>0&&gd<500){
+          var gStr=3.5*(1-gd/500);
+          var gdx=(gravTarget.wx-orb.wx)/gd,gdy=(gravTarget.wy-orb.wy)/gd;
+          orb.vx+=gdx*gStr*dt;orb.vy+=gdy*gStr*dt;
+        }
       }
     }
     orb.wx+=orb.vx*dt;orb.wy+=orb.vy*dt;
@@ -1464,20 +1478,18 @@ function update(dt){
         if(gravFieldActive){gravFieldActive=false;ci.hasGravField=false;gravFieldParts=[];updateGravBtn();}
         hitIdx=i;hitT=1;hitAmt=ci.r*.18;ci.shockwave={r:ci.r*.3,a:.9};
         var impactSpeed=Math.hypot(orb.vx,orb.vy);
-        if(currentMode!=='easy'){
-          var partCount=Math.min(40,Math.max(12,Math.round(impactSpeed*2.5)));
-          var partSpeed=Math.min(8,Math.max(2,impactSpeed*.6));
-          for(var pi=0;pi<partCount;pi++){var pa=Math.PI*2*pi/partCount+rnd(-.4,.4),psp=rnd(1.5,partSpeed);parts.push({wx:orb.wx,wy:orb.wy,vx:Math.cos(pa)*psp,vy:Math.sin(pa)*psp,life:1,col:ci.col,r:rnd(1.5,3+impactSpeed*.3)});}
-        }
+        var partCount=Math.min(40,Math.max(12,Math.round(impactSpeed*2.5)));
+        var partSpeed=Math.min(8,Math.max(2,impactSpeed*.6));
+        for(var pi=0;pi<partCount;pi++){var pa=Math.PI*2*pi/partCount+rnd(-.4,.4),psp=rnd(1.5,partSpeed);parts.push({wx:orb.wx,wy:orb.wy,vx:Math.cos(pa)*psp,vy:Math.sin(pa)*psp,life:1,col:ci.col,r:rnd(1.5,3+impactSpeed*.3)});}
         if(i===circles.length-1){
           if(tutStep>0)tutLanded();
           score++;combo++;snd(true);
-          if(currentMode!=='easy')screenShake(Math.min(2+score*.15,8));
+          screenShake(Math.min(2+score*.15,8));
           if(navigator.vibrate)navigator.vibrate(score>20?30:15);
           document.getElementById('sc').textContent=score;
-          if(currentMode!=='easy'&&score>S.best)S.best=score;
+          if(score>S.best)S.best=score;
           if(combo>=3){var ce=document.getElementById('co');ce.textContent='x'+combo+' COMBO';ce.style.color=ci.col;ce.style.opacity='1';clearTimeout(ce._t);ce._t=setTimeout(function(){ce.style.opacity='0';},900);}
-          if(currentMode!=='easy')checkMilestone();
+          checkMilestone();
           // Easy mode checkpoint every 10
           if(currentMode==='easy'&&score%10===0&&score!==lastCheckpoint){
             lastCheckpoint=score;
@@ -1554,30 +1566,7 @@ function drawTrail(){
       ctx.globalAlpha=a*.6;ctx.beginPath();ctx.arc(s.x,s.y,r*.8,0,6.28);
       ctx.fillStyle='rgba(255,250,200,'+(a*.3)+')';ctx.fill();
     }
-    else if(tr==='sakura'){
-      // Orb trail with delicate pink/white tones like flower orbs
-      var sakTime=Date.now()*.002;
-      var sakColors=['rgba(255,182,193,'+(a*1.1)+')','rgba(255,200,210,'+(a*1.0)+')','rgba(255,230,235,'+(a*.9)+')','rgba(255,255,255,'+(a*.7)+')','rgba(248,180,200,'+(a*1.0)+')'];
-      var orbSize=r*(1.2+Math.sin(i*.6+sakTime)*0.3);
-      // Main orb
-      ctx.globalAlpha=a*.85;ctx.beginPath();ctx.arc(s.x,s.y,orbSize,0,6.28);
-      ctx.fillStyle=sakColors[i%sakColors.length];ctx.fill();
-      // Soft glow
-      ctx.globalAlpha=a*.3;ctx.beginPath();ctx.arc(s.x,s.y,orbSize*1.6,0,6.28);
-      ctx.fillStyle=sakColors[(i+2)%sakColors.length];ctx.fill();
-      // Inner bright core
-      if(i%2===0){
-        ctx.globalAlpha=a*.5;ctx.beginPath();ctx.arc(s.x,s.y,orbSize*.35,0,6.28);
-        ctx.fillStyle='rgba(255,255,255,'+(a*.8)+')';ctx.fill();
-      }
-      // Floating secondary orb nearby
-      if(i%3===0){
-        var fo_a=sakTime*1.5+i*2.3;
-        var fo_x=s.x+Math.sin(fo_a)*r*1.8,fo_y=s.y+Math.cos(fo_a*.7)*r*1.4;
-        ctx.globalAlpha=a*.45;ctx.beginPath();ctx.arc(fo_x,fo_y,orbSize*.5,0,6.28);
-        ctx.fillStyle=sakColors[(i+1)%sakColors.length];ctx.fill();
-      }
-}
+    else if(tr==='sakura'){ctx.globalAlpha=a*1.2;ctx.beginPath();ctx.arc(s.x,s.y,r*1.5,0,6.28);ctx.fillStyle='hsl('+(330+prog*30)+',80%,72%)';ctx.fill();}
     ctx.restore();
   }
 }
