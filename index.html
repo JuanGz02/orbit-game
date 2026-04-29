@@ -556,14 +556,57 @@ function shouldShowTutorial(){return !S.tutorial&&S.best===0;}
 function startTutorial(){
   if(!shouldShowTutorial()){tutStep=0;return;}
   tutStep=1;tutFrozen=true;
-  showTutStep(t('tutTap'),'↓');
-}
-function showTutStep(text,arrow){
-  var el=document.getElementById('tut-overlay');
-  el.innerHTML='<div class="tut-arrow" style="font-size:32px;color:rgba(255,255,255,.5);margin-bottom:8px">'+arrow+'</div><div style="font-size:14px;letter-spacing:4px;font-weight:300;color:rgba(255,255,255,.6)">'+text+'</div>';
-  el.classList.add('on');
+  showTutHand(1);
 }
 function hideTut(){var el=document.getElementById('tut-overlay');el.classList.remove('on');el.innerHTML='';}
+
+function showTutHand(step){
+  var el=document.getElementById('tut-overlay');
+  el.classList.add('on');
+  var html='';
+  if(step===1){
+    // Step 1: Show hand tapping — "Tap to jump"
+    html+='<div style="display:flex;flex-direction:column;align-items:center;gap:12px">';
+    html+='<div style="font-size:14px;letter-spacing:4px;font-weight:300;color:rgba(255,255,255,.8)">'+(lang==='es'?'TOCA LA PANTALLA':'TAP THE SCREEN')+'</div>';
+    html+='<div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.4);max-width:220px;text-align:center">'+(lang==='es'?'para saltar al siguiente planeta':'to jump to the next planet')+'</div>';
+    html+='<div style="margin-top:16px;animation:tutBob 1s ease-in-out infinite">';
+    html+='<div style="width:48px;height:48px;border-radius:50%;border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(255,255,255,.08)">👆</div>';
+    html+='</div>';
+    html+='<div class="bk" style="font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.3);margin-top:8px">'+(lang==='es'?'toca ahora':'tap now')+'</div>';
+    html+='</div>';
+  }else if(step===3){
+    // Step 3: Show hold and release — "Hold for power"
+    html+='<div style="display:flex;flex-direction:column;align-items:center;gap:12px">';
+    html+='<div style="font-size:14px;letter-spacing:4px;font-weight:300;color:rgba(255,255,255,.8)">'+(lang==='es'?'MANTÉN PULSADO':'HOLD DOWN')+'</div>';
+    html+='<div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.4);max-width:240px;text-align:center">'+(lang==='es'?'mantén para cargar potencia, suelta para lanzar más lejos':'hold to charge power, release to launch further')+'</div>';
+    html+='<div style="margin-top:16px;position:relative">';
+    // Pulsing ring to show charge
+    html+='<div style="width:56px;height:56px;border-radius:50%;border:2px solid rgba(255,200,50,.5);display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(255,200,50,.08);animation:pulse 1.2s ease-in-out infinite">✊</div>';
+    html+='<div style="position:absolute;inset:-8px;border-radius:50%;border:1.5px solid rgba(255,200,50,.25);animation:pulse 1.2s ease-in-out infinite"></div>';
+    html+='</div>';
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-top:12px">';
+    html+='<div style="width:32px;height:3px;border-radius:2px;background:linear-gradient(90deg,rgba(255,200,50,.2),rgba(255,200,50,.8))"></div>';
+    html+='<div style="font-size:10px;letter-spacing:2px;color:rgba(255,200,50,.6)">'+(lang==='es'?'MÁS POTENCIA':'MORE POWER')+'</div>';
+    html+='<div style="width:32px;height:3px;border-radius:2px;background:linear-gradient(90deg,rgba(255,200,50,.8),rgba(255,200,50,.2))"></div>';
+    html+='</div>';
+    html+='<div class="bk" style="font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.3);margin-top:6px">'+(lang==='es'?'mantén ahora':'hold now')+'</div>';
+    html+='</div>';
+  }else if(step===5){
+    // Step 5: Show gravity field button
+    html+='<div style="display:flex;flex-direction:column;align-items:center;gap:12px">';
+    html+='<div style="font-size:14px;letter-spacing:4px;font-weight:300;color:rgba(255,255,255,.8)">'+(lang==='es'?'CAMPO GRAVITATORIO':'GRAVITY FIELD')+'</div>';
+    html+='<div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.4);max-width:240px;text-align:center">'+(lang==='es'?'usa el botón 🔘 para atraer tu proyectil al planeta — ¡te salva cuando fallas!':'use the 🔘 button to pull your projectile to the planet — saves you when you miss!')+'</div>';
+    html+='<div style="margin-top:12px;display:flex;align-items:center;gap:12px">';
+    html+='<div style="width:48px;height:48px;border-radius:50%;border:1.5px solid rgba(167,139,250,.5);background:rgba(167,139,250,.15);display:flex;align-items:center;justify-content:center;font-size:20px;animation:pulse 1.5s ease-in-out infinite">🔘</div>';
+    html+='<div style="font-size:24px;color:rgba(255,255,255,.3)">→</div>';
+    html+='<div style="font-size:11px;color:rgba(167,139,250,.7);letter-spacing:1px">'+(lang==='es'?'3 usos por partida':'3 uses per game')+'</div>';
+    html+='</div>';
+    html+='<div class="bk" style="font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.3);margin-top:12px">'+(lang==='es'?'toca para continuar':'tap to continue')+'</div>';
+    html+='</div>';
+  }
+  el.innerHTML=html;
+}
+
 function tutTap(){
   if(tutStep===1){
     hideTut();tutFrozen=false;slowMoTimer=90;slowMoFactor=0.25;
@@ -571,22 +614,24 @@ function tutTap(){
   }else if(tutStep===3){
     hideTut();tutFrozen=false;slowMoTimer=90;slowMoFactor=0.25;
     tutStep=4;
+  }else if(tutStep===5){
+    hideTut();tutFrozen=false;tutStep=0;slowMoTimer=0;slowMoFactor=1;
+    var el=document.createElement('div');
+    el.className='milestone-pop';
+    el.innerHTML='<div style="font-size:14px;letter-spacing:4px;color:#6ee7b7;font-weight:300">'+(lang==='es'?'¡LISTO PARA ORBITAR!':'READY TO ORBIT!')+'</div>';
+    document.body.appendChild(el);
+    setTimeout(function(){el.remove();},1800);
+    S.tutorial=true;saveState();
   }
 }
+
 function tutLanded(){
   if(tutStep===2){
     tutStep=3;tutFrozen=true;
-    setTimeout(function(){showTutStep(t('tutHold'),'⟳');},400);
+    setTimeout(function(){showTutHand(3);},400);
   }else if(tutStep===4){
-    tutStep=0;tutFrozen=false;slowMoTimer=0;slowMoFactor=1;
-    hideTut();
-    // Quick celebration
-    var el=document.createElement('div');
-    el.className='milestone-pop';
-    el.innerHTML='<div style="font-size:18px;letter-spacing:5px;color:#6ee7b7;font-weight:300">'+t('tutNice')+'</div>';
-    document.body.appendChild(el);
-    setTimeout(function(){el.remove();},1500);
-    S.tutorial=true;saveState();
+    tutStep=5;tutFrozen=true;
+    setTimeout(function(){showTutHand(5);},600);
   }
 }
 
