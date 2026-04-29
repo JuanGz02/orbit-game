@@ -1553,8 +1553,6 @@ function update(dt){
             var ra2=Math.PI*2*ri/16;
             parts.push({wx:orb.wx,wy:orb.wy,vx:Math.cos(ra2)*partSpeed*1.3,vy:Math.sin(ra2)*partSpeed*1.3,life:.7,col:'#ffffff',r:rnd(1,2.5)});
           }
-          // Crack the orbit on max impact
-          ci.cracked=true;ci.crackAng=Math.atan2(orb.wy-ci.wy,orb.wx-ci.wx);ci.crackSize=impactForce;
         }
         if(i===circles.length-1){
           if(tutStep>0)tutLanded();
@@ -1684,8 +1682,49 @@ function drawHome(){
     ctx.beginPath();ctx.arc(bx+Math.cos(ba)*br,by+Math.sin(ba)*br,W*.008,0,6.28);ctx.fillStyle=col;ctx.fill();
   }
 }
+// Galaxy background — subtle opal shimmer
+var bgStars=[];
+var bgInit=false;
+function initBgStars(){
+  bgStars=[];
+  for(var i=0;i<80;i++){
+    bgStars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.5+.3,spd:Math.random()*.0003+.0001,phase:Math.random()*6.28});
+  }
+  bgInit=true;
+}
+function drawGalaxyBg(){
+  if(!bgInit)initBgStars();
+  var time=Date.now()*.001;
+  // Subtle nebula clouds — very faint opal colors
+  var nebulas=isNight?
+    [{x:.3,y:.4,col:'rgba(167,139,250,.04)'},{x:.7,y:.6,col:'rgba(110,231,183,.03)'},{x:.5,y:.2,col:'rgba(249,168,212,.03)'}]:
+    [{x:.3,y:.4,col:'rgba(100,80,180,.03)'},{x:.7,y:.6,col:'rgba(60,160,120,.025)'},{x:.5,y:.2,col:'rgba(180,100,140,.025)'}];
+  for(var n=0;n<nebulas.length;n++){
+    var nb=nebulas[n];
+    var nx=nb.x*W+Math.sin(time*.15+n*2)*W*.08;
+    var ny=nb.y*H+Math.cos(time*.12+n*1.7)*H*.06;
+    var nr=Math.min(W,H)*.35;
+    var grad=ctx.createRadialGradient(nx,ny,0,nx,ny,nr);
+    grad.addColorStop(0,nb.col);
+    grad.addColorStop(1,'transparent');
+    ctx.fillStyle=grad;
+    ctx.fillRect(0,0,W,H);
+  }
+  // Distant stars — soft twinkle
+  for(var s=0;s<bgStars.length;s++){
+    var st=bgStars[s];
+    var sx=st.x*W,sy=st.y*H;
+    var twinkle=.3+Math.sin(time*1.5+st.phase)*.25;
+    ctx.globalAlpha=twinkle*(isNight?.6:.25);
+    ctx.beginPath();ctx.arc(sx,sy,st.r,0,6.28);
+    ctx.fillStyle=isNight?'#ffffff':'rgba(80,60,120,.8)';
+    ctx.fill();
+  }
+  ctx.globalAlpha=1;
+}
 function draw(){
   ctx.fillStyle=T.bg;ctx.fillRect(0,0,W,H);
+  drawGalaxyBg();
   var anyMenu=SCRS.some(function(s){return document.getElementById('scr-'+s).classList.contains('on');});
   if(anyMenu&&phase!=='paused'){drawHome();return;}
   if(phase==='idle'){drawHome();return;}
@@ -1707,30 +1746,6 @@ function draw(){
     if(ci.shockwave&&ci.shockwave.a>0){ctx.globalAlpha=ci.alpha*ci.shockwave.a;ctx.beginPath();ctx.arc(s.x+hox,s.y+hoy,sR(ci.shockwave.r),0,6.28);ctx.strokeStyle=ci.col;ctx.lineWidth=2.5;ctx.stroke();ctx.globalAlpha=ci.alpha;}
     ctx.beginPath();ctx.arc(s.x+hox,s.y+hoy,r+3,0,6.28);ctx.strokeStyle=ci.col+'44';ctx.lineWidth=2;ctx.stroke();
     ctx.beginPath();ctx.arc(s.x+hox,s.y+hoy,r,0,6.28);ctx.fillStyle=ci.col+'1a';ctx.fill();ctx.strokeStyle=ci.col+'cc';ctx.lineWidth=1.5;ctx.stroke();
-    // Draw cracks on max-impact planets
-    if(ci.cracked){
-      ctx.globalAlpha=ci.alpha*.8;
-      var ca=ci.crackAng,cs2=ci.crackSize||1;
-      var cr2=r*(.3+cs2*.5);
-      // Main crack line
-      ctx.beginPath();
-      ctx.moveTo(s.x+hox+Math.cos(ca)*r*.3,s.y+hoy+Math.sin(ca)*r*.3);
-      ctx.lineTo(s.x+hox+Math.cos(ca)*cr2,s.y+hoy+Math.sin(ca)*cr2);
-      // Branch left
-      ctx.moveTo(s.x+hox+Math.cos(ca)*cr2*.6,s.y+hoy+Math.sin(ca)*cr2*.6);
-      ctx.lineTo(s.x+hox+Math.cos(ca+.4)*cr2*.85,s.y+hoy+Math.sin(ca+.4)*cr2*.85);
-      // Branch right
-      ctx.moveTo(s.x+hox+Math.cos(ca)*cr2*.5,s.y+hoy+Math.sin(ca)*cr2*.5);
-      ctx.lineTo(s.x+hox+Math.cos(ca-.35)*cr2*.7,s.y+hoy+Math.sin(ca-.35)*cr2*.7);
-      // Small sub-branches
-      ctx.moveTo(s.x+hox+Math.cos(ca+.4)*cr2*.85,s.y+hoy+Math.sin(ca+.4)*cr2*.85);
-      ctx.lineTo(s.x+hox+Math.cos(ca+.7)*cr2*.65,s.y+hoy+Math.sin(ca+.7)*cr2*.65);
-      ctx.strokeStyle=isNight?'rgba(255,255,255,.5)':'rgba(0,0,0,.35)';
-      ctx.lineWidth=1.5+cs2;ctx.lineCap='round';ctx.stroke();
-      // Glow around crack point
-      ctx.globalAlpha=ci.alpha*.15;
-      ctx.beginPath();ctx.arc(s.x+hox+Math.cos(ca)*r*.4,s.y+hoy+Math.sin(ca)*r*.4,r*.2,0,6.28);
-      ctx.fillStyle=ci.col;ctx.fill();
     }
     if(i===orb.on&&orb.timerMax>0&&orb.timer>0){
       var pct=1-(orb.timer/orb.timerMax),curR=(r-.5)*pct,danger=pct>.6;
