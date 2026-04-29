@@ -1531,15 +1531,35 @@ function update(dt){
         orb.timer=(currentMode==='easy')?99999:Math.max(4,10-score*.08);orb.timerMax=orb.timer;
         // Deactivate gravity field on landing
         if(gravFieldActive){gravFieldActive=false;ci.hasGravField=false;gravFieldParts=[];updateGravBtn();}
-        hitIdx=i;hitT=1;hitAmt=ci.r*.18;ci.shockwave={r:ci.r*.3,a:.9};
         var impactSpeed=Math.hypot(orb.vx,orb.vy);
-        var partCount=Math.min(40,Math.max(12,Math.round(impactSpeed*2.5)));
-        var partSpeed=Math.min(8,Math.max(2,impactSpeed*.6));
-        for(var pi=0;pi<partCount;pi++){var pa=Math.PI*2*pi/partCount+rnd(-.4,.4),psp=rnd(1.5,partSpeed);parts.push({wx:orb.wx,wy:orb.wy,vx:Math.cos(pa)*psp,vy:Math.sin(pa)*psp,life:1,col:ci.col,r:rnd(1.5,3+impactSpeed*.3)});}
+        var impactForce=Math.min(impactSpeed/12,1); // 0-1 normalized
+        var isMaxImpact=impactForce>.85;
+        hitIdx=i;hitT=1;hitAmt=ci.r*(.18+impactForce*.15);
+        ci.shockwave={r:ci.r*(.3+impactForce*.4),a:.9+impactForce*.3};
+        // Scale particles with impact force
+        var partCount=Math.min(65,Math.max(14,Math.round(12+impactForce*50)));
+        var partSpeed=Math.min(12,Math.max(2.5,impactSpeed*.7));
+        var partSize=1.5+impactForce*3;
+        for(var pi=0;pi<partCount;pi++){
+          var pa=Math.PI*2*pi/partCount+rnd(-.5,.5),psp=rnd(1.5,partSpeed);
+          var pCol=ci.col;
+          // Max impact: add white/gold sparks
+          if(isMaxImpact&&pi%3===0)pCol=pi%6===0?'#fbbf24':'#ffffff';
+          parts.push({wx:orb.wx,wy:orb.wy,vx:Math.cos(pa)*psp,vy:Math.sin(pa)*psp,life:1,col:pCol,r:rnd(partSize*.5,partSize+impactSpeed*.3)});
+        }
+        // Max impact: extra ring burst
+        if(isMaxImpact){
+          for(var ri=0;ri<16;ri++){
+            var ra2=Math.PI*2*ri/16;
+            parts.push({wx:orb.wx,wy:orb.wy,vx:Math.cos(ra2)*partSpeed*1.3,vy:Math.sin(ra2)*partSpeed*1.3,life:.7,col:'#ffffff',r:rnd(1,2.5)});
+          }
+          // Crack the orbit on max impact
+          ci.cracked=true;ci.crackAng=Math.atan2(orb.wy-ci.wy,orb.wx-ci.wx);ci.crackSize=impactForce;
+        }
         if(i===circles.length-1){
           if(tutStep>0)tutLanded();
           score++;combo++;snd(true);
-          screenShake(Math.min(2+score*.15,8));
+          screenShake(Math.min(3+score*.15+impactForce*10,16));
           if(navigator.vibrate)navigator.vibrate(score>20?30:15);
           document.getElementById('sc').textContent=score;
           if(currentMode!=='easy'&&score>S.best)S.best=score;
@@ -1687,6 +1707,31 @@ function draw(){
     if(ci.shockwave&&ci.shockwave.a>0){ctx.globalAlpha=ci.alpha*ci.shockwave.a;ctx.beginPath();ctx.arc(s.x+hox,s.y+hoy,sR(ci.shockwave.r),0,6.28);ctx.strokeStyle=ci.col;ctx.lineWidth=2.5;ctx.stroke();ctx.globalAlpha=ci.alpha;}
     ctx.beginPath();ctx.arc(s.x+hox,s.y+hoy,r+3,0,6.28);ctx.strokeStyle=ci.col+'44';ctx.lineWidth=2;ctx.stroke();
     ctx.beginPath();ctx.arc(s.x+hox,s.y+hoy,r,0,6.28);ctx.fillStyle=ci.col+'1a';ctx.fill();ctx.strokeStyle=ci.col+'cc';ctx.lineWidth=1.5;ctx.stroke();
+    // Draw cracks on max-impact planets
+    if(ci.cracked){
+      ctx.globalAlpha=ci.alpha*.8;
+      var ca=ci.crackAng,cs2=ci.crackSize||1;
+      var cr2=r*(.3+cs2*.5);
+      // Main crack line
+      ctx.beginPath();
+      ctx.moveTo(s.x+hox+Math.cos(ca)*r*.3,s.y+hoy+Math.sin(ca)*r*.3);
+      ctx.lineTo(s.x+hox+Math.cos(ca)*cr2,s.y+hoy+Math.sin(ca)*cr2);
+      // Branch left
+      ctx.moveTo(s.x+hox+Math.cos(ca)*cr2*.6,s.y+hoy+Math.sin(ca)*cr2*.6);
+      ctx.lineTo(s.x+hox+Math.cos(ca+.4)*cr2*.85,s.y+hoy+Math.sin(ca+.4)*cr2*.85);
+      // Branch right
+      ctx.moveTo(s.x+hox+Math.cos(ca)*cr2*.5,s.y+hoy+Math.sin(ca)*cr2*.5);
+      ctx.lineTo(s.x+hox+Math.cos(ca-.35)*cr2*.7,s.y+hoy+Math.sin(ca-.35)*cr2*.7);
+      // Small sub-branches
+      ctx.moveTo(s.x+hox+Math.cos(ca+.4)*cr2*.85,s.y+hoy+Math.sin(ca+.4)*cr2*.85);
+      ctx.lineTo(s.x+hox+Math.cos(ca+.7)*cr2*.65,s.y+hoy+Math.sin(ca+.7)*cr2*.65);
+      ctx.strokeStyle=isNight?'rgba(255,255,255,.5)':'rgba(0,0,0,.35)';
+      ctx.lineWidth=1.5+cs2;ctx.lineCap='round';ctx.stroke();
+      // Glow around crack point
+      ctx.globalAlpha=ci.alpha*.15;
+      ctx.beginPath();ctx.arc(s.x+hox+Math.cos(ca)*r*.4,s.y+hoy+Math.sin(ca)*r*.4,r*.2,0,6.28);
+      ctx.fillStyle=ci.col;ctx.fill();
+    }
     if(i===orb.on&&orb.timerMax>0&&orb.timer>0){
       var pct=1-(orb.timer/orb.timerMax),curR=(r-.5)*pct,danger=pct>.6;
       if(curR>1){var pulse=.55+Math.sin(Date.now()*.008)*.2;
