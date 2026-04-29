@@ -1409,7 +1409,7 @@ function doRevive(){
 function die(){
   if(phase==='dead')return;
   // Easy mode: checkpoint respawn
-  if(currentMode==='easy'&&lastCheckpoint>0){
+  if(currentMode==='easy'&&lastCheckpoint>0&&score===lastCheckpoint){
     // Respawn at last checkpoint planet
     score=lastCheckpoint;
     var last=circles[circles.length-1];
