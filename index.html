@@ -288,7 +288,10 @@ function t(k){return(I18N[lang]||I18N.en)[k]||k;}
 var TRAILS=[{id:'simple',name:'Classic',icon:'⚪',price:0},{id:'rainbow',name:'Rainbow',icon:'🌈',price:1500},
   {id:'stars',name:'Stars',icon:'✨',price:2500},{id:'fire',name:'Fire',icon:'🔥',price:2000},
   {id:'ghost',name:'Ghost',icon:'🔘',price:2800},{id:'bubbles',name:'Bubbles',icon:'🫧',price:2000},
-  {id:'neon',name:'Neon',icon:'⚡',price:0},{id:'plasma',name:'Plasma',icon:'🌀',price:0},{id:'void',name:'Void',icon:'🕳️',price:0}];
+  {id:'aurora',name:'Aurora',icon:'🌊',price:1800},{id:'pixel',name:'Pixel',icon:'▪️',price:1200},
+  {id:'lightning',name:'Lightning',icon:'⚡',price:2200},{id:'sakura',name:'Sakura',icon:'🌸',price:1600},
+  {id:'comet',name:'Comet',icon:'☄️',price:2400},
+  {id:'neon',name:'Neon',icon:'💎',price:0},{id:'plasma',name:'Plasma',icon:'🌀',price:0},{id:'void',name:'Void',icon:'🕳️',price:0}];
 var PACKS=[{id:'noads',name:'No Ads',desc:'Remove all ads forever',price:'$1.99',col:'#4f46e5'},
   {id:'c3000',name:'3000 ⭐',desc:'Coin starter pack',price:'$0.99',col:'#d97706'},
   {id:'c10000',name:'10000 ⭐',desc:'Best value',price:'$2.99',col:'#b45309'}];
@@ -299,7 +302,8 @@ function getPal(){return GAME_PAL;}
 // 2. STATE
 // ══════════════════════════════════════════
 var DEF={user:null,nick:'',lang:'en',coins:0,best:0,noAds:false,themeMode:'auto',tutorial:false,
-  trail:'simple',ownedTrails:['simple'],hist:[],photo:null,country:'',ownedPowerups:{magnet:0}};
+  trail:'simple',ownedTrails:['simple'],hist:[],photo:null,country:'',ownedPowerups:{magnet:0},
+  streak:0,lastPlayDate:'',rank:'rookie'};
 var S=Object.assign({},DEF);
 function loadState(){try{var d=localStorage.getItem('orb7');if(d)S=Object.assign({},DEF,JSON.parse(d));}catch(e){}}
 function saveState(){localStorage.setItem('orb7',JSON.stringify(S));saveToCloud();}
@@ -479,6 +483,70 @@ function showMilestonePop(text,num){
   setTimeout(function(){el.remove();},1900);
 }
 
+// Rank system
+var RANKS=[
+  {id:'rookie',name:'Rookie',icon:'🔰',min:0},
+  {id:'orbiter',name:'Orbiter',icon:'🪐',min:15},
+  {id:'pilot',name:'Pilot',icon:'🚀',min:30},
+  {id:'captain',name:'Captain',icon:'⭐',min:50},
+  {id:'commander',name:'Commander',icon:'🎖️',min:80},
+  {id:'legend',name:'Legend',icon:'👑',min:120},
+  {id:'cosmic',name:'Cosmic',icon:'💫',min:200},
+  {id:'eternal',name:'Eternal',icon:'♾️',min:350}
+];
+function getRank(best){
+  var r=RANKS[0];
+  for(var i=RANKS.length-1;i>=0;i--){if(best>=RANKS[i].min){r=RANKS[i];break;}}
+  return r;
+}
+function updateRank(){
+  var r=getRank(S.best);
+  if(S.rank!==r.id){
+    S.rank=r.id;saveState();
+    toast(r.icon+' '+(lang==='es'?'Rango: ':'Rank: ')+r.name+'!');
+  }
+}
+
+// Login streak system
+function checkStreak(){
+  var today=new Date().toISOString().slice(0,10);
+  if(S.lastPlayDate===today)return;
+  var yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if(S.lastPlayDate===yesterday){
+    S.streak++;
+  }else if(S.lastPlayDate&&S.lastPlayDate!==today){
+    S.streak=1;
+  }else{
+    S.streak=1;
+  }
+  S.lastPlayDate=today;
+  // Streak rewards
+  var bonus=Math.min(S.streak*10,100);
+  S.coins+=bonus;
+  saveState();
+  setTimeout(function(){
+    var msg=lang==='es'?'🔥 Racha '+S.streak+' día'+(S.streak>1?'s':'')+'! +'+bonus+' ★':'🔥 '+S.streak+' day streak! +'+bonus+' ★';
+    toast(msg);
+  },1500);
+  // Day 7 bonus trail
+  if(S.streak===7&&S.ownedTrails.indexOf('aurora')<0){
+    S.ownedTrails.push('aurora');saveState();
+    setTimeout(function(){toast(lang==='es'?'🎁 ¡Trail AURORA desbloqueado por 7 días seguidos!':'🎁 AURORA trail unlocked for 7-day streak!');},3500);
+  }
+}
+
+// Trail shop label helper
+function trailShopLabel(tr,own,sel){
+  if(own)return sel?t('active'):t('owned');
+  if(tr.price===0){
+    var unlockMap={neon:50,plasma:150,void:300};
+    var lvl=unlockMap[tr.id];
+    if(lvl)return lang==='es'?'Score '+lvl:'Score '+lvl;
+    return lang==='es'?'Desbloquea jugando':'Unlock by playing';
+  }
+  return '★ '+tr.price;
+}
+
 // Tutorial system — freeze-based with slow-mo
 var tutStep=0,tutFrozen=false,slowMoTimer=0,slowMoFactor=1;
 function shouldShowTutorial(){return !S.tutorial&&S.best===0;}
@@ -600,7 +668,31 @@ function stopMenuMusic(){
 var userCountry='Local';
 try{
   var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';
-  var cm={'Europe/Bucharest':'Romania','Europe/Madrid':'Spain','America/Bogota':'Colombia','America/Mexico_City':'Mexico','America/New_York':'USA','America/Los_Angeles':'USA'};
+  var cm={'Europe/Bucharest':'Romania','Europe/Madrid':'Spain','America/Bogota':'Colombia','America/Mexico_City':'Mexico',
+    'America/New_York':'USA','America/Los_Angeles':'USA','America/Chicago':'USA','America/Denver':'USA',
+    'America/Monterrey':'Mexico','America/Cancun':'Mexico','America/Merida':'Mexico','America/Tijuana':'Mexico',
+    'America/Hermosillo':'Mexico','America/Chihuahua':'Mexico','America/Mazatlan':'Mexico',
+    'America/Sao_Paulo':'Brazil','America/Rio_Branco':'Brazil','America/Manaus':'Brazil',
+    'America/Argentina/Buenos_Aires':'Argentina','America/Lima':'Peru','America/Santiago':'Chile',
+    'America/Guayaquil':'Ecuador','America/Caracas':'Venezuela','America/Montevideo':'Uruguay',
+    'America/Asuncion':'Paraguay','America/La_Paz':'Bolivia','America/Costa_Rica':'Costa Rica',
+    'America/Panama':'Panama','America/Guatemala':'Guatemala','America/Tegucigalpa':'Honduras',
+    'America/Santo_Domingo':'Dominican Republic','America/Havana':'Cuba','America/Puerto_Rico':'Puerto Rico',
+    'Europe/London':'UK','Europe/Paris':'France','Europe/Berlin':'Germany','Europe/Rome':'Italy',
+    'Europe/Lisbon':'Portugal','Europe/Amsterdam':'Netherlands','Europe/Brussels':'Belgium',
+    'Europe/Stockholm':'Sweden','Europe/Warsaw':'Poland','Europe/Istanbul':'Turkey',
+    'Europe/Moscow':'Russia','Europe/Kiev':'Ukraine','Europe/Dublin':'Ireland',
+    'Europe/Vienna':'Austria','Europe/Zurich':'Switzerland','Europe/Oslo':'Norway',
+    'Europe/Copenhagen':'Denmark','Europe/Helsinki':'Finland','Europe/Athens':'Greece',
+    'Europe/Prague':'Czech Republic','Europe/Budapest':'Hungary','Europe/Zagreb':'Croatia',
+    'Europe/Sofia':'Bulgaria','Europe/Belgrade':'Serbia','Europe/Chisinau':'Moldova',
+    'Asia/Tokyo':'Japan','Asia/Shanghai':'China','Asia/Kolkata':'India','Asia/Seoul':'Korea',
+    'Asia/Jakarta':'Indonesia','Asia/Manila':'Philippines','Asia/Bangkok':'Thailand',
+    'Asia/Ho_Chi_Minh':'Vietnam','Asia/Dubai':'UAE','Asia/Riyadh':'Saudi Arabia',
+    'Asia/Jerusalem':'Israel','Africa/Cairo':'Egypt','Africa/Lagos':'Nigeria',
+    'Africa/Nairobi':'Kenya','Africa/Johannesburg':'South Africa',
+    'America/Toronto':'Canada','America/Vancouver':'Canada','Australia/Sydney':'Australia',
+    'Australia/Melbourne':'Australia','Pacific/Auckland':'New Zealand'};
   userCountry=cm[tz]||tz.split('/').pop().replace(/_/g,' ')||'Local';
 }catch(e){}
 
@@ -638,6 +730,9 @@ function initFirebase(){
             S.themeMode=data.themeMode||'auto';
             S.lang=data.lang||'en';
             S.country=data.country||userCountry;
+            S.streak=data.streak||0;
+            S.lastPlayDate=data.lastPlayDate||'';
+            S.rank=data.rank||'rookie';
             if(data.photo)S.photo=data.photo;
             else if(user.photoURL)S.photo=user.photoURL;
           }else{
@@ -674,6 +769,7 @@ function saveToCloud(){
     hist:(S.hist||[]).slice(-20),ownedPowerups:S.ownedPowerups||{magnet:0},
     themeMode:S.themeMode||'auto',lang:S.lang||'en',
     country:S.country||userCountry,photo:S.photo||null,
+    streak:S.streak||0,lastPlayDate:S.lastPlayDate||'',rank:S.rank||'rookie',
     updatedAt:firebase.firestore.FieldValue.serverTimestamp()
   },{merge:true}).catch(function(e){console.log('save error',e);});
 }
@@ -798,7 +894,7 @@ function showScr(name){
   document.getElementById('pause-btn').style.display='none';
   document.getElementById('sc').style.display='none';
   document.getElementById('coins-hud').style.display='none';
-  if(name==='home'){updateHomeUI();startMenuMusic();}
+  if(name==='home'){updateHomeUI();startMenuMusic();checkStreak();}
   if(name==='shop'){document.getElementById('sh-coins').textContent=S.coins;renderShop('trail');}
   if(name==='profile')renderProfile();
   if(name==='home'&&phase==='playing')phase='idle';
@@ -842,7 +938,7 @@ function renderShop(tab){
       html+='<div class="si '+(own?'owned ':'')+(sel?'sel':'')+'" style="background:'+T.card+';border-color:'+T.border+'" onclick="buyTrail(\''+tr.id+'\','+tr.price+')">';
       html+='<div style="font-size:24px;margin-bottom:8px">'+tr.icon+'</div>';
       html+='<div style="font-size:12px;font-weight:500;margin-bottom:4px;color:'+T.text+'">'+tr.name+'</div>';
-      html+='<div style="font-size:11px;color:'+(own?'#6ee7b7':'#fbbf24')+'">'+(own?(sel?t('active'):t('owned')):'★ '+tr.price)+'</div></div>';
+      html+='<div style="font-size:11px;color:'+(own?'#6ee7b7':'#fbbf24')+'">'+(trailShopLabel(tr,own,sel))+'</div></div>';
     }
     html+='</div>';
   }else{
@@ -900,6 +996,7 @@ function buyPack(id){
 // ══════════════════════════════════════════
 function renderProfile(){
   updateHomeUI();
+  var rank=getRank(S.best);
   document.getElementById('pr-nick').textContent=S.nick||'Player';
   document.getElementById('pr-nick').style.color=T.text;
   document.getElementById('pr-email').textContent=(S.user&&S.user.email)||'';
@@ -908,6 +1005,10 @@ function renderProfile(){
   [{n:S.best,l:t('statBest')},{n:S.coins,l:t('statCoins')},{n:S.hist.length,l:t('statGames')}].forEach(function(s){
     html+='<div class="sb" style="background:'+T.card+'"><div class="sn">'+s.n+'</div><div class="sl" style="color:'+T.textMuted+'">'+s.l+'</div></div>';
   });
+  // Add rank + streak row
+  html+='</div><div style="display:flex;gap:8px;width:100%;margin-top:8px">';
+  html+='<div class="sb" style="background:'+T.card+';flex:1;padding:10px"><div style="font-size:18px">'+rank.icon+'</div><div class="sl" style="color:'+T.textMuted+'">'+rank.name.toUpperCase()+'</div></div>';
+  html+='<div class="sb" style="background:'+T.card+';flex:1;padding:10px"><div style="font-size:18px;color:#fbbf24">🔥 '+S.streak+'</div><div class="sl" style="color:'+T.textMuted+'">'+(lang==='es'?'RACHA':'STREAK')+'</div></div>';
   document.getElementById('pr-stats').innerHTML=html;
   var hist=S.hist.slice().reverse().slice(0,8);
   document.getElementById('pr-hist').innerHTML=hist.length?hist.map(function(h){
@@ -992,7 +1093,7 @@ function renderLbData(all){
     h2+='<div style="display:flex;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid '+T.border+'">';
     h2+='<div style="width:18px;text-align:center;font-size:11px;color:'+T.textMuted+'">'+pos+'</div>';
     h2+=avCircle(r.nick,r.avatar||avCol(r.nick),r.photo,28,r.country);
-    h2+='<div style="flex:1;font-size:12px;color:'+T.text+';font-weight:'+(r.isMe?600:400)+'">'+r.nick+(r.isMe?' ◀':'')+'</div>';
+    h2+='<div style="flex:1;font-size:12px;color:'+T.text+';font-weight:'+(r.isMe?600:400)+'">'+getRank(r.score).icon+' '+r.nick+(r.isMe?' ◀':'')+'</div>';
     h2+='<div style="color:#fbbf24;font-size:12px;font-weight:500">'+r.score+'</div></div>';
   });
   document.getElementById('lb-more-list').innerHTML=h2;
@@ -1240,6 +1341,7 @@ function die(){
   hideTut();tutStep=0;tutFrozen=false;
   if(navigator.vibrate)navigator.vibrate([50,30,80]);
   S.coins+=sesCoins;if(score>S.best)S.best=score;
+  updateRank();
   S.hist.push({score:score,date:new Date().toLocaleDateString()});
   if(S.hist.length>30)S.hist.shift();
   saveState();saveLbEntry();deathCount++;
@@ -1325,7 +1427,10 @@ function update(dt){
         // Softer difficulty curve — min 4s, slower ramp
         orb.timer=Math.max(4,10-score*.08);orb.timerMax=orb.timer;
         hitIdx=i;hitT=1;hitAmt=ci.r*.18;ci.shockwave={r:ci.r*.3,a:.9};
-        burst(orb.wx,orb.wy,ci.col,16);
+        var impactSpeed=Math.hypot(orb.vx,orb.vy);
+        var partCount=Math.min(40,Math.max(12,Math.round(impactSpeed*2.5)));
+        var partSpeed=Math.min(8,Math.max(2,impactSpeed*.6));
+        for(var pi=0;pi<partCount;pi++){var pa=Math.PI*2*pi/partCount+rnd(-.4,.4),psp=rnd(1.5,partSpeed);parts.push({wx:orb.wx,wy:orb.wy,vx:Math.cos(pa)*psp,vy:Math.sin(pa)*psp,life:1,col:ci.col,r:rnd(1.5,3+impactSpeed*.3)});}
         if(i===circles.length-1){
           if(tutStep>0)tutLanded();
           score++;combo++;snd(true);screenShake(Math.min(2+score*.15,8));
@@ -1369,10 +1474,15 @@ function drawTrail(){
     else if(tr==='stars'&&i%3===0){var sz=Math.max(8,r*2.5);ctx.globalAlpha=a*1.8;ctx.font=sz+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('✦',s.x,s.y);}
     else if(tr==='fire'){ctx.globalAlpha=a*1.2;ctx.beginPath();ctx.arc(s.x,s.y,r*1.5,0,6.28);ctx.fillStyle='hsl('+(20+prog*40)+',100%,60%)';ctx.fill();}
     else if(tr==='ghost'){ctx.globalAlpha=a*.4;ctx.beginPath();ctx.arc(s.x,s.y,r*2,0,6.28);ctx.fillStyle='rgba(200,200,255,1)';ctx.fill();}
-    else if(tr==='bubbles'&&i%2===0){var bx=s.x+Math.sin(i*1.7)*r*1.2,by=s.y+Math.cos(i*2.3)*r*1.2,br=Math.max(2,r*(0.4+Math.sin(i*.8)*.3));ctx.globalAlpha=a*.55;ctx.beginPath();ctx.arc(bx,by,br,0,6.28);ctx.strokeStyle=isNight?'rgba(255,255,255,.7)':'rgba(100,120,180,.6)';ctx.lineWidth=1;ctx.stroke();}
+    else if(tr==='bubbles'&&i%2===0){var bx=s.x+Math.sin(i*1.7)*r*1.5,by=s.y+Math.cos(i*2.3)*r*1.5,br=Math.max(3,r*(0.6+Math.sin(i*.8)*.4));ctx.globalAlpha=a*.7;ctx.beginPath();ctx.arc(bx,by,br,0,6.28);var bCol='hsl('+(prog*60+190)+',60%,'+(isNight?'65%':'45%')+')';ctx.strokeStyle=bCol;ctx.lineWidth=1.2;ctx.stroke();ctx.globalAlpha=a*.15;ctx.fillStyle=bCol;ctx.fill();}
     else if(tr==='neon'){ctx.globalAlpha=a*1.5;ctx.beginPath();ctx.arc(s.x,s.y,r*1.3,0,6.28);var nc='hsl('+(prog*120+180)+',100%,65%)';ctx.fillStyle=nc;ctx.fill();ctx.shadowColor=nc;ctx.shadowBlur=8;ctx.beginPath();ctx.arc(s.x,s.y,r*.6,0,6.28);ctx.fillStyle='#fff';ctx.fill();ctx.shadowBlur=0;}
     else if(tr==='plasma'){var px=s.x+Math.sin(i*.9+Date.now()*.003)*r*.8,py=s.y+Math.cos(i*1.1+Date.now()*.002)*r*.8;ctx.globalAlpha=a*1.2;ctx.beginPath();ctx.arc(px,py,r*1.4,0,6.28);ctx.fillStyle='hsl('+(prog*200+Date.now()*.02%360)+',80%,55%)';ctx.fill();}
     else if(tr==='void'){ctx.globalAlpha=a*.8;ctx.beginPath();ctx.arc(s.x,s.y,r*2,0,6.28);ctx.fillStyle='rgba(0,0,0,.6)';ctx.fill();ctx.globalAlpha=a*.5;ctx.beginPath();ctx.arc(s.x,s.y,r*.5,0,6.28);ctx.fillStyle='#8b5cf6';ctx.fill();}
+    else if(tr==='aurora'){var ah=prog*120+140+Math.sin(Date.now()*.001+i*.3)*20;ctx.globalAlpha=a*.9;ctx.beginPath();ctx.arc(s.x,s.y+Math.sin(i*.5+Date.now()*.002)*r*.6,r*1.6,0,6.28);ctx.fillStyle='hsl('+ah+',70%,'+(isNight?'55%':'40%')+')';ctx.fill();ctx.globalAlpha=a*.4;ctx.beginPath();ctx.arc(s.x,s.y-Math.cos(i*.3+Date.now()*.001)*r*.4,r*.8,0,6.28);ctx.fillStyle='hsl('+(ah+40)+',80%,'+(isNight?'70%':'50%')+')';ctx.fill();}
+    else if(tr==='pixel'){var ps2=Math.max(3,r*1.2);ctx.globalAlpha=a;ctx.fillStyle=isNight?'hsl('+(prog*90+200)+',70%,65%)':'hsl('+(prog*90+200)+',50%,40%)';ctx.fillRect(s.x-ps2/2,s.y-ps2/2,ps2,ps2);}
+    else if(tr==='lightning'&&i>0){var prev=orb.trail[i-1],ps3=toS(prev.wx,prev.wy);ctx.globalAlpha=a*1.2;ctx.beginPath();ctx.moveTo(ps3.x+(Math.random()-.5)*4,ps3.y+(Math.random()-.5)*4);ctx.lineTo(s.x+(Math.random()-.5)*4,s.y+(Math.random()-.5)*4);ctx.strokeStyle=isNight?'hsl('+(prog*60+200)+',90%,75%)':'hsl('+(prog*60+200)+',70%,45%)';ctx.lineWidth=1+prog*1.5;ctx.stroke();}
+    else if(tr==='sakura'&&i%2===0){var sa2=i*2.1+Date.now()*.002,sx2=s.x+Math.sin(sa2)*r*.8,sy2=s.y+Math.cos(sa2*.7)*r*.8;ctx.globalAlpha=a*.9;ctx.save();ctx.translate(sx2,sy2);ctx.rotate(sa2);ctx.beginPath();ctx.ellipse(0,0,r*.7,r*.35,0,0,6.28);ctx.fillStyle=isNight?'hsl('+(prog*20+330)+',70%,75%)':'hsl('+(prog*20+330)+',60%,55%)';ctx.fill();ctx.restore();}
+    else if(tr==='comet'){ctx.globalAlpha=a*1.3;var cr2=r*(0.3+prog*1.5);ctx.beginPath();ctx.arc(s.x,s.y,cr2,0,6.28);ctx.fillStyle='rgba(255,255,255,'+(a*.6)+')';ctx.fill();ctx.globalAlpha=a*.5;ctx.beginPath();ctx.arc(s.x,s.y,r*.4,0,6.28);ctx.fillStyle=isNight?'#e0e7ff':'#475569';ctx.fill();}
     ctx.restore();
   }
 }
