@@ -773,6 +773,8 @@ function initFirebase(){
             if(data.photo)S.photo=data.photo;
             else if(user.photoURL)S.photo=user.photoURL;
           }else{
+            S=Object.assign({},DEF);
+            S.user={uid:user.uid,email:user.email||'',photo:user.photoURL||null};
             S.nick=user.displayName||user.email&&user.email.split('@')[0]||'Player';
             if(user.photoURL)S.photo=user.photoURL;
             S.country=userCountry;
