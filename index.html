@@ -1526,14 +1526,14 @@ function update(dt){
       if(Math.hypot(orb.wx-ci.wx,orb.wy-ci.wy)<=ci.r+12){
         orb.ang=Math.atan2(orb.wy-ci.wy,orb.wx-ci.wx);
         orb.wx=ci.wx+Math.cos(orb.ang)*ci.r;orb.wy=ci.wy+Math.sin(orb.ang)*ci.r;
+        var impactSpeed=Math.hypot(orb.vx,orb.vy);
+        var impactForce=Math.min(impactSpeed/12,1);
+        var isMaxImpact=impactForce>.85;
         orb.vx=0;orb.vy=0;orb.lastLaunched=-1;orb.graceFrames=0;orb.last=i;orb.on=i;
         // Softer difficulty curve — min 4s, slower ramp
         orb.timer=(currentMode==='easy')?99999:Math.max(4,10-score*.08);orb.timerMax=orb.timer;
         // Deactivate gravity field on landing
         if(gravFieldActive){gravFieldActive=false;ci.hasGravField=false;gravFieldParts=[];updateGravBtn();}
-        var impactSpeed=Math.hypot(orb.vx,orb.vy);
-        var impactForce=Math.min(impactSpeed/12,1); // 0-1 normalized
-        var isMaxImpact=impactForce>.85;
         hitIdx=i;hitT=1;hitAmt=ci.r*(.18+impactForce*.15);
         ci.shockwave={r:ci.r*(.3+impactForce*.4),a:.9+impactForce*.3};
         // Scale particles with impact force
