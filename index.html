@@ -610,6 +610,42 @@ function startMusic(){
   musicGain.connect(AC.destination);
   musicGain.gain.linearRampToValueAtTime(0.12,AC.currentTime+2);
   playAmbientChord();
+  // Zen music for Normal (easy) mode
+function startZenMusic(){
+  if(musicPlaying||!AC||!soundEnabled)return;
+  stopMenuMusic();
+  musicPlaying=true;
+  musicGain=AC.createGain();
+  musicGain.gain.value=0;
+  musicGain.connect(AC.destination);
+  musicGain.gain.linearRampToValueAtTime(0.10,AC.currentTime+3);
+  playZenChord();
+}
+function playZenChord(){
+  if(!musicPlaying||!AC)return;
+  // Pentatonic scale, very soft and warm
+  var zenNotes=[261.63,293.66,329.63,392,440,523.25,587.33];
+  var note=zenNotes[Math.floor(Math.random()*zenNotes.length)];
+  var o=AC.createOscillator(),g=AC.createGain();
+  o.type='sine';
+  o.frequency.value=note*(Math.random()<.4?0.5:1);
+  g.gain.setValueAtTime(0,AC.currentTime);
+  g.gain.linearRampToValueAtTime(.04*masterVolume,AC.currentTime+2.5);
+  g.gain.linearRampToValueAtTime(0,AC.currentTime+9);
+  o.connect(g);g.connect(musicGain);
+  o.start();o.stop(AC.currentTime+9.5);
+  // Occasional soft pad layer
+  if(Math.random()>.6){
+    var o2=AC.createOscillator(),g2=AC.createGain();
+    o2.type='sine';o2.frequency.value=note*1.5;
+    g2.gain.setValueAtTime(0,AC.currentTime);
+    g2.gain.linearRampToValueAtTime(.015*masterVolume,AC.currentTime+3);
+    g2.gain.linearRampToValueAtTime(0,AC.currentTime+8);
+    o2.connect(g2);g2.connect(musicGain);
+    o2.start();o2.stop(AC.currentTime+8.5);
+  }
+  setTimeout(function(){playZenChord();},4000+Math.random()*4000);
+}
 }
 function playAmbientChord(){
   if(!musicPlaying||!AC)return;
@@ -1194,7 +1230,7 @@ function addNext(){
   do{var a=rnd(0,6.28),d=rnd(minD,maxD);wx=p.wx+Math.cos(a)*d;wy=p.wy+Math.sin(a)*d;tries++;}
   while(tries<30&&circles.some(function(c){return Math.hypot(wx-c.wx,wy-c.wy)<c.r+80;}));
   var c=mkCircle(wx,wy,circles.length,minS,maxS);circles.push(c);
-  if(Math.random()>.45){
+  if(currentMode!=='easy'&&Math.random()>.45){
     for(var attempt=0;attempt<20;attempt++){
       var t2=rnd(.35,.65),cx=p.wx+(c.wx-p.wx)*t2+rnd(-18,18),cy=p.wy+(c.wy-p.wy)*t2+rnd(-18,18);
       if(!circles.some(function(cc){return Math.hypot(cx-cc.wx,cy-cc.wy)<cc.r+22;})){
@@ -1296,7 +1332,7 @@ function init(){
   camX=0;camY=0;tCamX=0;tCamY=0;zoom=.58;tZoom=.58;
   document.getElementById('sc').style.display='block';document.getElementById('sc').textContent='0';
   document.getElementById('sc').style.color=T.text;document.getElementById('co').style.opacity='0';
-  document.getElementById('coins-hud').style.display='block';document.getElementById('cv').textContent='0';
+  document.getElementById('coins-hud').style.display=(currentMode==='easy')?'none':'block';document.getElementById('cv').textContent='0';
   document.getElementById('pause-btn').style.display='flex';document.getElementById('revive-wrap').style.display='block';
   showMagnetBtn(currentMode!=='easy');
 }
@@ -1305,7 +1341,7 @@ function releaseJump(){
   if(!charging)return;charging=false;
   if(phase!=='playing'||orb.on===-1)return;
   if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();
-  startMusic();
+  if(currentMode==='easy')startZenMusic();else startMusic();
   var held=Math.min(Date.now()-chargeStart,MAX_CHARGE),power=1+(held/MAX_CHARGE)*2.8;
   var c=circles[orb.on],dir=c.spd>0?1:-1;
   var ra=Math.atan2(orb.wy-c.wy,orb.wx-c.wx),ta=ra+Math.PI/2*dir;
@@ -1374,10 +1410,26 @@ function doRevive(){
   },function(){toast(lang==='es'?'Ve el anuncio completo':'Watch the full ad to revive');});
 }
 function die(){
-  if(phase==='dead')return;phase='dead';snd(false);stopMusic();
+  if(phase==='dead')return;
+  // Easy mode: checkpoint respawn
+  if(currentMode==='easy'&&lastCheckpoint>0){
+    // Respawn at last checkpoint planet
+    score=lastCheckpoint;
+    var last=circles[circles.length-1];
+    circles=[last];parts=[];coins_arr=[];
+    orb={wx:last.wx+last.r,wy:last.wy,vx:0,vy:0,on:0,last:-1,lastLaunched:-1,graceFrames:0,ang:Math.atan2(last.r,0),trail:[],timer:99999,timerMax:99999};
+    addNext();
+    camX=last.wx;camY=last.wy;tCamX=last.wx;tCamY=last.wy;
+    document.getElementById('sc').textContent=score;
+    combo=0;
+    toast(lang==='es'?'🧘 Checkpoint '+lastCheckpoint:'🧘 Checkpoint '+lastCheckpoint);
+    if(navigator.vibrate)navigator.vibrate(15);
+    return;
+  }
+  phase='dead';snd(false);stopMusic();
   hideTut();tutStep=0;tutFrozen=false;
   if(navigator.vibrate)navigator.vibrate([50,30,80]);
-  S.coins+=sesCoins;
+  if(currentMode!=='easy')S.coins+=sesCoins;
   if(score>S.best)S.best=score;
   S.hist.push({score:score,date:new Date().toLocaleDateString()});
   if(S.hist.length>30)S.hist.shift();
@@ -1395,15 +1447,11 @@ function die(){
     document.getElementById('d-title').textContent=(score>=S.best&&score>0)?t('newRec'):t('crash');
     document.getElementById('d-score').textContent=score;document.getElementById('d-best').textContent=S.best;
     document.getElementById('d-earned').textContent=sesCoins;
-    
-    // Show revive only for good runs
     var reviveWrap=document.getElementById('revive-wrap');
     var reviveBtn=document.getElementById('d-revive');
     if(reviveBtn){
-      reviveBtn.style.background='';
-      reviveBtn.style.transform='';
-      reviveBtn.style.boxShadow='';
-      reviveBtn.style.animation='';
+      reviveBtn.style.background='';reviveBtn.style.transform='';
+      reviveBtn.style.boxShadow='';reviveBtn.style.animation='';
     }
     if(revivedThisRun||(score<10&&combo<3)){
       reviveWrap.style.display='none';
@@ -1411,7 +1459,6 @@ function die(){
       reviveWrap.style.display='block';
       startReviveCountdown();
     }
-    
     lbMoreOpen=false;renderLb();applyTheme();
   }
   setTimeout(function(){
@@ -1566,7 +1613,34 @@ function drawTrail(){
       ctx.globalAlpha=a*.6;ctx.beginPath();ctx.arc(s.x,s.y,r*.8,0,6.28);
       ctx.fillStyle='rgba(255,250,200,'+(a*.3)+')';ctx.fill();
     }
-    else if(tr==='sakura'){ctx.globalAlpha=a*1.2;ctx.beginPath();ctx.arc(s.x,s.y,r*1.5,0,6.28);ctx.fillStyle='hsl('+(330+prog*30)+',80%,72%)';ctx.fill();}
+    else if(tr==='sakura'){
+      var sakT=Date.now()*.001;
+      // Main petal orb — large and soft
+      var sakR=r*2.2;
+      var sakHue=330+prog*25;
+      ctx.globalAlpha=a*1.0;ctx.beginPath();ctx.arc(s.x,s.y,sakR,0,6.28);
+      ctx.fillStyle='hsla('+sakHue+',75%,78%,'+(a*.9)+')';ctx.fill();
+      // Soft outer glow
+      ctx.globalAlpha=a*.3;ctx.beginPath();ctx.arc(s.x,s.y,sakR*1.6,0,6.28);
+      ctx.fillStyle='hsla('+(sakHue+10)+',60%,85%,'+(a*.25)+')';ctx.fill();
+      // White inner core
+      ctx.globalAlpha=a*.55;ctx.beginPath();ctx.arc(s.x,s.y,sakR*.3,0,6.28);
+      ctx.fillStyle='rgba(255,255,255,'+(a*.6)+')';ctx.fill();
+      // Drifting micro-particles — small petals floating away
+      if(i%2===0){
+        var np=2;
+        for(var sp=0;sp<np;sp++){
+          var spA=sakT*1.2+i*1.7+sp*3.14;
+          var spDist=sakR*(1.2+Math.sin(spA*.8+sp)*.8);
+          var spX=s.x+Math.cos(spA)*spDist;
+          var spY=s.y+Math.sin(spA*.6)*spDist+Math.sin(sakT+i*.5)*r*.4;
+          var spR=Math.max(1.2,sakR*.15*(0.6+Math.sin(spA)*.4));
+          var spCol=sp%2===0?'hsla(335,70%,82%,'+(a*.6)+')':'hsla(0,0%,100%,'+(a*.45)+')';
+          ctx.globalAlpha=a*.5;ctx.beginPath();ctx.arc(spX,spY,spR,0,6.28);
+          ctx.fillStyle=spCol;ctx.fill();
+        }
+      }
+    }
     ctx.restore();
   }
 }
