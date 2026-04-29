@@ -610,7 +610,7 @@ function startMusic(){
   musicGain.connect(AC.destination);
   musicGain.gain.linearRampToValueAtTime(0.12,AC.currentTime+2);
   playAmbientChord();
-  // Zen music for Normal (easy) mode
+}
 function startZenMusic(){
   if(musicPlaying||!AC||!soundEnabled)return;
   stopMenuMusic();
@@ -623,7 +623,6 @@ function startZenMusic(){
 }
 function playZenChord(){
   if(!musicPlaying||!AC)return;
-  // Pentatonic scale, very soft and warm
   var zenNotes=[261.63,293.66,329.63,392,440,523.25,587.33];
   var note=zenNotes[Math.floor(Math.random()*zenNotes.length)];
   var o=AC.createOscillator(),g=AC.createGain();
@@ -634,7 +633,6 @@ function playZenChord(){
   g.gain.linearRampToValueAtTime(0,AC.currentTime+9);
   o.connect(g);g.connect(musicGain);
   o.start();o.stop(AC.currentTime+9.5);
-  // Occasional soft pad layer
   if(Math.random()>.6){
     var o2=AC.createOscillator(),g2=AC.createGain();
     o2.type='sine';o2.frequency.value=note*1.5;
@@ -645,7 +643,6 @@ function playZenChord(){
     o2.start();o2.stop(AC.currentTime+8.5);
   }
   setTimeout(function(){playZenChord();},4000+Math.random()*4000);
-}
 }
 function playAmbientChord(){
   if(!musicPlaying||!AC)return;
@@ -1430,10 +1427,10 @@ function die(){
   hideTut();tutStep=0;tutFrozen=false;
   if(navigator.vibrate)navigator.vibrate([50,30,80]);
   if(currentMode!=='easy')S.coins+=sesCoins;
-  if(score>S.best)S.best=score;
-  S.hist.push({score:score,date:new Date().toLocaleDateString()});
-  if(S.hist.length>30)S.hist.shift();
   if(currentMode!=='easy'){
+    if(score>S.best)S.best=score;
+    S.hist.push({score:score,date:new Date().toLocaleDateString()});
+    if(S.hist.length>30)S.hist.shift();
     updateRank();
   }
   saveState();
@@ -1534,7 +1531,7 @@ function update(dt){
           screenShake(Math.min(2+score*.15,8));
           if(navigator.vibrate)navigator.vibrate(score>20?30:15);
           document.getElementById('sc').textContent=score;
-          if(score>S.best)S.best=score;
+          if(currentMode!=='easy'&&score>S.best)S.best=score;
           if(combo>=3){var ce=document.getElementById('co');ce.textContent='x'+combo+' COMBO';ce.style.color=ci.col;ce.style.opacity='1';clearTimeout(ce._t);ce._t=setTimeout(function(){ce.style.opacity='0';},900);}
           checkMilestone();
           // Easy mode checkpoint every 10
