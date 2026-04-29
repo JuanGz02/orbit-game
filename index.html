@@ -124,6 +124,10 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     <div id="h-best" style="font-size:34px;font-weight:100;color:#fbbf24">0</div>
   </div>
   <div style="display:flex;flex-direction:column;gap:11px;width:100%;max-width:280px">
+    <div id="mode-selector" style="display:flex;gap:0;border-radius:24px;overflow:hidden;margin-bottom:8px;width:100%;border:1px solid rgba(128,128,128,.2)">
+      <div id="mode-easy" onclick="setGameMode('easy')" style="flex:1;padding:10px;text-align:center;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all .2s;opacity:.45">EASY</div>
+      <div id="mode-normal" onclick="setGameMode('normal')" style="flex:1;padding:10px;text-align:center;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all .2s;opacity:1;font-weight:600">NORMAL</div>
+    </div>
     <button class="btn" id="h-play" style="font-size:16px;padding:17px;letter-spacing:6px" onclick="startGame()">PLAY</button>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <button class="btn bsm" id="h-shop" onclick="showScr('shop')">SHOP</button>
@@ -288,9 +292,7 @@ function t(k){return(I18N[lang]||I18N.en)[k]||k;}
 var TRAILS=[{id:'simple',name:'Classic',icon:'⚪',price:0},{id:'rainbow',name:'Rainbow',icon:'🌈',price:1500},
   {id:'stars',name:'Stars',icon:'✨',price:2500},{id:'fire',name:'Fire',icon:'🔥',price:2000},
   {id:'ghost',name:'Ghost',icon:'🔘',price:2800},{id:'bubbles',name:'Bubbles',icon:'🫧',price:2000},
-  {id:'aurora',name:'Aurora',icon:'🌊',price:1800},{id:'pixel',name:'Pixel',icon:'▪️',price:1200},
   {id:'lightning',name:'Lightning',icon:'⚡',price:2200},{id:'sakura',name:'Sakura',icon:'🌸',price:1600},
-  {id:'comet',name:'Comet',icon:'☄️',price:2400},
   {id:'neon',name:'Neon',icon:'💎',price:0},{id:'plasma',name:'Plasma',icon:'🌀',price:0},{id:'void',name:'Void',icon:'🕳️',price:0}];
 var PACKS=[{id:'noads',name:'No Ads',desc:'Remove all ads forever',price:'$1.99',col:'#4f46e5'},
   {id:'c3000',name:'3000 ⭐',desc:'Coin starter pack',price:'$0.99',col:'#d97706'},
@@ -303,7 +305,7 @@ function getPal(){return GAME_PAL;}
 // ══════════════════════════════════════════
 var DEF={user:null,nick:'',lang:'en',coins:0,best:0,noAds:false,themeMode:'auto',tutorial:false,
   trail:'simple',ownedTrails:['simple'],hist:[],photo:null,country:'',ownedPowerups:{magnet:0},
-  streak:0,lastPlayDate:'',rank:'rookie'};
+  streak:0,lastPlayDate:'',rank:'rookie',gameMode:'normal'};
 var S=Object.assign({},DEF);
 function loadState(){try{var d=localStorage.getItem('orb7');if(d)S=Object.assign({},DEF,JSON.parse(d));}catch(e){}}
 function saveState(){localStorage.setItem('orb7',JSON.stringify(S));saveToCloud();}
@@ -529,10 +531,6 @@ function checkStreak(){
     toast(msg);
   },1500);
   // Day 7 bonus trail
-  if(S.streak===7&&S.ownedTrails.indexOf('aurora')<0){
-    S.ownedTrails.push('aurora');saveState();
-    setTimeout(function(){toast(lang==='es'?'🎁 ¡Trail AURORA desbloqueado por 7 días seguidos!':'🎁 AURORA trail unlocked for 7-day streak!');},3500);
-  }
 }
 
 // Trail shop label helper
@@ -733,6 +731,7 @@ function initFirebase(){
             S.streak=data.streak||0;
             S.lastPlayDate=data.lastPlayDate||'';
             S.rank=data.rank||'rookie';
+            S.gameMode=data.gameMode||'normal';
             if(data.photo)S.photo=data.photo;
             else if(user.photoURL)S.photo=user.photoURL;
           }else{
@@ -769,7 +768,7 @@ function saveToCloud(){
     hist:(S.hist||[]).slice(-20),ownedPowerups:S.ownedPowerups||{magnet:0},
     themeMode:S.themeMode||'auto',lang:S.lang||'en',
     country:S.country||userCountry,photo:S.photo||null,
-    streak:S.streak||0,lastPlayDate:S.lastPlayDate||'',rank:S.rank||'rookie',
+    streak:S.streak||0,lastPlayDate:S.lastPlayDate||'',rank:S.rank||'rookie',gameMode:S.gameMode||'normal',
     updatedAt:firebase.firestore.FieldValue.serverTimestamp()
   },{merge:true}).catch(function(e){console.log('save error',e);});
 }
@@ -907,6 +906,13 @@ function updateHomeUI(){
   var av=document.getElementById('pr-av');
   if(av){if(S.photo){av.style.background='none';av.style.backgroundImage='url('+S.photo+')';av.style.backgroundSize='cover';av.textContent='';}
   else{av.style.background=col;av.style.backgroundImage='none';av.textContent=ini(S.nick);}}
+  // Update mode selector
+  var m=S.gameMode||'normal';
+  var easy=document.getElementById('mode-easy'),norm=document.getElementById('mode-normal');
+  if(easy&&norm){
+    if(m==='easy'){easy.style.opacity='1';easy.style.fontWeight='600';easy.style.background=T.navOn||'rgba(128,128,128,.15)';norm.style.opacity='.45';norm.style.fontWeight='400';norm.style.background='transparent';}
+    else{norm.style.opacity='1';norm.style.fontWeight='600';norm.style.background=T.navOn||'rgba(128,128,128,.15)';easy.style.opacity='.45';easy.style.fontWeight='400';easy.style.background='transparent';}
+  }
 }
 function setLang(l){
   lang=l;S.lang=l;saveState();
@@ -945,11 +951,10 @@ function renderShop(tab){
     if(!S.ownedPowerups)S.ownedPowerups={};
     var mc=S.ownedPowerups.magnet||0;
     html='<div style="font-size:10px;letter-spacing:3px;color:'+T.textMuted+';margin-bottom:8px">POWER-UPS</div>';
-    html+='<div style="background:'+T.card+';border:1px solid '+T.border+';border-radius:14px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="buyMagnet()">';
-    html+='<div style="font-size:28px">🧲</div><div style="flex:1">';
-    html+='<div style="font-size:13px;font-weight:500;color:'+T.text+'">Magnet <span style="color:'+T.textMuted+';font-weight:400">(x'+mc+')</span></div>';
-    html+='<div style="font-size:11px;color:'+T.textMuted+';margin-top:2px">'+(lang==='es'?'Atrae monedas · 1 partida':'Pulls coins · 1 game')+'</div></div>';
-    html+='<div style="color:#fbbf24;font-size:13px;font-weight:600">★ 10</div></div>';
+    html+='<div style="background:'+T.card+';border:1px solid rgba(120,80,255,.3);border-radius:14px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px">';
+    html+='<div style="font-size:28px">🔘</div><div style="flex:1">';
+    html+='<div style="font-size:13px;font-weight:500;color:'+T.text+'">'+(lang==='es'?'Campo Gravitatorio':'Gravity Field')+'</div>';
+    html+='<div style="font-size:11px;color:'+T.textMuted+';margin-top:2px">'+(lang==='es'?'Atrae el proyectil al planeta · 3/partida · compra en juego':'Pulls projectile to planet · 3/game · buy in-game')+'</div></div></div>';
     html+='<div style="font-size:10px;letter-spacing:3px;color:'+T.textMuted+';margin-bottom:8px">COIN PACKS</div>';
     for(var j=0;j<PACKS.length;j++){
       var p=PACKS[j];
@@ -973,12 +978,6 @@ function buyTrail(id,price){
   if(S.coins<price){toast(t('notEnough'));return;}
   S.coins-=price;S.ownedTrails.push(id);S.trail=id;saveState();renderShop('trail');
   document.getElementById('sh-coins').textContent=S.coins;toast(t('unlocked'));
-}
-function buyMagnet(){
-  if(!S.ownedPowerups)S.ownedPowerups={};
-  if(S.coins<5){toast(t('notEnough'));return;}
-  S.coins-=5;S.ownedPowerups.magnet=(S.ownedPowerups.magnet||0)+1;
-  saveState();renderShop('packs');document.getElementById('sh-coins').textContent=S.coins;toast('🧲 '+t('unlocked'));
 }
 var STRIPE_LINKS={
   noads: 'https://buy.stripe.com/aFa3cxfDmbDofmJ8s68EM00',
@@ -1141,6 +1140,8 @@ function rsz(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
 window.addEventListener('resize',rsz);rsz();
 
 var phase='idle',score,combo,sesCoins,revived;
+var currentMode='normal';
+var lastCheckpoint=0;
 var sesCoinsFrac=0;
 var revivedThisRun=false;
 var reviveTimer=0;
@@ -1153,6 +1154,8 @@ var lastT=0;
 var shakeX=0,shakeY=0,shakeD=0;
 var hitIdx=-1,hitT=0,hitAmt=0;
 var magnetActive=false,magnetBtn=null;
+var gravFieldActive=false,gravFieldUsed=0,gravFieldMax=3;
+var gravFieldParts=[];
 
 function rnd(a,b){return a+Math.random()*(b-a);}
 var AC;
@@ -1171,11 +1174,14 @@ function sR(r){return r*zoom;}
 
 function mkCircle(wx,wy,idx,minS,maxS){
   var pal=getPal();minS=minS||.038;maxS=maxS||.058;
-  return{wx:wx,wy:wy,r:rnd(58,95),col:pal[idx%pal.length],spd:rnd(minS,maxS)*(Math.random()<.5?1:-1),ang:rnd(0,6.28),alpha:0,shockwave:null};
+  var col=pal[idx%pal.length];
+  // Easy mode: checkpoint planets every 10 are golden
+  if(currentMode==='easy'&&score>0&&(score+1)%10===0)col='#fbbf24';
+  return{wx:wx,wy:wy,r:rnd(58,95),col:col,spd:rnd(minS,maxS)*(Math.random()<.5?1:-1),ang:rnd(0,6.28),alpha:0,shockwave:null};
 }
 function addNext(){
   var p=circles[circles.length-1];
-  var diff=Math.min(score*.016,.8);
+  var diff=currentMode==='easy'?0:Math.min(score*.016,.8);
   var minD=220+diff*80,maxD=340+diff*140,minS=.038+diff*.035,maxS=.058+diff*.042;
   var wx,wy,tries=0;
   do{var a=rnd(0,6.28),d=rnd(minD,maxD);wx=p.wx+Math.cos(a)*d;wy=p.wy+Math.sin(a)*d;tries++;}
@@ -1194,82 +1200,92 @@ function addNext(){
 function spawnMagnetBtn(){
   if(magnetBtn)return;
   magnetBtn=document.createElement('button');
-  magnetBtn.style.cssText='position:absolute;bottom:44px;right:16px;width:48px;height:48px;border-radius:50%;background:rgba(251,191,36,.15);border:1.5px solid rgba(251,191,36,.5);color:#fbbf24;font-size:22px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all .2s;pointer-events:all;z-index:3';
-  magnetBtn.innerHTML='<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center">🧲<div id="magnet-fill" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(251,191,36,.35);border-radius:50%;clip-path:polygon(0 0,100% 0,100% 100%,0 100%);transition:clip-path 0.1s linear"></div></div>';
-  magnetBtn.onclick=activateMagnet;
+  magnetBtn.style.cssText='position:absolute;bottom:44px;right:16px;width:48px;height:48px;border-radius:50%;background:rgba(120,80,255,.15);border:1.5px solid rgba(120,80,255,.5);color:#a78bfa;font-size:22px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all .2s;pointer-events:all;z-index:3';
+  magnetBtn.innerHTML='<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center">🔘<div id="grav-count" style="position:absolute;top:-2px;right:-2px;background:#a78bfa;color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center">3</div></div>';
+  magnetBtn.onclick=activateGravField;
   document.body.appendChild(magnetBtn);
 }
-function activateMagnet(){
-  if(magnetActive||phase!=='playing')return;
-  if(!S.ownedPowerups)S.ownedPowerups={};
+function activateGravField(){
+  if(gravFieldActive||phase!=='playing'||orb.on===-1)return;
+  if(gravFieldUsed>=gravFieldMax){toast(lang==='es'?'Máx 3 por partida':'Max 3 per game');return;}
+  var cost=15+Math.floor(score*0.2);
   var total=S.coins+sesCoins;
-  var magnetCost=10+Math.floor(score*0.3);
-  if(!(S.ownedPowerups.magnet>0)){
-    if(total<magnetCost){toast(t('notEnough'));return;}
-    var cost=magnetCost;
-    if(sesCoins>=cost){sesCoins-=cost;}
-    else{cost-=sesCoins;sesCoins=0;S.coins=Math.max(0,S.coins-cost);}
-    document.getElementById('cv').textContent=Math.floor(sesCoins);saveState();
-    animateCoinDeduction(magnetCost);
-  }else{S.ownedPowerups.magnet--;saveState();}
-  magnetActive=true;
-  magnetTimer=20;
+  if(total<cost){toast(t('notEnough'));return;}
+  if(sesCoins>=cost){sesCoins-=cost;}
+  else{var diff2=cost-sesCoins;sesCoins=0;S.coins=Math.max(0,S.coins-diff2);}
+  document.getElementById('cv').textContent=Math.floor(sesCoins);saveState();
+  gravFieldActive=true;gravFieldUsed++;
+  updateGravBtn();
+  // Mark next planet with gravity field
+  var nextPlanet=circles[circles.length-1];
+  if(nextPlanet)nextPlanet.hasGravField=true;
+  toast(lang==='es'?'🌀 Campo activado':'🌀 Field activated');
+}
+function updateGravBtn(){
+  var countEl=document.getElementById('grav-count');
+  if(countEl)countEl.textContent=(gravFieldMax-gravFieldUsed);
   if(magnetBtn){
-    magnetBtn.style.background='rgba(202,162,30,.35)';
-    magnetBtn.style.border='1.5px solid rgba(202,162,30,.8)';
-    magnetBtn.style.boxShadow='0 0 14px rgba(202,162,30,.4)';
-    var fill=document.getElementById('magnet-fill');
-    if(fill)fill.style.clipPath='polygon(0 0,100% 0,100% 100%,0 100%)';
+    if(gravFieldUsed>=gravFieldMax){magnetBtn.style.opacity='.25';}
+    else{magnetBtn.style.opacity='1';}
+    if(gravFieldActive){
+      magnetBtn.style.background='rgba(120,80,255,.35)';
+      magnetBtn.style.border='1.5px solid rgba(120,80,255,.8)';
+      magnetBtn.style.boxShadow='0 0 14px rgba(120,80,255,.4)';
+    }else{
+      magnetBtn.style.background='rgba(120,80,255,.15)';
+      magnetBtn.style.border='1.5px solid rgba(120,80,255,.5)';
+      magnetBtn.style.boxShadow='none';
+    }
   }
-  // Spawn absorption particles
-  for(var i=0;i<12;i++){var a=rnd(0,6.28),d=rnd(30,80);parts.push({wx:orb.wx+Math.cos(a)*d,wy:orb.wy+Math.sin(a)*d,vx:Math.cos(a)*-2,vy:Math.sin(a)*-2,life:1,col:'#caaa1e',r:rnd(2,4)});}
 }
 var magnetTimer=0;
 var magnetMaxTime=20;
 function updateMagnetTimer(dt){
-  if(magnetActive&&magnetTimer>0){
-    magnetTimer-=dt/60;
-    var fill=document.getElementById('magnet-fill');
-    if(fill){
-      var pct=magnetTimer/magnetMaxTime;
-      fill.style.clipPath='polygon(0 '+((1-pct)*100)+'%,100% '+((1-pct)*100)+'%,100% 100%,0 100%)';
-    }
-    if(magnetTimer<=0){
-      magnetActive=false;magnetTimer=0;
-      if(magnetBtn){
-        magnetBtn.innerHTML='<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center">🧲<div id="magnet-fill" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(251,191,36,.35);border-radius:50%;clip-path:polygon(0 100%,100% 100%,100% 100%,0 100%);transition:clip-path 0.1s linear"></div></div>';
-        magnetBtn.style.background='rgba(251,191,36,.15)';
-        magnetBtn.style.border='1.5px solid rgba(251,191,36,.5)';
-        magnetBtn.style.boxShadow='none';
+  // Gravity field: pull orb toward next planet if field is active
+  if(gravFieldActive&&orb.on===-1){
+    var target=circles[circles.length-1];
+    if(target&&target.hasGravField){
+      var gdist=Math.hypot(orb.wx-target.wx,orb.wy-target.wy);
+      if(gdist>0&&gdist<600){
+        var pullStr=5.0*(1-gdist/600);
+        var gfx=(target.wx-orb.wx)/gdist,gfy=(target.wy-orb.wy)/gdist;
+        orb.vx+=gfx*pullStr*dt;orb.vy+=gfy*pullStr*dt;
       }
     }
   }
-}
-function animateCoinDeduction(amount){
-  var hud=document.getElementById('coins-hud'),cvEl=document.getElementById('cv');
-  var saved=S.coins+amount;
-  cvEl.textContent=saved;hud.style.transform='scale(1.15)';hud.style.textShadow='0 0 8px rgba(251,191,36,.6)';
-  setTimeout(function(){cvEl.textContent=saved+' − '+amount;cvEl.style.color='#ef4444';},400);
-  setTimeout(function(){cvEl.textContent=S.coins;cvEl.style.color='#fbbf24';},1000);
-  setTimeout(function(){cvEl.textContent=Math.floor(sesCoins);hud.style.transform='scale(1)';hud.style.textShadow='none';},1600);
+  // Spawn visual particles around gravity field planet
+  if(gravFieldActive){
+    var gTarget=circles[circles.length-1];
+    if(gTarget&&gTarget.hasGravField&&Math.random()>.7){
+      var ga=rnd(0,6.28),gd2=gTarget.r+rnd(20,80);
+      gravFieldParts.push({wx:gTarget.wx+Math.cos(ga)*gd2,wy:gTarget.wy+Math.sin(ga)*gd2,
+        vx:Math.cos(ga+Math.PI)*1.5,vy:Math.sin(ga+Math.PI)*1.5,life:1,r:rnd(1.5,3)});
+    }
+  }
+  // Update gravity field particles
+  for(var gp=gravFieldParts.length-1;gp>=0;gp--){
+    var pp=gravFieldParts[gp];
+    pp.wx+=pp.vx*dt;pp.wy+=pp.vy*dt;pp.life-=.025*dt;
+    if(pp.life<=0)gravFieldParts.splice(gp,1);
+  }
 }
 function showMagnetBtn(show){
   if(!magnetBtn)spawnMagnetBtn();
-  if(!S.ownedPowerups)S.ownedPowerups={};
   magnetBtn.style.display=show?'flex':'none';
-  magnetBtn.style.opacity=(S.ownedPowerups.magnet>0)?'1':'0.45';
+  updateGravBtn();
 }
 
 function init(){
   score=0;combo=0;sesCoins=0;sesCoinsFrac=0;revived=false;revivedThisRun=false;parts=[];coins_arr=[];
   lastMilestone=0;GAME_PAL=['#a78bfa','#6ee7b7','#f9a8d4'];
   tutStep=0;tutFrozen=false;slowMoTimer=0;slowMoFactor=1;hideTut();
+  lastCheckpoint=0;
   if(reviveInterval){clearInterval(reviveInterval);reviveInterval=null;}
   var pal=getPal();
   var c0={wx:0,wy:0,r:88,col:pal[0],spd:.025,ang:0,alpha:1,shockwave:null};
   circles=[c0];
-  orb={wx:c0.r,wy:0,vx:0,vy:0,on:0,last:-1,lastLaunched:-1,graceFrames:0,ang:0,trail:[],timer:10,timerMax:10};
-  magnetActive=false;addNext();
+  orb={wx:c0.r,wy:0,vx:0,vy:0,on:0,last:-1,lastLaunched:-1,graceFrames:0,ang:0,trail:[],timer:99999,timerMax:99999};
+  magnetActive=false;gravFieldActive=false;gravFieldUsed=0;gravFieldParts=[];addNext();
   camX=0;camY=0;tCamX=0;tCamY=0;zoom=.58;tZoom=.58;
   document.getElementById('sc').style.display='block';document.getElementById('sc').textContent='0';
   document.getElementById('sc').style.color=T.text;document.getElementById('co').style.opacity='0';
@@ -1290,7 +1306,13 @@ function releaseJump(){
   orb.vx=Math.cos(ta)*sp;orb.vy=Math.sin(ta)*sp;
   orb.lastLaunched=orb.on;orb.graceFrames=10;orb.last=-1;orb.on=-1;
 }
-function startGame(){SCRS.forEach(function(s){document.getElementById('scr-'+s).classList.remove('on');});phase='playing';init();startTutorial();}
+function setGameMode(m){
+  S.gameMode=m;saveState();currentMode=m;
+  var easy=document.getElementById('mode-easy'),norm=document.getElementById('mode-normal');
+  if(m==='easy'){easy.style.opacity='1';easy.style.fontWeight='600';easy.style.background=T.navOn||'rgba(128,128,128,.15)';norm.style.opacity='.45';norm.style.fontWeight='400';norm.style.background='transparent';}
+  else{norm.style.opacity='1';norm.style.fontWeight='600';norm.style.background=T.navOn||'rgba(128,128,128,.15)';easy.style.opacity='.45';easy.style.fontWeight='400';easy.style.background='transparent';}
+}
+function startGame(){SCRS.forEach(function(s){document.getElementById('scr-'+s).classList.remove('on');});currentMode=S.gameMode||'normal';phase='playing';init();startTutorial();}
 function togglePause(){
   if(phase==='playing'){phase='paused';document.getElementById('scr-pause').classList.add('on');document.getElementById('scr-pause').style.background=T.bg;document.getElementById('pause-btn').style.display='none';}
   else if(phase==='paused'){phase='playing';document.getElementById('scr-pause').classList.remove('on');document.getElementById('pause-btn').style.display='flex';}
@@ -1340,11 +1362,16 @@ function die(){
   if(phase==='dead')return;phase='dead';snd(false);stopMusic();
   hideTut();tutStep=0;tutFrozen=false;
   if(navigator.vibrate)navigator.vibrate([50,30,80]);
-  S.coins+=sesCoins;if(score>S.best)S.best=score;
-  updateRank();
-  S.hist.push({score:score,date:new Date().toLocaleDateString()});
-  if(S.hist.length>30)S.hist.shift();
-  saveState();saveLbEntry();deathCount++;
+  S.coins+=sesCoins;
+  if(currentMode!=='easy'){
+    if(score>S.best)S.best=score;
+    updateRank();
+    S.hist.push({score:score,date:new Date().toLocaleDateString()});
+    if(S.hist.length>30)S.hist.shift();
+  }
+  saveState();
+  if(currentMode!=='easy')saveLbEntry();
+  deathCount++;
   document.getElementById('sc').style.display='none';document.getElementById('coins-hud').style.display='none';
   document.getElementById('co').style.opacity='0';document.getElementById('pause-btn').style.display='none';
   showMagnetBtn(false);
@@ -1389,15 +1416,7 @@ function update(dt){
   if(orb.graceFrames>0)orb.graceFrames-=dt;
   if(hitT>0)hitT=Math.max(0,hitT-dt*.15);
   if(shakeD>0.05){shakeX*=.55;shakeY*=.55;shakeD*=.55;}else{shakeX=0;shakeY=0;shakeD=0;}
-  if(magnetActive){
-    coins_arr.forEach(function(cn){
-      if(cn.done)return;
-      var dx=orb.wx-cn.wx,dy=orb.wy-cn.wy,dist=Math.hypot(dx,dy);
-      if(dist<280&&dist>0){var pull=6*(1-dist/280)*dt;cn.wx+=dx/dist*pull;cn.wy+=dy/dist*pull;}
-      if(dist<20){cn.done=true;var multiplier=1+combo*0.15;var earned=1*multiplier;sesCoinsFrac+=earned;var whole=Math.floor(sesCoinsFrac);if(whole>0){sesCoins+=whole;sesCoinsFrac-=whole;}document.getElementById('cv').textContent=sesCoins;if(earned>1)showCoinPopup('+'+earned.toFixed(1),cn.wx,cn.wy);burst(cn.wx,cn.wy,'#fbbf24',7);burst(cn.wx,cn.wy,'#caaa1e',3);}
-    });
-    coins_arr=coins_arr.filter(function(c){return !c.done;});
-  }else{
+  {
     coins_arr.forEach(function(cn){
       if(cn.done)return;
       if(Math.hypot(orb.wx-cn.wx,orb.wy-cn.wy)<cn.r+20){cn.done=true;var multiplier=1+combo*0.15;var earned=1*multiplier;sesCoinsFrac+=earned;var whole=Math.floor(sesCoinsFrac);if(whole>0){sesCoins+=whole;sesCoinsFrac-=whole;}document.getElementById('cv').textContent=sesCoins;if(earned>1)showCoinPopup('+'+earned.toFixed(1),cn.wx,cn.wy);burst(cn.wx,cn.wy,'#fbbf24',7);}
@@ -1413,7 +1432,22 @@ function update(dt){
     var span=Math.hypot(nx.wx-c.wx,nx.wy-c.wy)+Math.max(c.r,nx.r)*2+80;
     tZoom=Math.min(1.0,Math.min(W,H)*.82/span);
   }else{
-    orb.vy+=.22*dt;orb.wx+=orb.vx*dt;orb.wy+=orb.vy*dt;
+    orb.vy+=.22*dt;
+    // Easy mode: gravitational pull toward nearest planet
+    if(currentMode==='easy'){
+      var closestC=null,closestD=Infinity;
+      for(var gi=0;gi<circles.length;gi++){
+        if(gi===orb.lastLaunched&&orb.graceFrames>0)continue;
+        var gd=Math.hypot(orb.wx-circles[gi].wx,orb.wy-circles[gi].wy);
+        if(gd<closestD){closestD=gd;closestC=circles[gi];}
+      }
+      if(closestC&&closestD>0&&closestD<500){
+        var gStr=3.5*(1-closestD/500);
+        var gdx=(closestC.wx-orb.wx)/closestD,gdy=(closestC.wy-orb.wy)/closestD;
+        orb.vx+=gdx*gStr*dt;orb.vy+=gdy*gStr*dt;
+      }
+    }
+    orb.wx+=orb.vx*dt;orb.wy+=orb.vy*dt;
     tCamX+=(orb.wx-tCamX)*.09*dt;tCamY+=(orb.wy-tCamY)*.09*dt;
     var landed=false;
     for(var i=0;i<circles.length;i++){
@@ -1425,19 +1459,30 @@ function update(dt){
         orb.wx=ci.wx+Math.cos(orb.ang)*ci.r;orb.wy=ci.wy+Math.sin(orb.ang)*ci.r;
         orb.vx=0;orb.vy=0;orb.lastLaunched=-1;orb.graceFrames=0;orb.last=i;orb.on=i;
         // Softer difficulty curve — min 4s, slower ramp
-        orb.timer=Math.max(4,10-score*.08);orb.timerMax=orb.timer;
+        orb.timer=(currentMode==='easy')?99999:Math.max(4,10-score*.08);orb.timerMax=orb.timer;
+        // Deactivate gravity field on landing
+        if(gravFieldActive){gravFieldActive=false;ci.hasGravField=false;gravFieldParts=[];updateGravBtn();}
         hitIdx=i;hitT=1;hitAmt=ci.r*.18;ci.shockwave={r:ci.r*.3,a:.9};
         var impactSpeed=Math.hypot(orb.vx,orb.vy);
-        var partCount=Math.min(40,Math.max(12,Math.round(impactSpeed*2.5)));
-        var partSpeed=Math.min(8,Math.max(2,impactSpeed*.6));
-        for(var pi=0;pi<partCount;pi++){var pa=Math.PI*2*pi/partCount+rnd(-.4,.4),psp=rnd(1.5,partSpeed);parts.push({wx:orb.wx,wy:orb.wy,vx:Math.cos(pa)*psp,vy:Math.sin(pa)*psp,life:1,col:ci.col,r:rnd(1.5,3+impactSpeed*.3)});}
+        if(currentMode!=='easy'){
+          var partCount=Math.min(40,Math.max(12,Math.round(impactSpeed*2.5)));
+          var partSpeed=Math.min(8,Math.max(2,impactSpeed*.6));
+          for(var pi=0;pi<partCount;pi++){var pa=Math.PI*2*pi/partCount+rnd(-.4,.4),psp=rnd(1.5,partSpeed);parts.push({wx:orb.wx,wy:orb.wy,vx:Math.cos(pa)*psp,vy:Math.sin(pa)*psp,life:1,col:ci.col,r:rnd(1.5,3+impactSpeed*.3)});}
+        }
         if(i===circles.length-1){
           if(tutStep>0)tutLanded();
-          score++;combo++;snd(true);screenShake(Math.min(2+score*.15,8));
+          score++;combo++;snd(true);
+          if(currentMode!=='easy')screenShake(Math.min(2+score*.15,8));
           if(navigator.vibrate)navigator.vibrate(score>20?30:15);
-          document.getElementById('sc').textContent=score;if(score>S.best)S.best=score;
+          document.getElementById('sc').textContent=score;
+          if(currentMode!=='easy'&&score>S.best)S.best=score;
           if(combo>=3){var ce=document.getElementById('co');ce.textContent='x'+combo+' COMBO';ce.style.color=ci.col;ce.style.opacity='1';clearTimeout(ce._t);ce._t=setTimeout(function(){ce.style.opacity='0';},900);}
-          checkMilestone();
+          if(currentMode!=='easy')checkMilestone();
+          // Easy mode checkpoint every 10
+          if(currentMode==='easy'&&score%10===0&&score!==lastCheckpoint){
+            lastCheckpoint=score;
+            showMilestonePop('CHECKPOINT '+score,score);
+          }
           while(circles.length>3){circles.shift();if(orb.on>0)orb.on--;if(orb.lastLaunched>0)orb.lastLaunched--;i=Math.max(0,i-1);}
           addNext();
         }else{combo=0;document.getElementById('co').style.opacity='0';}
@@ -1471,18 +1516,68 @@ function drawTrail(){
     ctx.save();var tr=S.trail;
     if(tr==='simple'){ctx.globalAlpha=a;ctx.beginPath();ctx.arc(s.x,s.y,r,0,6.28);ctx.fillStyle=T.orbCol;ctx.fill();}
     else if(tr==='rainbow'){ctx.globalAlpha=a;ctx.beginPath();ctx.arc(s.x,s.y,r*1.2,0,6.28);ctx.fillStyle='hsl('+(prog*360)+',90%,70%)';ctx.fill();}
-    else if(tr==='stars'&&i%3===0){var sz=Math.max(8,r*2.5);ctx.globalAlpha=a*1.8;ctx.font=sz+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('✦',s.x,s.y);}
-    else if(tr==='fire'){ctx.globalAlpha=a*1.2;ctx.beginPath();ctx.arc(s.x,s.y,r*1.5,0,6.28);ctx.fillStyle='hsl('+(20+prog*40)+',100%,60%)';ctx.fill();}
+    else if(tr==='stars'&&i%3===0){var sz=Math.max(12,r*3.5);ctx.globalAlpha=a*1.8;ctx.font=sz+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('✦',s.x,s.y);}    else if(tr==='fire'){ctx.globalAlpha=a*1.2;ctx.beginPath();ctx.arc(s.x,s.y,r*1.5,0,6.28);ctx.fillStyle='hsl('+(20+prog*40)+',100%,60%)';ctx.fill();}
     else if(tr==='ghost'){ctx.globalAlpha=a*.4;ctx.beginPath();ctx.arc(s.x,s.y,r*2,0,6.28);ctx.fillStyle='rgba(200,200,255,1)';ctx.fill();}
     else if(tr==='bubbles'&&i%2===0){var bx=s.x+Math.sin(i*1.7)*r*1.5,by=s.y+Math.cos(i*2.3)*r*1.5,br=Math.max(3,r*(0.6+Math.sin(i*.8)*.4));ctx.globalAlpha=a*.7;ctx.beginPath();ctx.arc(bx,by,br,0,6.28);var bCol='hsl('+(prog*60+190)+',60%,'+(isNight?'65%':'45%')+')';ctx.strokeStyle=bCol;ctx.lineWidth=1.2;ctx.stroke();ctx.globalAlpha=a*.15;ctx.fillStyle=bCol;ctx.fill();}
     else if(tr==='neon'){ctx.globalAlpha=a*1.5;ctx.beginPath();ctx.arc(s.x,s.y,r*1.3,0,6.28);var nc='hsl('+(prog*120+180)+',100%,65%)';ctx.fillStyle=nc;ctx.fill();ctx.shadowColor=nc;ctx.shadowBlur=8;ctx.beginPath();ctx.arc(s.x,s.y,r*.6,0,6.28);ctx.fillStyle='#fff';ctx.fill();ctx.shadowBlur=0;}
     else if(tr==='plasma'){var px=s.x+Math.sin(i*.9+Date.now()*.003)*r*.8,py=s.y+Math.cos(i*1.1+Date.now()*.002)*r*.8;ctx.globalAlpha=a*1.2;ctx.beginPath();ctx.arc(px,py,r*1.4,0,6.28);ctx.fillStyle='hsl('+(prog*200+Date.now()*.02%360)+',80%,55%)';ctx.fill();}
     else if(tr==='void'){ctx.globalAlpha=a*.8;ctx.beginPath();ctx.arc(s.x,s.y,r*2,0,6.28);ctx.fillStyle='rgba(0,0,0,.6)';ctx.fill();ctx.globalAlpha=a*.5;ctx.beginPath();ctx.arc(s.x,s.y,r*.5,0,6.28);ctx.fillStyle='#8b5cf6';ctx.fill();}
-    else if(tr==='aurora'){var ah=prog*120+140+Math.sin(Date.now()*.001+i*.3)*20;ctx.globalAlpha=a*.9;ctx.beginPath();ctx.arc(s.x,s.y+Math.sin(i*.5+Date.now()*.002)*r*.6,r*1.6,0,6.28);ctx.fillStyle='hsl('+ah+',70%,'+(isNight?'55%':'40%')+')';ctx.fill();ctx.globalAlpha=a*.4;ctx.beginPath();ctx.arc(s.x,s.y-Math.cos(i*.3+Date.now()*.001)*r*.4,r*.8,0,6.28);ctx.fillStyle='hsl('+(ah+40)+',80%,'+(isNight?'70%':'50%')+')';ctx.fill();}
-    else if(tr==='pixel'){var ps2=Math.max(3,r*1.2);ctx.globalAlpha=a;ctx.fillStyle=isNight?'hsl('+(prog*90+200)+',70%,65%)':'hsl('+(prog*90+200)+',50%,40%)';ctx.fillRect(s.x-ps2/2,s.y-ps2/2,ps2,ps2);}
-    else if(tr==='lightning'&&i>0){var prev=orb.trail[i-1],ps3=toS(prev.wx,prev.wy);ctx.globalAlpha=a*1.2;ctx.beginPath();ctx.moveTo(ps3.x+(Math.random()-.5)*4,ps3.y+(Math.random()-.5)*4);ctx.lineTo(s.x+(Math.random()-.5)*4,s.y+(Math.random()-.5)*4);ctx.strokeStyle=isNight?'hsl('+(prog*60+200)+',90%,75%)':'hsl('+(prog*60+200)+',70%,45%)';ctx.lineWidth=1+prog*1.5;ctx.stroke();}
-    else if(tr==='sakura'&&i%2===0){var sa2=i*2.1+Date.now()*.002,sx2=s.x+Math.sin(sa2)*r*.8,sy2=s.y+Math.cos(sa2*.7)*r*.8;ctx.globalAlpha=a*.9;ctx.save();ctx.translate(sx2,sy2);ctx.rotate(sa2);ctx.beginPath();ctx.ellipse(0,0,r*.7,r*.35,0,0,6.28);ctx.fillStyle=isNight?'hsl('+(prog*20+330)+',70%,75%)':'hsl('+(prog*20+330)+',60%,55%)';ctx.fill();ctx.restore();}
-    else if(tr==='comet'){ctx.globalAlpha=a*1.3;var cr2=r*(0.3+prog*1.5);ctx.beginPath();ctx.arc(s.x,s.y,cr2,0,6.28);ctx.fillStyle='rgba(255,255,255,'+(a*.6)+')';ctx.fill();ctx.globalAlpha=a*.5;ctx.beginPath();ctx.arc(s.x,s.y,r*.4,0,6.28);ctx.fillStyle=isNight?'#e0e7ff':'#475569';ctx.fill();}
+    else if(tr==='lightning'&&i>0){
+      // Electric bolts that wrap around the projectile
+      var prev=orb.trail[i-1],ps3=toS(prev.wx,prev.wy);
+      var time=Date.now()*.005;
+      // Main bolt - jagged with alternating yellow/white
+      var segments=3;
+      for(var seg=0;seg<segments;seg++){
+        var t1=seg/segments,t2=(seg+1)/segments;
+        var mx1=ps3.x+(s.x-ps3.x)*t1,my1=ps3.y+(s.y-ps3.y)*t1;
+        var mx2=ps3.x+(s.x-ps3.x)*t2,my2=ps3.y+(s.y-ps3.y)*t2;
+        var jitter=r*2.5*(1-prog*.3);
+        var ox=(Math.random()-.5)*jitter,oy=(Math.random()-.5)*jitter;
+        var boltCol=(seg+Math.floor(time*3+i))%2===0?'rgba(255,240,80,'+(a*1.8)+')':'rgba(255,255,255,'+(a*1.6)+')';
+        ctx.globalAlpha=1;ctx.beginPath();ctx.moveTo(mx1,my1);ctx.lineTo(mx2+ox,my2+oy);
+        ctx.strokeStyle=boltCol;ctx.lineWidth=1.5+prog*2.5;ctx.stroke();
+        // Glow layer
+        ctx.globalAlpha=a*.4;ctx.lineWidth=4+prog*5;ctx.strokeStyle='rgba(255,220,50,'+(a*.5)+')';
+        ctx.beginPath();ctx.moveTo(mx1,my1);ctx.lineTo(mx2+ox,my2+oy);ctx.stroke();
+      }
+      // Side bolts that branch off  
+      if(i%3===0&&prog>.2){
+        var ba2=time*4+i*1.7;
+        var bx2=s.x+Math.cos(ba2)*r*3,by2=s.y+Math.sin(ba2)*r*3;
+        var bCol2=(i%4<2)?'rgba(255,255,200,'+(a*1.2)+')':'rgba(255,230,50,'+(a*1.2)+')';
+        ctx.globalAlpha=a*.9;ctx.beginPath();ctx.moveTo(s.x,s.y);
+        ctx.lineTo(s.x+(bx2-s.x)*.5+(Math.random()-.5)*r*1.5,s.y+(by2-s.y)*.5+(Math.random()-.5)*r*1.5);
+        ctx.lineTo(bx2,by2);ctx.strokeStyle=bCol2;ctx.lineWidth=1+prog;ctx.stroke();
+      }
+      // Core glow at each point
+      ctx.globalAlpha=a*.6;ctx.beginPath();ctx.arc(s.x,s.y,r*.8,0,6.28);
+      ctx.fillStyle='rgba(255,250,200,'+(a*.3)+')';ctx.fill();
+    }
+    else if(tr==='sakura'){
+      // Orb trail with delicate pink/white tones like flower orbs
+      var sakTime=Date.now()*.002;
+      var sakColors=['rgba(255,182,193,'+(a*1.1)+')','rgba(255,200,210,'+(a*1.0)+')','rgba(255,230,235,'+(a*.9)+')','rgba(255,255,255,'+(a*.7)+')','rgba(248,180,200,'+(a*1.0)+')'];
+      var orbSize=r*(1.2+Math.sin(i*.6+sakTime)*0.3);
+      // Main orb
+      ctx.globalAlpha=a*.85;ctx.beginPath();ctx.arc(s.x,s.y,orbSize,0,6.28);
+      ctx.fillStyle=sakColors[i%sakColors.length];ctx.fill();
+      // Soft glow
+      ctx.globalAlpha=a*.3;ctx.beginPath();ctx.arc(s.x,s.y,orbSize*1.6,0,6.28);
+      ctx.fillStyle=sakColors[(i+2)%sakColors.length];ctx.fill();
+      // Inner bright core
+      if(i%2===0){
+        ctx.globalAlpha=a*.5;ctx.beginPath();ctx.arc(s.x,s.y,orbSize*.35,0,6.28);
+        ctx.fillStyle='rgba(255,255,255,'+(a*.8)+')';ctx.fill();
+      }
+      // Floating secondary orb nearby
+      if(i%3===0){
+        var fo_a=sakTime*1.5+i*2.3;
+        var fo_x=s.x+Math.sin(fo_a)*r*1.8,fo_y=s.y+Math.cos(fo_a*.7)*r*1.4;
+        ctx.globalAlpha=a*.45;ctx.beginPath();ctx.arc(fo_x,fo_y,orbSize*.5,0,6.28);
+        ctx.fillStyle=sakColors[(i+1)%sakColors.length];ctx.fill();
+      }
+}
     ctx.restore();
   }
 }
@@ -1535,7 +1630,24 @@ function draw(){
   for(var k=0;k<parts.length;k++){var p=parts[k],ps=toS(p.wx,p.wy);ctx.save();ctx.globalAlpha=p.life;ctx.beginPath();ctx.arc(ps.x,ps.y,p.r*p.life,0,6.28);ctx.fillStyle=p.col;ctx.fill();ctx.restore();}
   if(charging&&orb.on>=0){var held=Math.min(Date.now()-chargeStart,MAX_CHARGE),pct2=held/MAX_CHARGE,os=toS(orb.wx,orb.wy);ctx.beginPath();ctx.arc(os.x,os.y,sR(16)+38*pct2,0,6.28);ctx.strokeStyle='rgba(255,200,50,'+(.3+pct2*.6)+')';ctx.lineWidth=2+pct2*3;ctx.stroke();}
   var os2=toS(orb.wx,orb.wy),or2=sR(16);
-  if(magnetActive){var mp=.3+Math.sin(Date.now()*.006)*.25,mr=or2*1.7+Math.sin(Date.now()*.004)*or2*.15;ctx.beginPath();ctx.arc(os2.x,os2.y,mr,0,6.28);ctx.strokeStyle='rgba(202,162,30,'+mp+')';ctx.lineWidth=1.2;ctx.stroke();}
+  // Draw gravity field visual on target planet
+  if(gravFieldActive){
+    var gfTarget=circles[circles.length-1];
+    if(gfTarget&&gfTarget.hasGravField){
+      var gs=toS(gfTarget.wx,gfTarget.wy),gr=sR(gfTarget.r);
+      var gPulse=.15+Math.sin(Date.now()*.004)*.1;
+      ctx.globalAlpha=gPulse;ctx.beginPath();ctx.arc(gs.x,gs.y,gr+sR(60),0,6.28);
+      ctx.strokeStyle='rgba(167,139,250,.5)';ctx.lineWidth=2;ctx.stroke();
+      ctx.globalAlpha=gPulse*.5;ctx.beginPath();ctx.arc(gs.x,gs.y,gr+sR(40),0,6.28);
+      ctx.fillStyle='rgba(167,139,250,.08)';ctx.fill();
+    }
+    for(var gpi=0;gpi<gravFieldParts.length;gpi++){
+      var gpp=gravFieldParts[gpi],gps=toS(gpp.wx,gpp.wy);
+      ctx.globalAlpha=gpp.life*.6;ctx.beginPath();ctx.arc(gps.x,gps.y,gpp.r*gpp.life,0,6.28);
+      ctx.fillStyle='rgba(167,139,250,.8)';ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
   ctx.beginPath();ctx.arc(os2.x,os2.y,or2,0,6.28);ctx.fillStyle=T.orbCol;ctx.fill();
   var pal2=getPal();ctx.beginPath();ctx.arc(os2.x,os2.y,or2*.5,0,6.28);ctx.fillStyle=pal2[score%pal2.length];ctx.fill();
 }
