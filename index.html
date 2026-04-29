@@ -1746,7 +1746,6 @@ function draw(){
     if(ci.shockwave&&ci.shockwave.a>0){ctx.globalAlpha=ci.alpha*ci.shockwave.a;ctx.beginPath();ctx.arc(s.x+hox,s.y+hoy,sR(ci.shockwave.r),0,6.28);ctx.strokeStyle=ci.col;ctx.lineWidth=2.5;ctx.stroke();ctx.globalAlpha=ci.alpha;}
     ctx.beginPath();ctx.arc(s.x+hox,s.y+hoy,r+3,0,6.28);ctx.strokeStyle=ci.col+'44';ctx.lineWidth=2;ctx.stroke();
     ctx.beginPath();ctx.arc(s.x+hox,s.y+hoy,r,0,6.28);ctx.fillStyle=ci.col+'1a';ctx.fill();ctx.strokeStyle=ci.col+'cc';ctx.lineWidth=1.5;ctx.stroke();
-    }
     if(i===orb.on&&orb.timerMax>0&&orb.timer>0){
       var pct=1-(orb.timer/orb.timerMax),curR=(r-.5)*pct,danger=pct>.6;
       if(curR>1){var pulse=.55+Math.sin(Date.now()*.008)*.2;
