@@ -802,6 +802,8 @@ function initFirebase(){
 
 function saveToCloud(){
   if(!db||!S.user||!S.user.uid)return;
+  if(S.user.isGuest) return; // Don't save guest data to cloud
+  if(!db||!S.user||!S.user.uid)return;
   db.collection('users').doc(S.user.uid).set({
     nick:S.nick||'',coins:S.coins||0,best:S.best||0,
     trail:S.trail||'simple',ownedTrails:S.ownedTrails||['simple'],
@@ -813,6 +815,8 @@ function saveToCloud(){
   },{merge:true}).catch(function(e){console.log('save error',e);});
 }
 function saveLbEntry(){
+  if(!db||!S.user||!S.user.uid||!S.best)return;
+  if(S.user.isGuest) return; // Guests can't enter leaderboard
   if(!db||!S.user||!S.user.uid||!S.best)return;
   var country=S.country||userCountry||'Unknown';
   db.collection('leaderboard').doc(S.user.uid).set({
@@ -846,8 +850,12 @@ function authFB(){
   });
 }
 function authGuest(){
+  // Show warning before proceeding
+  var msg = lang==='es'
+    ? '⚠️ Como invitado:\n\n• Tus datos NO se guardarán\n• No aparecerás en el ranking global ni local\n• Tu progreso se perderá al cerrar\n\n¿Continuar?'
+    : '⚠️ As a guest:\n\n• Your data will NOT be saved\n• You won\'t appear in global or local rankings\n• Your progress will be lost when you leave\n\nContinue?';
+  if(!confirm(msg)) return;
   showScr('guest');
-  // apply theme to guest screen
   var el=document.getElementById('scr-guest');
   if(el){el.style.background=T.bg;}
   var inp=document.getElementById('gs-nick');
@@ -1098,7 +1106,8 @@ function toggleLbMore(){
 function renderLb(){
   document.getElementById('lb-reset-lbl').textContent='';
   document.getElementById('lbs-local').textContent='📍 '+userCountry.toUpperCase();
-  var me={nick:S.nick||'You',score:S.best,country:userCountry,avatar:avCol(S.nick),photo:S.photo,isMe:true,id:S.user&&S.user.uid};
+  var isGuest=S.user&&S.user.isGuest;
+  var me={nick:S.nick||(isGuest?'Guest':'You'),score:isGuest?0:S.best,country:userCountry,avatar:avCol(S.nick),photo:S.photo,isMe:true,id:S.user&&S.user.uid,isGuest:isGuest};
   if(!db){renderLbData([me]);return;}
   db.collection('leaderboard').orderBy('score','desc').limit(10).get()
   .then(function(snap){
