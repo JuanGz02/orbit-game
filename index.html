@@ -1894,9 +1894,10 @@ window.addEventListener('load',function(){
       var s3=document.createElement('script');
       s3.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js';
       s3.onload=function(){
+        initFirebase();
         var s4=document.createElement('script');
         s4.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js';
-        s4.onload=function(){initFirebase();initFCM();};
+        s4.onload=function(){initFCM();};
         document.head.appendChild(s4);
       };
       document.head.appendChild(s3);
