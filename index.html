@@ -124,12 +124,12 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     <div id="h-best" style="font-size:34px;font-weight:100;color:#fbbf24">0</div>
   </div>
   <div style="display:flex;flex-direction:column;gap:11px;width:100%;max-width:280px">
+    <div id="daily-challenge" style="display:none;width:100%;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.15);border-radius:12px;padding:10px 14px;margin-bottom:6px"></div>
     <div id="mode-selector" style="display:flex;gap:0;border-radius:24px;overflow:hidden;width:100%;border:1px solid rgba(128,128,128,.2)">
-      <div id="mode-easy" onclick="setGameMode('easy')" style="flex:1;padding:10px;text-align:center;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all .2s;opacity:.45" id-label="modeNormal">NORMAL</div>
-      <div id="mode-normal" onclick="setGameMode('normal')" style="flex:1;padding:10px;text-align:center;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all .2s;opacity:1;font-weight:600" id-label="modeComp">COMPETITIVE</div>
+      <div id="mode-easy" onclick="setGameMode('easy')" style="flex:1;padding:9px 4px;text-align:center;font-size:10px;letter-spacing:1px;cursor:pointer;transition:all .2s;opacity:.45" id-label="modeNormal">NORMAL</div>
+      <div id="mode-normal" onclick="setGameMode('normal')" style="flex:1;padding:9px 4px;text-align:center;font-size:10px;letter-spacing:1px;cursor:pointer;transition:all .2s;opacity:1;font-weight:600" id-label="modeComp">COMPETITIVE</div>
     </div>
-    <div id="mode-desc" style="font-size:10px;letter-spacing:1px;opacity:.4;margin-bottom:8px;text-align:center;min-height:14px"></div>
-    <div id="daily-challenge" style="display:none;width:100%;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.15);border-radius:12px;padding:10px 14px;margin-bottom:4px"></div>
+    <div id="mode-desc" style="font-size:10px;letter-spacing:1px;opacity:.4;margin-bottom:6px;text-align:center;min-height:14px"></div>
     <button class="btn" id="h-play" style="font-size:16px;padding:17px;letter-spacing:6px" onclick="startGame()">PLAY</button>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
       <button class="btn bsm" id="h-top" onclick="showScr('leaderboard')">🏆 TOP</button>
@@ -204,7 +204,9 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
   </div>
   <div class="nav" id="sh-nav">
     <div class="nt on" id="sh-t1" onclick="switchShop('trail',this)">TRAILS</div>
+    <div class="nt" id="sh-t2" onclick="switchShop('bundles',this)" id-label="shBundles">BUNDLES</div>
     <div class="nt" id="sh-t3" onclick="switchShop('packs',this)">PACKS</div>
+    <div class="nt" id="sh-t4" onclick="openSpin()">🎰</div>
   </div>
   <div class="scroll" id="sh-content"></div>
 </div>
@@ -267,6 +269,18 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
   <div id="lb-full-me" style="margin-top:10px;padding:12px;border-radius:12px;text-align:center;font-size:12px;letter-spacing:2px"></div>
 </div>
 
+<!-- SPIN MODAL -->
+<div id="spin-modal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.75);align-items:center;justify-content:center;flex-direction:column;gap:16px">
+  <div id="spin-box" style="width:90%;max-width:320px;border-radius:20px;padding:24px;text-align:center">
+    <div id="spin-title" style="font-size:13px;letter-spacing:4px;margin-bottom:18px;font-weight:600">DAILY SPIN</div>
+    <div id="spin-wheel" style="font-size:52px;height:80px;line-height:80px;overflow:hidden;border-radius:14px;margin-bottom:18px;transition:none"></div>
+    <div id="spin-result" style="font-size:13px;letter-spacing:2px;min-height:20px;margin-bottom:16px;color:#fbbf24"></div>
+    <button id="spin-btn-free" class="btn" style="width:100%;margin-bottom:8px;font-weight:700" onclick="doSpin(false)">FREE SPIN</button>
+    <button id="spin-btn-ad" class="btn bsm" style="width:100%;opacity:.7" onclick="doSpin(true)">WATCH AD + SPIN</button>
+    <button class="btn bsm" style="width:100%;margin-top:8px;opacity:.4" onclick="closeSpin()">✕ CLOSE</button>
+  </div>
+</div>
+
 <script>
 // Register Service Worker
 if('serviceWorker' in navigator){
@@ -293,8 +307,16 @@ var I18N={
     seeMore:'▼ SEE MORE',seeLess:'▲ HIDE',share:'↗ SHARE',
     tutTap:'TAP',tutHold:'HOLD & RELEASE',tutNice:'NICE!',
     ms10:'WARMING UP',ms20:'ON FIRE',ms30:'UNSTOPPABLE',ms50:'LEGENDARY',ms100:'GODLIKE',ms150:'TRANSCENDENT',ms300:'ETERNAL',
-    modeNormal:'ZEN 🍃',modeComp:'COMPETITIVE 🏅',modeDescNormal:'Explore the galaxy in peace · no rewards',modeDescComp:'Compete for your place in the league',
-    rankLabel:'Rank',},
+    modeNormal:'ZEN 🍃',modeComp:'🏅 COMPETITIVE',modeDescNormal:'Explore the galaxy in peace · no rewards',modeDescComp:'Compete for your place in the league',
+    rankLabel:'Rank',
+    streak:'STREAK',dailyCh:'DAILY CHALLENGE',chComplete:'Complete',unlockPlay:'Unlock by playing',
+    copied:'Copied!',adUnavail:'Ad unavailable, try again',watchFullAd:'Watch the full ad to revive',
+    gravField:'Gravity Field',gravDesc:'Use the button below · 3 per game',gravLimit:'Max 3 per game',gravActive:'🌀 Field activated',
+    rankUp:'Rank: ',spinTitle:'DAILY SPIN',spinFree:'FREE SPIN',spinWatch:'WATCH AD + SPIN',spinDone:'Come back tomorrow!',
+    bundleTitle:'BUNDLES',seasonPass:'Season Pass',seasonDesc:'2× coins · Exclusive trail · Weekly',
+    rankBoost:'Rank Boost',rankBoostDesc:'Jump to next rank instantly',
+    giftCoins:'🎁 GIFT',shBundles:'BUNDLES',shSpin:'🎰 SPIN',
+    trailUnlocked:'🎁 Trail unlocked!',dayStreak:'day streak!',},
   es:{tag:'toca · mantén para potencia',google:'Continuar con Google',fb:'Continuar con Facebook',or:'o',
     reg:'CREAR CUENTA',login:'INICIAR SESIÓN',guest:'Jugar como invitado',hint:'toca · mantén para potencia',
     bestLbl:'RÉCORD',play:'JUGAR',shop:'TIENDA',prof:'PERFIL',save:'GUARDAR',
@@ -309,8 +331,16 @@ var I18N={
     seeMore:'▼ VER MÁS',seeLess:'▲ OCULTAR',share:'↗ COMPARTIR',
     tutTap:'TOCA',tutHold:'MANTÉN Y SUELTA',tutNice:'¡GENIAL!',
     ms10:'CALENTANDO',ms20:'EN LLAMAS',ms30:'IMPARABLE',ms50:'LEGENDARIO',ms100:'DIVINO',ms150:'TRANSCENDENTE',ms300:'ETERNO',
-    modeNormal:'ZEN 🍃',modeComp:'COMPETITIVO 🏅',modeDescNormal:'Explora la galaxia en paz · sin recompensas',modeDescComp:'Compite por tu lugar en la liga',
-    rankLabel:'Rango'}
+    modeNormal:'ZEN 🍃',modeComp:'🏅 COMPETITIVO',modeDescNormal:'Explora la galaxia en paz · sin recompensas',modeDescComp:'Compite por tu lugar en la liga',
+    rankLabel:'Rango',
+    streak:'RACHA',dailyCh:'RETO DIARIO',chComplete:'Completado',unlockPlay:'Desbloquea jugando',
+    copied:'¡Copiado!',adUnavail:'Anuncio no disponible, intenta de nuevo',watchFullAd:'Ve el anuncio completo para revivir',
+    gravField:'Campo Gravitatorio',gravDesc:'Usa el botón de abajo · 3 por partida',gravLimit:'Máx 3 por partida',gravActive:'🌀 Campo activado',
+    rankUp:'Rango: ',spinTitle:'GIRO DIARIO',spinFree:'GIRO GRATIS',spinWatch:'VER ANUNCIO + GIRAR',spinDone:'¡Vuelve mañana!',
+    bundleTitle:'PAQUETES',seasonPass:'Pase de Temporada',seasonDesc:'2× monedas · Rastro exclusivo · Semanal',
+    rankBoost:'Boost de Rango',rankBoostDesc:'Sube de rango al instante',
+    giftCoins:'🎁 REGALO',shBundles:'PAQUETES',shSpin:'🎰 GIRAR',
+    trailUnlocked:'🎁 ¡Rastro desbloqueado!',dayStreak:'día(s) de racha!',}
 };
 var lang='en';
 function t(k){return(I18N[lang]||I18N.en)[k]||k;}
@@ -322,7 +352,13 @@ var TRAILS=[{id:'simple',name:'Classic',icon:'⚪',price:0},{id:'rainbow',name:'
   {id:'neon',name:'Neon',icon:'💎',price:0},{id:'plasma',name:'Plasma',icon:'🌀',price:0},{id:'void',name:'Void',icon:'🕳️',price:0}];
 var PACKS=[{id:'noads',name:'No Ads',desc:'Remove all ads forever',price:'$1.99',col:'#4f46e5'},
   {id:'c3000',name:'3000 ⭐',desc:'Coin starter pack',price:'$0.99',col:'#d97706'},
-  {id:'c10000',name:'10000 ⭐',desc:'Best value',price:'$2.99',col:'#b45309'}];
+  {id:'c10000',name:'10000 ⭐',desc:'Best value',price:'$2.99',col:'#b45309'},
+  {id:'season',name:'Season Pass',desc:'2× coins · Exclusive trail · Weekly',price:'$0.99/wk',col:'#8b5cf6'},
+  {id:'rankboost',name:'Rank Boost',desc:'Jump to next rank instantly',price:'$0.99',col:'#f59e0b'}];
+var BUNDLES=[
+  {id:'space-bundle',name:'Space Bundle',desc:'Ghost + Void + Lightning',trails:['ghost','void','lightning'],price:'$1.99',col:'#6366f1',icon:'🚀'},
+  {id:'neon-bundle',name:'Neon Bundle',desc:'Neon + Rainbow + Plasma',trails:['neon','rainbow','plasma'],price:'$1.99',col:'#ec4899',icon:'💎'},
+  {id:'nature-bundle',name:'Nature Bundle',desc:'Sakura + Stars + Bubbles',trails:['sakura','stars','bubbles'],price:'$1.99',col:'#10b981',icon:'🌸'}];
 var GAME_PAL=['#a78bfa','#6ee7b7','#f9a8d4'];
 function getPal(){return GAME_PAL;}
 
@@ -331,7 +367,7 @@ function getPal(){return GAME_PAL;}
 // ══════════════════════════════════════════
 var DEF={user:null,nick:'',lang:'en',coins:0,best:0,noAds:false,themeMode:'auto',tutorial:false,
   trail:'simple',ownedTrails:['simple'],hist:[],photo:null,country:'',ownedPowerups:{magnet:0},
-  streak:0,lastPlayDate:'',rank:'rookie',gameMode:'normal'};
+  streak:0,lastPlayDate:'',rank:'rookie',gameMode:'normal',lastSpinDate:'',lastSpinExtra:''};
 var S=Object.assign({},DEF);
 function loadState(){try{var d=localStorage.getItem('orb7');if(d)S=Object.assign({},DEF,JSON.parse(d));}catch(e){}}
 function saveState(){localStorage.setItem('orb7',JSON.stringify(S));saveToCloud();}
@@ -503,15 +539,15 @@ function checkMilestone(){
       // Free trail rewards
       if(ms[i]===50&&S.ownedTrails.indexOf('neon')<0){
         S.ownedTrails.push('neon');saveState();
-        setTimeout(function(){toast(lang==='es'?'🎁 Trail NEON desbloqueado!':'🎁 NEON trail unlocked!');},2000);
+        setTimeout(function(){toast(t('trailUnlocked')+' 💎 NEON');},2000);
       }
       if(ms[i]===150&&S.ownedTrails.indexOf('plasma')<0){
         S.ownedTrails.push('plasma');saveState();
-        setTimeout(function(){toast(lang==='es'?'🎁 Trail PLASMA desbloqueado!':'🎁 PLASMA trail unlocked!');},2000);
+        setTimeout(function(){toast(t('trailUnlocked')+' 🌀 PLASMA');},2000);
       }
       if(ms[i]===300&&S.ownedTrails.indexOf('void')<0){
         S.ownedTrails.push('void');saveState();
-        setTimeout(function(){toast(lang==='es'?'🎁 Trail VOID desbloqueado!':'🎁 VOID trail unlocked!');},2000);
+        setTimeout(function(){toast(t('trailUnlocked')+' 🕳️ VOID');},2000);
       }
       break;
     }
@@ -547,7 +583,7 @@ function updateRank(){
   var r=getRank(S.best);
   if(S.rank!==r.id){
     S.rank=r.id;saveState();
-    toast(r.icon+' '+(lang==='es'?'Rango: ':'Rank: ')+r.name+'!');
+    toast(r.icon+' '+t('rankUp')+r.name+'!');
   }
 }
 
@@ -569,7 +605,7 @@ function checkStreak(){
   S.coins+=bonus;
   saveState();
   setTimeout(function(){
-    var msg=lang==='es'?'🔥 Racha '+S.streak+' día'+(S.streak>1?'s':'')+'! +'+bonus+' ★':'🔥 '+S.streak+' day streak! +'+bonus+' ★';
+    var msg='🔥 '+S.streak+' '+t('dayStreak')+' +'+bonus+' ★';
     toast(msg);
   },1500);
   // Day 7 bonus trail
@@ -645,7 +681,7 @@ function trailShopLabel(tr,own,sel){
     var unlockMap={neon:50,plasma:150,void:300};
     var lvl=unlockMap[tr.id];
     if(lvl)return lang==='es'?'Score '+lvl:'Score '+lvl;
-    return lang==='es'?'Desbloquea jugando':'Unlock by playing';
+    return t('unlockPlay');
   }
   return '★ '+tr.price;
 }
@@ -1150,10 +1186,10 @@ function updateHomeUI(){
     var today=new Date().toISOString().slice(0,10);
     if(dc.date===today&&!dc.done){
       dcEl.style.display='block';
-      dcEl.innerHTML='<div style="font-size:10px;letter-spacing:3px;opacity:.35;margin-bottom:4px">'+(lang==='es'?'RETO DIARIO':'DAILY CHALLENGE')+'</div><div style="font-size:12px;color:'+T.text+'">'+dc.text+'</div><div style="display:flex;align-items:center;gap:6px;margin-top:4px"><div style="flex:1;height:3px;border-radius:2px;background:'+T.border+'"><div style="height:100%;border-radius:2px;background:#fbbf24;width:'+Math.min(100,((dc.progress||0)/dc.target)*100)+'%"></div></div><div style="font-size:10px;color:#fbbf24">+'+ dc.reward+' ★</div></div>';
+      dcEl.innerHTML='<div style="font-size:10px;letter-spacing:3px;opacity:.35;margin-bottom:4px">'+t('dailyCh')+'</div><div style="font-size:12px;color:'+T.text+'">'+dc.text+'</div><div style="display:flex;align-items:center;gap:6px;margin-top:4px"><div style="flex:1;height:3px;border-radius:2px;background:'+T.border+'"><div style="height:100%;border-radius:2px;background:#fbbf24;width:'+Math.min(100,((dc.progress||0)/dc.target)*100)+'%"></div></div><div style="font-size:10px;color:#fbbf24">+'+ dc.reward+' ★</div></div>';
     }else if(dc.done){
       dcEl.style.display='block';
-      dcEl.innerHTML='<div style="font-size:10px;letter-spacing:3px;opacity:.35;margin-bottom:4px">'+(lang==='es'?'RETO DIARIO':'DAILY CHALLENGE')+'</div><div style="font-size:12px;color:#6ee7b7">✓ '+(lang==='es'?'Completado':'Complete')+'</div>';
+      dcEl.innerHTML='<div style="font-size:10px;letter-spacing:3px;opacity:.35;margin-bottom:4px">'+t('dailyCh')+'</div><div style="font-size:12px;color:#6ee7b7">✓ '+t('chComplete')+'</div>';
     }else{dcEl.style.display='none';}
   }
 }
@@ -1166,7 +1202,7 @@ function setLang(l){
 function applyLang(){
   var map={'a-tag':'tag','a-google':'google','a-fb':'fb','a-or':'or','a-reg':'reg','a-login':'login','a-guest':'guest',
     'h-hint':'hint','h-best-lbl':'bestLbl','h-play':'play','h-shop':'shop','h-prof':'prof',
-    'sh-title':'shTitle','sh-t1':'shTrail','sh-t3':'shPacks',
+    'sh-title':'shTitle','sh-t1':'shTrail','sh-t2':'shBundles','sh-t3':'shPacks',
     'pr-title':'prTitle','pr-hist-lbl':'prHist','pr-reset':'prReset','pr-logout':'prLogout',
     'photo-btn':'photo','pr-nick-save':'save',
     'p-title':'pauseTitle','p-resume':'resume','p-menu':'menu',
@@ -1190,13 +1226,29 @@ function renderShop(tab){
       html+='<div style="font-size:11px;color:'+(own?'#6ee7b7':'#fbbf24')+'">'+(trailShopLabel(tr,own,sel))+'</div></div>';
     }
     html+='</div>';
+  }else if(tab==='bundles'){
+    html='<div style="font-size:10px;letter-spacing:3px;color:'+T.textMuted+';margin-bottom:10px">'+t('bundleTitle')+'</div>';
+    for(var b=0;b<BUNDLES.length;b++){
+      var bn=BUNDLES[b];
+      var allOwned=bn.trails.every(function(tid){return S.ownedTrails.indexOf(tid)>=0;});
+      html+='<div style="background:'+T.card+';border:1px solid '+bn.col+'55;border-radius:16px;padding:16px;margin-bottom:12px;position:relative;cursor:pointer" onclick="buyBundle(\''+bn.id+'\')">';
+      html+='<div style="position:absolute;top:0;right:14px;background:'+bn.col+';font-size:11px;font-weight:700;padding:2px 10px;border-radius:0 0 8px 8px;color:#fff">'+bn.price+'</div>';
+      html+='<div style="font-size:22px;margin-bottom:6px">'+bn.icon+'</div>';
+      html+='<div style="font-size:14px;font-weight:600;color:'+T.text+';margin-bottom:3px">'+bn.name+'</div>';
+      html+='<div style="font-size:11px;color:'+T.textMuted+';margin-bottom:10px">'+bn.desc+'</div>';
+      if(allOwned){
+        html+='<div style="font-size:11px;color:#6ee7b7;font-weight:600">✓ '+t('owned')+'</div>';
+      }else{
+        html+='<button class="btn bsm" style="width:100%;background:'+bn.col+';color:#fff;font-weight:700;pointer-events:none">'+t('buy')+' '+bn.price+'</button>';
+      }
+      html+='</div>';
+    }
   }else{
     if(!S.ownedPowerups)S.ownedPowerups={};
-    var mc=S.ownedPowerups.magnet||0;
     html='<div style="font-size:10px;letter-spacing:3px;color:'+T.textMuted+';margin-bottom:8px">POWER-UPS</div>';
     html+='<div style="background:'+T.card+';border:1px solid rgba(120,80,255,.3);border-radius:14px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px">';
     html+='<div style="font-size:28px">🔘</div><div style="flex:1">';
-    html+='<div style="font-size:13px;font-weight:500;color:'+T.text+'">'+(lang==='es'?'Campo Gravitatorio':'Gravity Field')+'</div>';
+    html+='<div style="font-size:13px;font-weight:500;color:'+T.text+'">'+t('gravField')+'</div>';
     html+='<div style="font-size:11px;color:'+T.textMuted+';margin-top:2px">'+(lang==='es'?'Atrae el proyectil al planeta · 3/partida · compra en juego':'Pulls projectile to planet · 3/game · buy in-game')+'</div></div></div>';
     html+='<div style="font-size:10px;letter-spacing:3px;color:'+T.textMuted+';margin-bottom:8px">COIN PACKS</div>';
     for(var j=0;j<PACKS.length;j++){
@@ -1210,6 +1262,11 @@ function renderShop(tab){
   }
   el.innerHTML=html;
 }
+function buyBundle(id){
+  var link=STRIPE_LINKS[id];
+  if(!link||link.indexOf('REPLACE')>=0){toast('Coming soon!');return;}
+  window.open(link+'?client_reference_id='+(S.user&&S.user.uid||''),'_blank');
+}
 function switchShop(tab,el){
   document.querySelectorAll('#scr-shop .nt').forEach(function(e){e.classList.remove('on');e.style.background='transparent';e.style.opacity='.45';e.style.fontWeight='400';});
   el.classList.add('on');el.style.background=T.navOn;el.style.opacity='1';el.style.fontWeight='600';
@@ -1217,7 +1274,7 @@ function switchShop(tab,el){
 }
 function buyTrail(id,price){
   if(S.ownedTrails.indexOf(id)>=0){S.trail=id;saveState();renderShop('trail');toast(t('activated'));return;}
-  if(price===0){toast(lang==='es'?'Desbloquea jugando':'Unlock by playing');return;}
+  if(price===0){toast(t('unlockPlay'));return;}
   if(S.coins<price){toast(t('notEnough'));return;}
   S.coins-=price;S.ownedTrails.push(id);S.trail=id;saveState();renderShop('trail');
   document.getElementById('sh-coins').textContent=S.coins;toast(t('unlocked'));
@@ -1225,7 +1282,12 @@ function buyTrail(id,price){
 var STRIPE_LINKS={
   noads: 'https://buy.stripe.com/aFa3cxfDmbDofmJ8s68EM00',
   c3000: 'https://buy.stripe.com/4gM00l2QAgXIfmJfUy8EM01',
-  c10000:'https://buy.stripe.com/7sY4gBfDm36S4I56jY8EM02'
+  c10000:'https://buy.stripe.com/7sY4gBfDm36S4I56jY8EM02',
+  season:'REPLACE_SEASON',
+  rankboost:'REPLACE_RANKBOOST',
+  'space-bundle':'REPLACE_SPACE_BUNDLE',
+  'neon-bundle':'REPLACE_NEON_BUNDLE',
+  'nature-bundle':'REPLACE_NATURE_BUNDLE'
 };
 function buyPack(id){
   var link=STRIPE_LINKS[id];
@@ -1250,7 +1312,7 @@ function renderProfile(){
   // Add rank + streak row
   html+='</div><div style="display:flex;gap:8px;width:100%;margin-top:8px">';
   html+='<div class="sb" style="background:'+T.card+';flex:1;padding:10px"><div style="font-size:14px">'+rank.icon+' '+rank.name+'</div><div class="sl" style="color:'+T.textMuted+'">'+t('rankLabel')+' '+rank.min+'+</div></div>';
-  html+='<div class="sb" style="background:'+T.card+';flex:1;padding:10px"><div style="font-size:18px;color:#fbbf24">🔥 '+S.streak+'</div><div class="sl" style="color:'+T.textMuted+'">'+(lang==='es'?'RACHA':'STREAK')+'</div></div>';
+  html+='<div class="sb" style="background:'+T.card+';flex:1;padding:10px"><div style="font-size:18px;color:#fbbf24">🔥 '+S.streak+'</div><div class="sl" style="color:'+T.textMuted+'">'+t('streak')+'</div></div>';
   document.getElementById('pr-stats').innerHTML=html;
   var hist=S.hist.slice().reverse().slice(0,8);
   document.getElementById('pr-hist').innerHTML=hist.length?hist.map(function(h){
@@ -1396,7 +1458,91 @@ function renderLbData(all){
 }
 
 // ══════════════════════════════════════════
-// 11. ADMOB
+// 11. DAILY SPIN
+// ══════════════════════════════════════════
+var SPIN_PRIZES=[
+  {icon:'⭐',label:'50 ★',coins:50,weight:30},
+  {icon:'💫',label:'150 ★',coins:150,weight:25},
+  {icon:'🌟',label:'300 ★',coins:300,weight:20},
+  {icon:'✨',label:'500 ★',coins:500,weight:12},
+  {icon:'💰',label:'1000 ★',coins:1000,weight:8},
+  {icon:'🎁',label:'+Trail',coins:0,trail:true,weight:3},
+  {icon:'🪐',label:'2000 ★',coins:2000,weight:2}
+];
+function getSpinPrize(){
+  var total=SPIN_PRIZES.reduce(function(s,p){return s+p.weight;},0);
+  var r=Math.random()*total,cum=0;
+  for(var i=0;i<SPIN_PRIZES.length;i++){cum+=SPIN_PRIZES[i].weight;if(r<=cum)return SPIN_PRIZES[i];}
+  return SPIN_PRIZES[0];
+}
+function getTodayKey(){return new Date().toISOString().slice(0,10);}
+function openSpin(){
+  var box=document.getElementById('spin-box');
+  if(box){box.style.background=T.bg;box.style.color=T.text;box.style.border='1px solid '+T.border;}
+  var modal=document.getElementById('spin-modal');
+  modal.style.display='flex';
+  var today=getTodayKey();
+  var spun=S.lastSpinDate===today;
+  var extraSpun=S.lastSpinExtra===today;
+  document.getElementById('spin-title').textContent=t('spinTitle');
+  document.getElementById('spin-result').textContent='';
+  document.getElementById('spin-wheel').textContent='🎰';
+  document.getElementById('spin-btn-free').textContent=spun?t('spinDone'):t('spinFree');
+  document.getElementById('spin-btn-free').disabled=spun;
+  document.getElementById('spin-btn-free').style.opacity=spun?'.35':'1';
+  document.getElementById('spin-btn-ad').textContent=extraSpun?t('spinDone'):t('spinWatch');
+  document.getElementById('spin-btn-ad').disabled=extraSpun;
+  document.getElementById('spin-btn-ad').style.opacity=extraSpun?'.35':'1';
+}
+function closeSpin(){document.getElementById('spin-modal').style.display='none';}
+function doSpin(useAd){
+  var today=getTodayKey();
+  if(useAd){
+    if(S.lastSpinExtra===today){toast(t('spinDone'));return;}
+    showRewardedAd(function(){executeSpin(true);},function(){});
+  }else{
+    if(S.lastSpinDate===today){toast(t('spinDone'));return;}
+    executeSpin(false);
+  }
+}
+function executeSpin(isExtra){
+  var today=getTodayKey();
+  var wheel=document.getElementById('spin-wheel');
+  var icons=SPIN_PRIZES.map(function(p){return p.icon;});
+  var idx=0,speed=80,ticks=0,maxTicks=18+Math.floor(Math.random()*12);
+  function tick(){
+    wheel.textContent=icons[idx%icons.length];
+    idx++;ticks++;
+    if(ticks<maxTicks){setTimeout(tick,speed+(ticks*8));}
+    else{
+      var prize=getSpinPrize();
+      wheel.textContent=prize.icon;
+      if(prize.trail){
+        var unownedTrails=TRAILS.filter(function(tr){return tr.price>0&&S.ownedTrails.indexOf(tr.id)<0;});
+        if(unownedTrails.length>0){
+          var won=unownedTrails[Math.floor(Math.random()*unownedTrails.length)];
+          S.ownedTrails.push(won.id);
+          document.getElementById('spin-result').textContent=t('trailUnlocked')+' '+won.icon+' '+won.name;
+        }else{prize.coins=500;document.getElementById('spin-result').textContent='500 ★';}
+      }else{
+        S.coins+=prize.coins;
+        document.getElementById('spin-result').textContent='+'+prize.label;
+        var ch=document.getElementById('h-coins');if(ch)ch.textContent=S.coins;
+        var sc=document.getElementById('sh-coins');if(sc)sc.textContent=S.coins;
+      }
+      if(isExtra){S.lastSpinExtra=today;}else{S.lastSpinDate=today;}
+      saveState();
+      document.getElementById('spin-btn-free').disabled=!isExtra||S.lastSpinDate===today;
+      document.getElementById('spin-btn-free').style.opacity=(S.lastSpinDate===today)?'.35':'1';
+      document.getElementById('spin-btn-ad').disabled=isExtra;
+      document.getElementById('spin-btn-ad').style.opacity=isExtra?'.35':'1';
+    }
+  }
+  tick();
+}
+
+// ══════════════════════════════════════════
+// 12. ADMOB
 // ══════════════════════════════════════════
 var deathCount=0;
 function adBreakSafe(config){
@@ -1421,7 +1567,7 @@ function showRewardedAd(onRewarded,onDismissed){
     });
   } else {
     // AdMob not loaded yet (ad blocker or slow load) — give benefit of doubt
-    toast(lang==='es'?'Anuncio no disponible, reviviendo...':'Ad unavailable, reviving...');
+    toast(t('adUnavail'));
     setTimeout(function(){onRewarded();},1000);
   }
 }
@@ -1502,7 +1648,7 @@ function spawnMagnetBtn(){
 }
 function activateGravField(){
   if(gravFieldActive||phase!=='playing'||orb.on===-1)return;
-  if(gravFieldUsed>=gravFieldMax){toast(lang==='es'?'Máx 3 por partida':'Max 3 per game');return;}
+  if(gravFieldUsed>=gravFieldMax){toast(t('gravLimit'));return;}
   var cost=15+Math.floor(score*0.2);
   var total=S.coins+sesCoins;
   if(total<cost){toast(t('notEnough'));return;}
@@ -1514,7 +1660,7 @@ function activateGravField(){
   // Mark next planet with gravity field
   var nextPlanet=circles[circles.length-1];
   if(nextPlanet)nextPlanet.hasGravField=true;
-  toast(lang==='es'?'🌀 Campo activado':'🌀 Field activated');
+  toast(t('gravActive'));
 }
 function updateGravBtn(){
   var countEl=document.getElementById('grav-count');
@@ -1659,7 +1805,7 @@ function doRevive(){
     document.getElementById('coins-hud').style.display='block';document.getElementById('pause-btn').style.display='flex';
     showMagnetBtn(currentMode!=='easy');
     toast('✓ Revived!');
-  },function(){toast(lang==='es'?'Ve el anuncio completo':'Watch the full ad to revive');});
+  },function(){toast(t('watchFullAd'));});
 }
 function die(){
   if(phase==='dead')return;
