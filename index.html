@@ -247,6 +247,25 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     <button class="btn bsm" id="pr-logout" onclick="doLogout()" style="flex:1">SIGN OUT</button>
   </div>
 </div>
+<!-- LEADERBOARD FULL -->
+<div class="scr" id="scr-leaderboard">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;width:100%">
+    <button class="btn bsm" onclick="showScr('home')">←</button>
+    <div style="font-size:16px;font-weight:300;letter-spacing:4px">🏆 RANKINGS</div>
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:10px;width:100%">
+    <div class="lang-switch" id="lb-full-scope" style="font-size:10px;flex:1">
+      <div class="lang-opt on" id="lbf-global" onclick="setLbFullScope('global',this)">🌍 GLOBAL</div>
+      <div class="lang-opt" id="lbf-local" onclick="setLbFullScope('local',this)">📍 LOCAL</div>
+    </div>
+  </div>
+  <div id="lb-full-country-search" style="display:none;margin-bottom:10px;width:100%">
+    <input type="text" id="lb-country-input" placeholder="Search country..." style="font-size:12px;padding:8px" onkeyup="filterCountries(this.value)">
+    <div id="lb-country-list" style="max-height:120px;overflow-y:auto;margin-top:6px;border:1px solid rgba(128,128,128,.2);border-radius:8px;padding:4px"></div>
+  </div>
+  <div class="scroll" id="lb-full-list" style="max-height:60vh"></div>
+  <div id="lb-full-me" style="margin-top:10px;padding:12px;border-radius:12px;text-align:center;font-size:12px;letter-spacing:2px"></div>
+</div>
 
 <script>
 // Register Service Worker
@@ -2070,24 +2089,5 @@ window.addEventListener('load',function(){
   document.head.appendChild(adScript);
 });
 </script>
-<!-- LEADERBOARD FULL -->
-<div class="scr" id="scr-leaderboard">
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;width:100%">
-    <button class="btn bsm" onclick="showScr('home')">←</button>
-    <div style="font-size:16px;font-weight:300;letter-spacing:4px">🏆 RANKINGS</div>
-  </div>
-  <div style="display:flex;gap:6px;margin-bottom:10px;width:100%">
-    <div class="lang-switch" id="lb-full-scope" style="font-size:10px;flex:1">
-      <div class="lang-opt on" id="lbf-global" onclick="setLbFullScope('global',this)">🌍 GLOBAL</div>
-      <div class="lang-opt" id="lbf-local" onclick="setLbFullScope('local',this)">📍 LOCAL</div>
-    </div>
-  </div>
-  <div id="lb-full-country-search" style="display:none;margin-bottom:10px;width:100%">
-    <input type="text" id="lb-country-input" placeholder="Search country..." style="font-size:12px;padding:8px" onkeyup="filterCountries(this.value)">
-    <div id="lb-country-list" style="max-height:120px;overflow-y:auto;margin-top:6px;border:1px solid rgba(128,128,128,.2);border-radius:8px;padding:4px"></div>
-  </div>
-  <div class="scroll" id="lb-full-list" style="max-height:60vh"></div>
-  <div id="lb-full-me" style="margin-top:10px;padding:12px;border-radius:12px;text-align:center;font-size:12px;letter-spacing:2px"></div>
-</div>
 </body>
 </html>
