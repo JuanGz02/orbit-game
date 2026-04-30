@@ -293,7 +293,7 @@ var I18N={
     seeMore:'▼ SEE MORE',seeLess:'▲ HIDE',share:'↗ SHARE',
     tutTap:'TAP',tutHold:'HOLD & RELEASE',tutNice:'NICE!',
     ms10:'WARMING UP',ms20:'ON FIRE',ms30:'UNSTOPPABLE',ms50:'LEGENDARY',ms100:'GODLIKE',ms150:'TRANSCENDENT',ms300:'ETERNAL',
-    modeNormal:'ZEN 🍃',modeComp:'COMPETITIVE',modeDescNormal:'Explore the galaxy in peace · no rewards',modeDescComp:'Compete for your place in the league',
+    modeNormal:'ZEN 🍃',modeComp:'COMPETITIVE 🏅',modeDescNormal:'Explore the galaxy in peace · no rewards',modeDescComp:'Compete for your place in the league',
     rankLabel:'Rank',},
   es:{tag:'toca · mantén para potencia',google:'Continuar con Google',fb:'Continuar con Facebook',or:'o',
     reg:'CREAR CUENTA',login:'INICIAR SESIÓN',guest:'Jugar como invitado',hint:'toca · mantén para potencia',
@@ -309,7 +309,7 @@ var I18N={
     seeMore:'▼ VER MÁS',seeLess:'▲ OCULTAR',share:'↗ COMPARTIR',
     tutTap:'TOCA',tutHold:'MANTÉN Y SUELTA',tutNice:'¡GENIAL!',
     ms10:'CALENTANDO',ms20:'EN LLAMAS',ms30:'IMPARABLE',ms50:'LEGENDARIO',ms100:'DIVINO',ms150:'TRANSCENDENTE',ms300:'ETERNO',
-    modeNormal:'ZEN 🍃',modeComp:'COMPETITIVO',modeDescNormal:'Explora la galaxia en paz · sin recompensas',modeDescComp:'Compite por tu lugar en la liga',
+    modeNormal:'ZEN 🍃',modeComp:'COMPETITIVO 🏅',modeDescNormal:'Explora la galaxia en paz · sin recompensas',modeDescComp:'Compite por tu lugar en la liga',
     rankLabel:'Rango'}
 };
 var lang='en';
@@ -898,6 +898,7 @@ function initFirebase(){
 
     auth.onAuthStateChanged(function(user){
       if(user){
+        if(user.isAnonymous&&S.user&&S.user.isGuest&&S.nick){updateHomeUI();showScr('home');return;}
         S.user={uid:user.uid,email:user.email||'',photo:user.photoURL||null};
         db.collection('users').doc(user.uid).get().then(function(doc){
           if(doc.exists){
