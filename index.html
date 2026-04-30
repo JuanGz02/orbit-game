@@ -254,8 +254,11 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     <div class="scroll" id="pr-hist" style="max-height:28vh"></div>
   </div>
   <div style="display:flex;gap:10px;margin-top:14px;width:100%">
-    <button class="btn bsm" id="pr-reset" onclick="resetScore()" style="flex:1;color:#fca5a5;border:1px solid rgba(239,68,68,.28);background:rgba(239,68,68,.08)">RESET SCORE</button>
-    <button class="btn bsm" id="pr-logout" onclick="doLogout()" style="flex:1">SIGN OUT</button>
+    <button id="pr-notif" onclick="toggleNotifications()" class="btn bsm" style="width:100%;margin-bottom:8px">🔔 NOTIFICATIONS</button>
+    <div style="display:flex;gap:10px;width:100%">
+      <button class="btn bsm" id="pr-reset" onclick="resetScore()" style="flex:1;color:#fca5a5;border:1px solid rgba(239,68,68,.28);background:rgba(239,68,68,.08)">RESET SCORE</button>
+      <button class="btn bsm" id="pr-logout" onclick="doLogout()" style="flex:1">SIGN OUT</button>
+    </div>
   </div>
 </div>
 <!-- LEADERBOARD FULL -->
@@ -1022,11 +1025,35 @@ function requestNotifPermission(){
       fcmMessaging.getToken({vapidKey:'BI4Ya4XD2j_BMIasIFBDdbB0JgEvy5pg37HabetzarIAqWW4yvAA2w7BDH7ohyiKTk8j3I3ZgCWQpw77eL8fhQQ'}).then(function(token){
         if(token&&db){
           db.collection('users').doc(S.user.uid).set({fcmToken:token},{merge:true});
-          toast(lang==='es'?'🔔 Notificaciones activadas':'🔔 Notifications enabled');
+          toast('🔔 '+(lang==='es'?'Notificaciones activadas':'Notifications enabled'));
+          updateNotifBtn();
         }
       }).catch(function(e){console.log('FCM token error:',e);});
+    }else if(perm==='denied'){
+      toast(lang==='es'?'Actívalas en ajustes del navegador':'Enable them in browser settings');
     }
   });
+}
+function toggleNotifications(){
+  if(!('Notification' in window)){toast('Not supported');return;}
+  if(Notification.permission==='granted'){
+    // desactivar — borrar token
+    if(db&&S.user&&S.user.uid){
+      db.collection('users').doc(S.user.uid).set({fcmToken:null},{merge:true});
+      toast('🔕 '+(lang==='es'?'Notificaciones desactivadas':'Notifications disabled'));
+      updateNotifBtn();
+    }
+  }else{
+    requestNotifPermission();
+  }
+}
+function updateNotifBtn(){
+  var btn=document.getElementById('pr-notif');
+  if(!btn)return;
+  var on=('Notification' in window)&&Notification.permission==='granted';
+  btn.textContent=on?'🔔 NOTIFICATIONS ON':'🔕 NOTIFICATIONS OFF';
+  btn.style.opacity=on?'1':'.55';
+  btn.style.border=on?'1px solid rgba(251,191,36,.4)':'';
 }
 
 function saveToCloud(){
@@ -1317,6 +1344,7 @@ function buyPack(id){
 // ══════════════════════════════════════════
 function renderProfile(){
   updateHomeUI();
+  setTimeout(updateNotifBtn,50);
   var rank=getRank(S.best);
   document.getElementById('pr-nick').textContent=S.nick||'Player';
   document.getElementById('pr-nick').style.color=T.text;
