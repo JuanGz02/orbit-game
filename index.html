@@ -19,10 +19,12 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>ORBIT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea{user-select:text;-webkit-user-select:text}
-body{overflow:hidden;font-family:system-ui,sans-serif;touch-action:none;transition:background .6s,color .6s}
+body{overflow:hidden;font-family:'Space Grotesk',system-ui,sans-serif;touch-action:none;transition:background .6s,color .6s}
 canvas{display:block;position:absolute;inset:0;touch-action:none;z-index:0}
 #hud{position:absolute;top:0;left:0;width:100%;text-align:center;padding-top:26px;pointer-events:none;z-index:2}
 #sc{font-size:56px;font-weight:100;letter-spacing:-2px;display:none;pointer-events:none;cursor:default;text-shadow:0 1px 8px rgba(0,0,0,.15)}
@@ -31,12 +33,15 @@ canvas{display:block;position:absolute;inset:0;touch-action:none;z-index:0}
 #pause-btn{position:absolute;top:22px;left:16px;width:36px;height:36px;border-radius:50%;display:none;align-items:center;justify-content:center;font-size:11px;cursor:pointer;border:none;z-index:2}
 .scr{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:0 24px;z-index:1}
 .scr.on{display:flex}
-.btn{border:none;border-radius:32px;cursor:pointer;font-family:inherit;letter-spacing:3px;font-size:12px;transition:transform .12s}
-.btn:active{transform:scale(.94)}
-.bsm{padding:9px 20px;font-size:11px}
-.nav{display:flex;border-radius:12px;padding:3px;margin-bottom:16px;width:100%}
-.nt{flex:1;padding:9px;text-align:center;border-radius:9px;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all .2s;opacity:.45}
-.nt.on{opacity:1;font-weight:600}
+.btn{border:none;border-radius:32px;cursor:pointer;font-family:'Space Grotesk',inherit;letter-spacing:2px;font-size:12px;font-weight:600;transition:transform .15s,box-shadow .2s;padding:12px 24px}
+.btn:active{transform:scale(.93)}
+.btn-play{background:linear-gradient(135deg,#7c3aed 0%,#a855f7 50%,#fbbf24 100%)!important;color:#fff!important;font-size:15px!important;padding:18px!important;letter-spacing:5px!important;font-weight:700!important;box-shadow:0 0 32px rgba(124,58,237,.4),0 4px 24px rgba(0,0,0,.35)!important;border:none!important}
+.btn-play:active{transform:scale(.95)!important;box-shadow:0 0 16px rgba(124,58,237,.3)!important}
+.bsm{padding:10px 22px;font-size:11px;font-weight:600}
+.btn-icon{width:38px;height:38px;padding:0!important;display:inline-flex;align-items:center;justify-content:center;font-size:16px;border-radius:50%!important}
+.nav{display:flex;border-radius:14px;padding:4px;margin-bottom:16px;width:100%}
+.nt{flex:1;padding:9px 4px;text-align:center;border-radius:10px;font-size:10px;letter-spacing:1px;cursor:pointer;transition:all .2s;opacity:.5;font-weight:600}
+.nt.on{opacity:1;font-weight:700}
 .scroll{width:100%;max-height:48vh;overflow-y:auto}
 .sg{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
 .si{border-radius:14px;padding:14px 10px;text-align:center;cursor:pointer;transition:border .18s;border-width:1px;border-style:solid}
@@ -45,7 +50,11 @@ canvas{display:block;position:absolute;inset:0;touch-action:none;z-index:0}
 .sb{border-radius:12px;padding:12px 8px;text-align:center}
 .sn{font-size:22px;font-weight:300;color:#fbbf24}.sl{font-size:10px;letter-spacing:2px;margin-top:3px;opacity:.45}
 .row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom-width:1px;border-bottom-style:solid}
-#toast{position:absolute;bottom:68px;left:50%;transform:translateX(-50%);border-radius:24px;padding:10px 22px;font-size:13px;letter-spacing:1px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;z-index:999;max-width:90vw;word-break:break-word}
+#toast{position:absolute;bottom:68px;left:50%;transform:translateX(-50%);border-radius:24px;padding:11px 24px;font-size:12px;letter-spacing:1px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;z-index:999;max-width:90vw;word-break:break-word;backdrop-filter:blur(12px)}
+.spin-sector-label{font-family:'Space Grotesk',sans-serif;font-weight:700}
+#spin-canvas-wrap{position:relative;width:260px;height:260px;margin:0 auto 16px}
+#spin-pointer{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:22px solid #fbbf24;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));z-index:2}
+@keyframes spinBtnPulse{0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,.4)}50%{box-shadow:0 0 0 8px rgba(251,191,36,0)}}
 .lang-switch{display:flex;align-items:center;border-radius:20px;overflow:hidden;border-width:1px;border-style:solid}
 .lang-opt{padding:7px 16px;font-size:11px;letter-spacing:3px;cursor:pointer;transition:all .2s}
 input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-style:solid;font-size:14px;font-family:inherit;outline:none;margin-bottom:10px;transition:all .3s}
@@ -130,11 +139,11 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
       <div id="mode-normal" onclick="setGameMode('normal')" style="flex:1;padding:9px 4px;text-align:center;font-size:10px;letter-spacing:1px;cursor:pointer;transition:all .2s;opacity:1;font-weight:600" id-label="modeComp">COMPETITIVE</div>
     </div>
     <div id="mode-desc" style="font-size:10px;letter-spacing:1px;opacity:.4;margin-bottom:6px;text-align:center;min-height:14px"></div>
-    <button class="btn" id="h-play" style="font-size:16px;padding:17px;letter-spacing:6px" onclick="startGame()">PLAY</button>
+    <button class="btn btn-play" id="h-play" onclick="startGame()">PLAY</button>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-      <button class="btn bsm" id="h-top" onclick="showScr('leaderboard')">🏆 TOP</button>
-      <button class="btn bsm" id="h-shop" onclick="showScr('shop')">SHOP</button>
-      <button class="btn bsm" id="h-prof" onclick="showScr('profile')">PROFILE</button>
+      <button class="btn bsm" id="h-top" onclick="showScr('leaderboard')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>TOP</button>
+      <button class="btn bsm" id="h-shop" onclick="showScr('shop')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>SHOP</button>
+      <button class="btn bsm" id="h-prof" onclick="showScr('profile')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>PROFILE</button>
     </div>
   </div>
   <div style="position:absolute;top:18px;right:16px;display:flex;align-items:center;gap:5px;border-radius:20px;padding:5px 12px">
@@ -270,14 +279,20 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
 </div>
 
 <!-- SPIN MODAL -->
-<div id="spin-modal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.75);align-items:center;justify-content:center;flex-direction:column;gap:16px">
-  <div id="spin-box" style="width:90%;max-width:320px;border-radius:20px;padding:24px;text-align:center">
-    <div id="spin-title" style="font-size:13px;letter-spacing:4px;margin-bottom:18px;font-weight:600">DAILY SPIN</div>
-    <div id="spin-wheel" style="font-size:52px;height:80px;line-height:80px;overflow:hidden;border-radius:14px;margin-bottom:18px;transition:none"></div>
-    <div id="spin-result" style="font-size:13px;letter-spacing:2px;min-height:20px;margin-bottom:16px;color:#fbbf24"></div>
-    <button id="spin-btn-free" class="btn" style="width:100%;margin-bottom:8px;font-weight:700" onclick="doSpin(false)">FREE SPIN</button>
-    <button id="spin-btn-ad" class="btn bsm" style="width:100%;opacity:.7" onclick="doSpin(true)">WATCH AD + SPIN</button>
-    <button class="btn bsm" style="width:100%;margin-top:8px;opacity:.4" onclick="closeSpin()">✕ CLOSE</button>
+<div id="spin-modal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);align-items:center;justify-content:center;flex-direction:column;gap:0">
+  <div id="spin-box" style="width:92%;max-width:320px;border-radius:24px;padding:22px 20px 20px;text-align:center;border:1px solid rgba(255,255,255,.1)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="width:28px"></div>
+      <div id="spin-title" style="font-size:11px;letter-spacing:4px;font-weight:700;opacity:.7">DAILY SPIN</div>
+      <button onclick="closeSpin()" style="background:none;border:none;cursor:pointer;opacity:.4;font-size:18px;padding:0;width:28px;color:inherit">✕</button>
+    </div>
+    <div id="spin-canvas-wrap">
+      <div id="spin-pointer"></div>
+      <canvas id="spin-canvas" width="260" height="260"></canvas>
+    </div>
+    <div id="spin-result" style="font-size:14px;letter-spacing:2px;font-weight:700;min-height:22px;margin-bottom:14px;color:#fbbf24"></div>
+    <button id="spin-btn-free" class="btn" style="width:100%;margin-bottom:8px;animation:spinBtnPulse 2s infinite" onclick="doSpin(false)">🎰 FREE SPIN</button>
+    <button id="spin-btn-ad" class="btn bsm" style="width:100%;opacity:.65" onclick="doSpin(true)">📺 WATCH AD + SPIN</button>
   </div>
 </div>
 
@@ -367,7 +382,7 @@ function getPal(){return GAME_PAL;}
 // ══════════════════════════════════════════
 var DEF={user:null,nick:'',lang:'en',coins:0,best:0,noAds:false,themeMode:'auto',tutorial:false,
   trail:'simple',ownedTrails:['simple'],hist:[],photo:null,country:'',ownedPowerups:{magnet:0},
-  streak:0,lastPlayDate:'',rank:'rookie',gameMode:'normal',lastSpinDate:'',lastSpinExtra:''};
+  streak:0,lastPlayDate:'',rank:'rookie',gameMode:'normal',lastSpinDate:'',lastSpinExtra:'',nextGameMultiplier:1};
 var S=Object.assign({},DEF);
 function loadState(){try{var d=localStorage.getItem('orb7');if(d)S=Object.assign({},DEF,JSON.parse(d));}catch(e){}}
 function saveState(){localStorage.setItem('orb7',JSON.stringify(S));saveToCloud();}
@@ -399,7 +414,9 @@ function resolveNight(){
 function applyTheme(){
   document.body.style.background=T.bg;document.body.style.color=T.text;
   document.querySelectorAll('input').forEach(function(e){e.style.background=T.input;e.style.borderColor=T.inputB;e.style.color=T.text;});
-  ['h-play','a-reg','d-retry','p-resume'].forEach(function(id){var e=document.getElementById(id);if(e){e.style.background=T.btnP;e.style.color=T.btnPT;}});
+  var playEl=document.getElementById('h-play');
+  if(playEl){playEl.style.background='';playEl.style.color='';} // let CSS class handle it
+  ['a-reg','d-retry','p-resume'].forEach(function(id){var e=document.getElementById(id);if(e){e.style.background=T.btnP;e.style.color=T.btnPT;}});
   ['h-top','h-shop','h-prof','a-login','a-guest','d-menu','p-menu','pr-logout','photo-btn'].forEach(function(id){var e=document.getElementById(id);if(e){e.style.background=T.btn;e.style.color=T.text;e.style.border='1px solid '+T.btnBorder;}});
   document.querySelectorAll('.nav').forEach(function(e){e.style.background=T.navBg;});
   document.querySelectorAll('.nt').forEach(function(e){e.style.color=T.text;});
@@ -1154,7 +1171,7 @@ function showScr(name){
   document.getElementById('pause-btn').style.display='none';
   document.getElementById('sc').style.display='none';
   document.getElementById('coins-hud').style.display='none';
-  if(name==='home'){updateHomeUI();startMenuMusic();checkStreak();initDailyChallenge();}
+  if(name==='home'){updateHomeUI();startMenuMusic();checkStreak();initDailyChallenge();checkAutoSpin();}
   if(name==='leaderboard'){renderLbFull();}
   if(name==='shop'){document.getElementById('sh-coins').textContent=S.coins;renderShop('trail');}
   if(name==='profile')renderProfile();
@@ -1460,41 +1477,71 @@ function renderLbData(all){
 // ══════════════════════════════════════════
 // 11. DAILY SPIN
 // ══════════════════════════════════════════
+// Premios equilibrados — menos generosos, más emocionantes
 var SPIN_PRIZES=[
-  {icon:'⭐',label:'50 ★',coins:50,weight:30},
-  {icon:'💫',label:'150 ★',coins:150,weight:25},
-  {icon:'🌟',label:'300 ★',coins:300,weight:20},
-  {icon:'✨',label:'500 ★',coins:500,weight:12},
-  {icon:'💰',label:'1000 ★',coins:1000,weight:8},
-  {icon:'🎁',label:'+Trail',coins:0,trail:true,weight:3},
-  {icon:'🪐',label:'2000 ★',coins:2000,weight:2}
+  {label:'25 ★', coins:25,  col:'#6366f1', weight:35},
+  {label:'75 ★', coins:75,  col:'#8b5cf6', weight:25},
+  {label:'150 ★',coins:150, col:'#a855f7', weight:18},
+  {label:'300 ★',coins:300, col:'#ec4899', weight:12},
+  {label:'Trail',coins:0,   col:'#10b981', trail:true, weight:5},
+  {label:'500 ★',coins:500, col:'#fbbf24', weight:4},
+  {label:'2× Next',coins:0, col:'#f97316', multiplier:true, weight:1}
 ];
-function getSpinPrize(){
-  var total=SPIN_PRIZES.reduce(function(s,p){return s+p.weight;},0);
-  var r=Math.random()*total,cum=0;
-  for(var i=0;i<SPIN_PRIZES.length;i++){cum+=SPIN_PRIZES[i].weight;if(r<=cum)return SPIN_PRIZES[i];}
-  return SPIN_PRIZES[0];
-}
+var spinAngle=0,spinVelocity=0,spinAnimId=null,spinLocked=false;
 function getTodayKey(){return new Date().toISOString().slice(0,10);}
+function drawSpinWheel(angle){
+  var canvas=document.getElementById('spin-canvas');
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  var W=260,R=125,cx=130,cy=130;
+  ctx.clearRect(0,0,W,W);
+  var n=SPIN_PRIZES.length,arc=(2*Math.PI)/n;
+  SPIN_PRIZES.forEach(function(p,i){
+    var start=angle+i*arc,end=start+arc;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,start,end);ctx.closePath();
+    ctx.fillStyle=p.col;ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,.25)';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(start+arc/2);
+    ctx.textAlign='right';ctx.fillStyle='#fff';
+    ctx.font='bold 11px Space Grotesk,sans-serif';ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=3;
+    ctx.fillText(p.label,R-8,4);
+    ctx.restore();
+  });
+  // Center circle
+  ctx.beginPath();ctx.arc(cx,cy,22,0,2*Math.PI);
+  ctx.fillStyle='#0a0a14';ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='#fbbf24';ctx.font='bold 13px Space Grotesk,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('🎰',cx,cy);
+}
+function getSpinPrizeAtAngle(angle){
+  var n=SPIN_PRIZES.length,arc=(2*Math.PI)/n;
+  var pointer=(-Math.PI/2-angle)%(2*Math.PI);
+  if(pointer<0)pointer+=2*Math.PI;
+  var idx=Math.floor(pointer/arc)%n;
+  return SPIN_PRIZES[idx];
+}
 function openSpin(){
   var box=document.getElementById('spin-box');
-  if(box){box.style.background=T.bg;box.style.color=T.text;box.style.border='1px solid '+T.border;}
-  var modal=document.getElementById('spin-modal');
-  modal.style.display='flex';
-  var today=getTodayKey();
-  var spun=S.lastSpinDate===today;
-  var extraSpun=S.lastSpinExtra===today;
+  if(box){box.style.background=T.bg;box.style.color=T.text;}
+  document.getElementById('spin-modal').style.display='flex';
+  var today=getTodayKey(),spun=S.lastSpinDate===today,extraSpun=S.lastSpinExtra===today;
   document.getElementById('spin-title').textContent=t('spinTitle');
   document.getElementById('spin-result').textContent='';
-  document.getElementById('spin-wheel').textContent='🎰';
-  document.getElementById('spin-btn-free').textContent=spun?t('spinDone'):t('spinFree');
-  document.getElementById('spin-btn-free').disabled=spun;
-  document.getElementById('spin-btn-free').style.opacity=spun?'.35':'1';
-  document.getElementById('spin-btn-ad').textContent=extraSpun?t('spinDone'):t('spinWatch');
-  document.getElementById('spin-btn-ad').disabled=extraSpun;
-  document.getElementById('spin-btn-ad').style.opacity=extraSpun?'.35':'1';
+  var fb=document.getElementById('spin-btn-free'),ab=document.getElementById('spin-btn-ad');
+  fb.textContent='🎰 '+(spun?t('spinDone'):t('spinFree'));
+  fb.disabled=spun;fb.style.opacity=spun?'.35':'1';
+  fb.style.animation=spun?'none':'spinBtnPulse 2s infinite';
+  fb.style.background=spun?'':(isNight?'rgba(255,255,255,.12)':'rgba(20,20,40,.08)');
+  ab.textContent='📺 '+(extraSpun?t('spinDone'):t('spinWatch'));
+  ab.disabled=extraSpun;ab.style.opacity=extraSpun?'.35':'.7';
+  spinLocked=false;
+  drawSpinWheel(spinAngle);
 }
-function closeSpin(){document.getElementById('spin-modal').style.display='none';}
+function closeSpin(){
+  if(spinAnimId){cancelAnimationFrame(spinAnimId);spinAnimId=null;}
+  document.getElementById('spin-modal').style.display='none';
+}
 function doSpin(useAd){
   var today=getTodayKey();
   if(useAd){
@@ -1506,39 +1553,63 @@ function doSpin(useAd){
   }
 }
 function executeSpin(isExtra){
-  var today=getTodayKey();
-  var wheel=document.getElementById('spin-wheel');
-  var icons=SPIN_PRIZES.map(function(p){return p.icon;});
-  var idx=0,speed=80,ticks=0,maxTicks=18+Math.floor(Math.random()*12);
-  function tick(){
-    wheel.textContent=icons[idx%icons.length];
-    idx++;ticks++;
-    if(ticks<maxTicks){setTimeout(tick,speed+(ticks*8));}
+  if(spinLocked)return;
+  spinLocked=true;
+  document.getElementById('spin-btn-free').disabled=true;
+  document.getElementById('spin-btn-ad').disabled=true;
+  document.getElementById('spin-result').textContent='';
+  var target=Math.random()*2*Math.PI;
+  var totalRotation=4*Math.PI*2+target; // ≥4 full turns + landing
+  var start=null,duration=4000+Math.random()*1500;
+  function easeOut(t){return 1-Math.pow(1-t,3);}
+  var startAngle=spinAngle;
+  function frame(ts){
+    if(!start)start=ts;
+    var elapsed=ts-start,progress=Math.min(elapsed/duration,1);
+    spinAngle=startAngle+totalRotation*easeOut(progress);
+    drawSpinWheel(spinAngle);
+    if(progress<1){spinAnimId=requestAnimationFrame(frame);}
     else{
-      var prize=getSpinPrize();
-      wheel.textContent=prize.icon;
-      if(prize.trail){
-        var unownedTrails=TRAILS.filter(function(tr){return tr.price>0&&S.ownedTrails.indexOf(tr.id)<0;});
-        if(unownedTrails.length>0){
-          var won=unownedTrails[Math.floor(Math.random()*unownedTrails.length)];
-          S.ownedTrails.push(won.id);
-          document.getElementById('spin-result').textContent=t('trailUnlocked')+' '+won.icon+' '+won.name;
-        }else{prize.coins=500;document.getElementById('spin-result').textContent='500 ★';}
-      }else{
-        S.coins+=prize.coins;
-        document.getElementById('spin-result').textContent='+'+prize.label;
-        var ch=document.getElementById('h-coins');if(ch)ch.textContent=S.coins;
-        var sc=document.getElementById('sh-coins');if(sc)sc.textContent=S.coins;
-      }
-      if(isExtra){S.lastSpinExtra=today;}else{S.lastSpinDate=today;}
-      saveState();
-      document.getElementById('spin-btn-free').disabled=!isExtra||S.lastSpinDate===today;
-      document.getElementById('spin-btn-free').style.opacity=(S.lastSpinDate===today)?'.35':'1';
-      document.getElementById('spin-btn-ad').disabled=isExtra;
-      document.getElementById('spin-btn-ad').style.opacity=isExtra?'.35':'1';
+      spinAnimId=null;
+      var prize=getSpinPrizeAtAngle(spinAngle);
+      applySpinPrize(prize,isExtra);
     }
   }
-  tick();
+  spinAnimId=requestAnimationFrame(frame);
+}
+function applySpinPrize(prize,isExtra){
+  var today=getTodayKey();
+  var resultEl=document.getElementById('spin-result');
+  if(prize.trail){
+    var unowned=TRAILS.filter(function(tr){return tr.price>0&&S.ownedTrails.indexOf(tr.id)<0;});
+    if(unowned.length>0){
+      var won=unowned[Math.floor(Math.random()*unowned.length)];
+      S.ownedTrails.push(won.id);
+      resultEl.textContent=t('trailUnlocked')+' '+won.name+'!';
+    }else{prize={coins:150};resultEl.textContent='+150 ★';}
+  }else if(prize.multiplier){
+    S.nextGameMultiplier=2;
+    resultEl.textContent='🚀 2× coins next game!';
+  }else{
+    S.coins+=prize.coins;
+    resultEl.textContent='+'+prize.label+' ★';
+    var ch=document.getElementById('h-coins');if(ch)ch.textContent=S.coins;
+    var sc=document.getElementById('sh-coins');if(sc)sc.textContent=S.coins;
+  }
+  if(isExtra){S.lastSpinExtra=today;}else{S.lastSpinDate=today;}
+  saveState();
+  var fb=document.getElementById('spin-btn-free'),ab=document.getElementById('spin-btn-ad');
+  fb.textContent='🎰 '+(S.lastSpinDate===today?t('spinDone'):t('spinFree'));
+  fb.disabled=S.lastSpinDate===today;fb.style.opacity=S.lastSpinDate===today?'.35':'1';
+  ab.textContent='📺 '+(S.lastSpinExtra===today?t('spinDone'):t('spinWatch'));
+  ab.disabled=S.lastSpinExtra===today;ab.style.opacity=S.lastSpinExtra===today?'.35':'.7';
+  spinLocked=false;
+}
+// Auto-popup: mostrar spin al abrir home si no se ha girado hoy
+function checkAutoSpin(){
+  if(S.user&&!S.user.isGuest&&S.lastSpinDate!==getTodayKey()){
+    setTimeout(openSpin,1200);
+  }
 }
 
 // ══════════════════════════════════════════
@@ -1827,7 +1898,7 @@ function die(){
   phase='dead';snd(false);stopMusic();
   hideTut();tutStep=0;tutFrozen=false;
   if(navigator.vibrate)navigator.vibrate([50,30,80]);
-  if(currentMode!=='easy')S.coins+=sesCoins;
+  if(currentMode!=='easy'){var mult=S.nextGameMultiplier||1;S.coins+=sesCoins*mult;if(mult>1){toast('🚀 2× coins!');S.nextGameMultiplier=1;}}
   if(currentMode!=='easy'){
     if(score>S.best)S.best=score;
     S.hist.push({score:score,date:new Date().toLocaleDateString()});
@@ -1843,8 +1914,8 @@ function die(){
   checkDailyProgress('games',1);
   checkDailyProgress('coins',sesCoins);
   // Ask for notification permission after 3rd game
-  if(deathCount===3&&!S.user.isGuest&&'Notification' in window&&Notification.permission==='default'){
-    setTimeout(function(){requestNotifPermission();},2000);
+  if(deathCount===1&&!S.user.isGuest&&'Notification' in window&&Notification.permission==='default'){
+    setTimeout(function(){requestNotifPermission();},2500);
   }
   document.getElementById('sc').style.display='none';document.getElementById('coins-hud').style.display='none';
   document.getElementById('co').style.opacity='0';document.getElementById('pause-btn').style.display='none';
