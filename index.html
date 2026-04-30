@@ -131,7 +131,8 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     <div id="mode-desc" style="font-size:10px;letter-spacing:1px;opacity:.4;margin-bottom:8px;text-align:center;min-height:14px"></div>
     <div id="daily-challenge" style="display:none;width:100%;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.15);border-radius:12px;padding:10px 14px;margin-bottom:4px"></div>
     <button class="btn" id="h-play" style="font-size:16px;padding:17px;letter-spacing:6px" onclick="startGame()">PLAY</button>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <button class="btn bsm" id="h-top" onclick="showScr('leaderboard')">🏆 TOP</button>
       <button class="btn bsm" id="h-shop" onclick="showScr('shop')">SHOP</button>
       <button class="btn bsm" id="h-prof" onclick="showScr('profile')">PROFILE</button>
     </div>
@@ -273,7 +274,7 @@ var I18N={
     seeMore:'▼ SEE MORE',seeLess:'▲ HIDE',share:'↗ SHARE',
     tutTap:'TAP',tutHold:'HOLD & RELEASE',tutNice:'NICE!',
     ms10:'WARMING UP',ms20:'ON FIRE',ms30:'UNSTOPPABLE',ms50:'LEGENDARY',ms100:'GODLIKE',ms150:'TRANSCENDENT',ms300:'ETERNAL',
-    modeNormal:'NORMAL',modeComp:'COMPETITIVE',modeDescNormal:'Explore the galaxy in peace',modeDescComp:'Compete for your place in the league',
+    modeNormal:'ZEN 🍃',modeComp:'COMPETITIVE',modeDescNormal:'Explore the galaxy in peace · no rewards',modeDescComp:'Compete for your place in the league',
     rankLabel:'Rank',},
   es:{tag:'toca · mantén para potencia',google:'Continuar con Google',fb:'Continuar con Facebook',or:'o',
     reg:'CREAR CUENTA',login:'INICIAR SESIÓN',guest:'Jugar como invitado',hint:'toca · mantén para potencia',
@@ -289,7 +290,7 @@ var I18N={
     seeMore:'▼ VER MÁS',seeLess:'▲ OCULTAR',share:'↗ COMPARTIR',
     tutTap:'TOCA',tutHold:'MANTÉN Y SUELTA',tutNice:'¡GENIAL!',
     ms10:'CALENTANDO',ms20:'EN LLAMAS',ms30:'IMPARABLE',ms50:'LEGENDARIO',ms100:'DIVINO',ms150:'TRANSCENDENTE',ms300:'ETERNO',
-    modeNormal:'NORMAL',modeComp:'COMPETITIVO',modeDescNormal:'Explora la galaxia en paz',modeDescComp:'Compite por tu lugar en la liga',
+    modeNormal:'ZEN 🍃',modeComp:'COMPETITIVO',modeDescNormal:'Explora la galaxia en paz · sin recompensas',modeDescComp:'Compite por tu lugar en la liga',
     rankLabel:'Rango'}
 };
 var lang='en';
@@ -470,6 +471,7 @@ var MILESTONE_PALS=[
   ['#c084fc','#22d3ee','#fb923c']
 ];
 function checkMilestone(){
+  if(currentMode==='easy')return; // No rewards in Zen mode
   var ms=[10,20,30,50,100,150,300];
   for(var i=ms.length-1;i>=0;i--){
     if(score>=ms[i]&&lastMilestone<ms[i]){
@@ -1087,7 +1089,7 @@ function handlePhoto(inp){
 // ══════════════════════════════════════════
 // 7. SCREENS
 // ══════════════════════════════════════════
-var SCRS=['auth','home','dead','pause','shop','profile','guest'];
+var SCRS=['auth','home','dead','pause','shop','profile','guest','leaderboard'];
 function showScr(name){
   SCRS.forEach(function(s){document.getElementById('scr-'+s).classList.remove('on');});
   var el=document.getElementById('scr-'+name);el.classList.add('on');
@@ -1097,6 +1099,7 @@ function showScr(name){
   document.getElementById('sc').style.display='none';
   document.getElementById('coins-hud').style.display='none';
   if(name==='home'){updateHomeUI();startMenuMusic();checkStreak();initDailyChallenge();}
+  if(name==='leaderboard'){renderLbFull();}
   if(name==='shop'){document.getElementById('sh-coins').textContent=S.coins;renderShop('trail');}
   if(name==='profile')renderProfile();
   if(name==='home'&&phase==='playing')phase='idle';
@@ -1265,6 +1268,59 @@ function setLbScope(scope,el){
   lbScope=scope;
   document.querySelectorAll('#lb-scope-sw .lang-opt').forEach(function(e){e.classList.remove('on');e.style.background='transparent';});
   el.classList.add('on');el.style.background=T.langOn;renderLb();
+}
+var lbFullScope='global',lbFullCountry=null;
+function setLbFullScope(scope,el){
+  lbFullScope=scope;
+  document.querySelectorAll('#lb-full-scope .lang-opt').forEach(function(e){e.classList.remove('on');e.style.background='transparent';});
+  el.classList.add('on');el.style.background=T.langOn;
+  var searchDiv=document.getElementById('lb-full-country-search');
+  if(scope==='local'){searchDiv.style.display='block';lbFullCountry=null;renderLbFull();}
+  else{searchDiv.style.display='none';lbFullCountry=null;renderLbFull();}
+}
+
+function filterCountries(query){
+  if(!query){document.getElementById('lb-country-list').innerHTML='';return;}
+  var countries=Object.keys(CF).filter(function(c){return c.toLowerCase().includes(query.toLowerCase())&&c!=='Local';});
+  var html=countries.slice(0,15).map(function(c){return '<div style="padding:6px 8px;cursor:pointer;border-bottom:1px solid '+T.border+';font-size:11px" onclick="selectCountry(\''+c+'\')">'+getFlag(c)+' '+c+'</div>';}).join('');
+  document.getElementById('lb-country-list').innerHTML=html;
+}
+
+function selectCountry(country){
+  lbFullCountry=country;
+  document.getElementById('lb-country-input').value=country;
+  document.getElementById('lb-country-list').innerHTML='';
+  renderLbFull();
+}
+
+function renderLbFull(){
+  if(!db){return;}
+  var query=db.collection('leaderboard').orderBy('score','desc').limit(5000);
+  query.get().then(function(snap){
+    var data=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+    data=filterByCurrentWeek(data);
+    if(lbFullScope==='local'){
+      var targetCountry=lbFullCountry||userCountry;
+      data=data.filter(function(r){return !r.country||r.country===targetCountry||r.country==='Local';});
+    }
+    var myPos=data.findIndex(function(e){return e.id===S.user.uid;});
+    var html='';
+    data.forEach(function(r,idx){
+      var pos=idx+1;
+      var rk=getRank(r.score);
+      var medal=pos<=3?['🥇','🥈','🥉'][pos-1]:'';
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid '+T.border+';background:'+(r.id===S.user.uid?'rgba(251,191,36,.08)':T.card)+'">';
+      html+='<div style="width:24px;text-align:center;font-size:12px;font-weight:600;color:#fbbf24">'+medal+(medal?'':pos)+'</div>';
+      html+=avCircle(r.nick,r.avatar||avCol(r.nick),r.photo,28,r.country);
+      html+='<div style="flex:1;font-size:11px;color:'+T.text+';font-weight:'+(r.id===S.user.uid?600:400)+'">';
+      html+=r.nick+(r.id===S.user.uid?' ◀':'')+'<br><span style="font-size:9px;opacity:.5;letter-spacing:1px">'+rk.icon+rk.name+'</span></div>';
+      html+='<div style="color:#fbbf24;font-size:12px;font-weight:600;min-width:40px;text-align:right">'+r.score+'</div></div>';
+    });
+    document.getElementById('lb-full-list').innerHTML=html||'<div style="text-align:center;color:'+T.textMuted+';padding:20px">No rankings yet</div>';
+    var myRank=myPos>=0?myPos+1:'—';
+    var scopeText=lbFullScope==='global'?'worldwide':'in '+( lbFullCountry||userCountry);
+    document.getElementById('lb-full-me').innerHTML='<div style="color:#fbbf24;font-size:14px;font-weight:600">You are #'+myRank+' '+scopeText+'</div>';
+  }).catch(function(){});
 }
 function toggleLbMore(){
   lbMoreOpen=!lbMoreOpen;
@@ -2014,4 +2070,24 @@ window.addEventListener('load',function(){
   document.head.appendChild(adScript);
 });
 </script>
-</body></html>
+<!-- LEADERBOARD FULL -->
+<div class="scr" id="scr-leaderboard">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;width:100%">
+    <button class="btn bsm" onclick="showScr('home')">←</button>
+    <div style="font-size:16px;font-weight:300;letter-spacing:4px">🏆 RANKINGS</div>
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:10px;width:100%">
+    <div class="lang-switch" id="lb-full-scope" style="font-size:10px;flex:1">
+      <div class="lang-opt on" id="lbf-global" onclick="setLbFullScope('global',this)">🌍 GLOBAL</div>
+      <div class="lang-opt" id="lbf-local" onclick="setLbFullScope('local',this)">📍 LOCAL</div>
+    </div>
+  </div>
+  <div id="lb-full-country-search" style="display:none;margin-bottom:10px;width:100%">
+    <input type="text" id="lb-country-input" placeholder="Search country..." style="font-size:12px;padding:8px" onkeyup="filterCountries(this.value)">
+    <div id="lb-country-list" style="max-height:120px;overflow-y:auto;margin-top:6px;border:1px solid rgba(128,128,128,.2);border-radius:8px;padding:4px"></div>
+  </div>
+  <div class="scroll" id="lb-full-list" style="max-height:60vh"></div>
+  <div id="lb-full-me" style="margin-top:10px;padding:12px;border-radius:12px;text-align:center;font-size:12px;letter-spacing:2px"></div>
+</div>
+</body>
+</html>
