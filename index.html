@@ -85,7 +85,7 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
       <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       <span id="a-google">Continue with Google</span>
     </button>
-    <button class="social-btn" style="background:#1877F2;color:#fff" onclick="authFB()">
+    <button class="social-btn" style="background:#1877F2;color:#fff;display:none" onclick="authFB()">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
       <span id="a-fb">Continue with Facebook</span>
     </button>
@@ -129,6 +129,7 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
       <div id="mode-normal" onclick="setGameMode('normal')" style="flex:1;padding:10px;text-align:center;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all .2s;opacity:1;font-weight:600" id-label="modeComp">COMPETITIVE</div>
     </div>
     <div id="mode-desc" style="font-size:10px;letter-spacing:1px;opacity:.4;margin-bottom:8px;text-align:center;min-height:14px"></div>
+    <div id="daily-challenge" style="display:none;width:100%;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.15);border-radius:12px;padding:10px 14px;margin-bottom:4px"></div>
     <button class="btn" id="h-play" style="font-size:16px;padding:17px;letter-spacing:6px" onclick="startGame()">PLAY</button>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <button class="btn bsm" id="h-shop" onclick="showScr('shop')">SHOP</button>
@@ -394,51 +395,66 @@ function showCoinPopup(text,wx,wy){
 
 // Share score
 function shareScore(){
-  // Generate a score card image
   var can=document.createElement('canvas');
   can.width=600;can.height=400;
   var c=can.getContext('2d');
-  // Background
-  c.fillStyle='#0a0a14';c.fillRect(0,0,600,400);
-  // Decorative circles
+  // Background gradient
+  var bg=c.createLinearGradient(0,0,600,400);
+  bg.addColorStop(0,'#0a0a14');bg.addColorStop(1,'#1a1030');
+  c.fillStyle=bg;c.fillRect(0,0,600,400);
+  // Decorative orbits
   var cols=['#a78bfa','#6ee7b7','#f9a8d4'];
   for(var i=0;i<3;i++){
-    c.beginPath();c.arc(150+i*150,200,60,0,6.28);
-    c.strokeStyle=cols[i]+'66';c.lineWidth=2;c.stroke();
+    c.beginPath();c.arc(150+i*150,200,60+i*8,0,6.28);
+    c.strokeStyle=cols[i]+'44';c.lineWidth=1.5;c.stroke();
+    // Orbiting dot
+    var da=Date.now()*.001+i*2;
+    c.beginPath();c.arc(150+i*150+Math.cos(da)*(60+i*8),200+Math.sin(da)*(60+i*8),4,0,6.28);
+    c.fillStyle=cols[i];c.fill();
   }
   // ORBIT title
-  c.fillStyle='#ffffff';c.font='100 48px system-ui,sans-serif';c.textAlign='center';
-  c.fillText('ORBIT',300,80);
-  // Score
-  c.fillStyle='#fbbf24';c.font='100 96px system-ui,sans-serif';
-  c.fillText(score,300,230);
-  // Labels
-  c.fillStyle='rgba(255,255,255,.4)';c.font='300 14px system-ui,sans-serif';c.letterSpacing='4px';
-  c.fillText('SCORE',300,270);
-  // Best
-  c.fillStyle='rgba(255,255,255,.6)';c.font='300 18px system-ui,sans-serif';
-  c.fillText('BEST: '+S.best,300,310);
-  // Challenge text
-  c.fillStyle='rgba(255,255,255,.3)';c.font='300 13px system-ui,sans-serif';
-  c.fillText(lang==='es'?'¿Puedes superarme?':'Can you beat me?',300,360);
-  c.fillText('deerrockstudios.github.io/orbit-game',300,385);
+  c.fillStyle='#ffffff';c.font='100 42px system-ui,sans-serif';c.textAlign='center';
+  c.fillText('ORBIT',300,60);
+  // Score big
+  c.fillStyle='#fbbf24';c.font='100 88px system-ui,sans-serif';
+  c.fillText(score,300,200);
+  // Rank badge
+  var rank=getRank(S.best);
+  c.fillStyle='rgba(255,255,255,.5)';c.font='300 16px system-ui,sans-serif';
+  c.fillText(rank.icon+' '+rank.name,300,240);
+  // Challenge messages
+  var challenges=lang==='es'?
+    ['¿Puedes superarme?','Te reto a intentarlo','¿Crees que puedes más?','Supera esto si puedes']:
+    ['Can you beat me?','I dare you to try','Think you can do better?','Beat this if you can'];
+  var challenge=challenges[Math.floor(Math.random()*challenges.length)];
+  c.fillStyle='rgba(255,255,255,.4)';c.font='300 15px system-ui,sans-serif';
+  c.fillText(challenge,300,310);
+  // URL
+  c.fillStyle='rgba(255,255,255,.25)';c.font='300 12px system-ui,sans-serif';
+  c.fillText('deerrockstudios.github.io/orbit-game',300,380);
+  // Combo badge if high
+  if(combo>=5){
+    c.fillStyle='rgba(251,191,36,.15)';
+    c.beginPath();c.roundRect(220,260,160,28,14);c.fill();
+    c.fillStyle='#fbbf24';c.font='600 12px system-ui,sans-serif';
+    c.fillText('🔥 x'+combo+' COMBO',300,280);
+  }
 
   can.toBlob(function(blob){
+    var shareText=lang==='es'
+      ?'🪐 '+score+' puntos en ORBIT! '+challenge+' 🚀\n'
+      :'🪐 '+score+' points in ORBIT! '+challenge+' 🚀\n';
+    shareText+=location.href;
+
     if(navigator.share&&navigator.canShare){
       var file=new File([blob],'orbit-score.png',{type:'image/png'});
-      var shareData={
-        title:'ORBIT',
-        text:(lang==='es'?'¡Hice '+score+' en ORBIT! ¿Puedes superarme? 🚀':'I scored '+score+' in ORBIT! Can you beat me? 🚀')+'\n'+location.href,
-        files:[file]
-      };
+      var shareData={title:'ORBIT — '+score+' pts',text:shareText,files:[file]};
       if(navigator.canShare(shareData)){
         navigator.share(shareData).catch(function(){});
         return;
       }
     }
-    // Fallback: copy text
-    var text=(lang==='es'?'¡Hice '+score+' en ORBIT! ¿Puedes superarme? 🚀':'I scored '+score+' in ORBIT! Can you beat me? 🚀')+'\n'+location.href;
-    navigator.clipboard.writeText(text).then(function(){toast(lang==='es'?'Copiado':'Copied!');}).catch(function(){});
+    navigator.clipboard.writeText(shareText).then(function(){toast(lang==='es'?'Copiado':'Copied!');}).catch(function(){});
   },'image/png');
 }
 
@@ -538,6 +554,69 @@ function checkStreak(){
   // Day 7 bonus trail
 }
 
+// ══════════════════════════════════════════
+// DAILY CHALLENGES
+// ══════════════════════════════════════════
+var CHALLENGES=[
+  {id:'score20',get:function(){return{target:20,type:'score',reward:50};},
+    en:'Score 20 in one game',es:'Logra 20 en una partida'},
+  {id:'score40',get:function(){return{target:40,type:'score',reward:100};},
+    en:'Score 40 in one game',es:'Logra 40 en una partida'},
+  {id:'combo5',get:function(){return{target:5,type:'combo',reward:60};},
+    en:'Get a x5 combo',es:'Logra un combo x5'},
+  {id:'combo10',get:function(){return{target:10,type:'combo',reward:120};},
+    en:'Get a x10 combo',es:'Logra un combo x10'},
+  {id:'games3',get:function(){return{target:3,type:'games',reward:40};},
+    en:'Play 3 games',es:'Juega 3 partidas'},
+  {id:'games5',get:function(){return{target:5,type:'games',reward:70};},
+    en:'Play 5 games',es:'Juega 5 partidas'},
+  {id:'coins30',get:function(){return{target:30,type:'coins',reward:80};},
+    en:'Collect 30 coins in one game',es:'Recoge 30 monedas en una partida'},
+  {id:'score60',get:function(){return{target:60,type:'score',reward:150};},
+    en:'Score 60 in one game',es:'Logra 60 en una partida'}
+];
+
+function getDailyChallenge(){
+  var today=new Date().toISOString().slice(0,10);
+  // Seed from date for consistent daily pick
+  var seed=0;for(var i=0;i<today.length;i++)seed+=today.charCodeAt(i);
+  var idx=seed%CHALLENGES.length;
+  var ch=CHALLENGES[idx];
+  var data=ch.get();
+  return{id:ch.id,text:lang==='es'?ch.es:ch.en,target:data.target,type:data.type,reward:data.reward,date:today};
+}
+
+function checkDailyProgress(type,value){
+  if(currentMode==='easy')return; // No challenges in normal/zen mode
+  if(!S.dailyChallenge)return;
+  var today=new Date().toISOString().slice(0,10);
+  if(S.dailyChallenge.date!==today||S.dailyChallenge.done)return;
+  var ch=S.dailyChallenge;
+  if(ch.type!==type)return;
+  if(type==='games'){
+    ch.progress=(ch.progress||0)+value;
+  }else{
+    ch.progress=Math.max(ch.progress||0,value);
+  }
+  if(ch.progress>=ch.target&&!ch.done){
+    ch.done=true;
+    S.coins+=ch.reward;
+    saveState();
+    setTimeout(function(){
+      toast(lang==='es'?'🏆 Reto diario completado! +'+ch.reward+' ★':'🏆 Daily challenge complete! +'+ch.reward+' ★');
+    },800);
+  }
+  saveState();
+}
+
+function initDailyChallenge(){
+  var today=new Date().toISOString().slice(0,10);
+  if(!S.dailyChallenge||S.dailyChallenge.date!==today){
+    var ch=getDailyChallenge();
+    S.dailyChallenge={id:ch.id,text:ch.text,target:ch.target,type:ch.type,reward:ch.reward,date:today,progress:0,done:false};
+    saveState();
+  }
+}
 // Trail shop label helper
 function trailShopLabel(tr,own,sel){
   if(own)return sel?t('active'):t('owned');
@@ -815,6 +894,7 @@ function initFirebase(){
             S.lastPlayDate=data.lastPlayDate||'';
             S.rank=data.rank||'rookie';
             S.gameMode=data.gameMode||'normal';
+            S.dailyChallenge=data.dailyChallenge||null;
             if(data.photo)S.photo=data.photo;
             else if(user.photoURL)S.photo=user.photoURL;
           }else{
@@ -885,6 +965,7 @@ function saveToCloud(){
     themeMode:S.themeMode||'auto',lang:S.lang||'en',
     country:S.country||userCountry,photo:S.photo||null,
     streak:S.streak||0,lastPlayDate:S.lastPlayDate||'',rank:S.rank||'rookie',gameMode:S.gameMode||'normal',
+    dailyChallenge:S.dailyChallenge||null,
     updatedAt:firebase.firestore.FieldValue.serverTimestamp()
   },{merge:true}).catch(function(e){console.log('save error',e);});
 }
@@ -1015,7 +1096,7 @@ function showScr(name){
   document.getElementById('pause-btn').style.display='none';
   document.getElementById('sc').style.display='none';
   document.getElementById('coins-hud').style.display='none';
-  if(name==='home'){updateHomeUI();startMenuMusic();checkStreak();}
+  if(name==='home'){updateHomeUI();startMenuMusic();checkStreak();initDailyChallenge();}
   if(name==='shop'){document.getElementById('sh-coins').textContent=S.coins;renderShop('trail');}
   if(name==='profile')renderProfile();
   if(name==='home'&&phase==='playing')phase='idle';
@@ -1039,6 +1120,19 @@ function updateHomeUI(){
     else{norm.style.opacity='1';norm.style.fontWeight='600';norm.style.background=T.navOn||'rgba(128,128,128,.15)';easy.style.opacity='.45';easy.style.fontWeight='400';easy.style.background='transparent';}
   }
   if(desc)desc.textContent=m==='easy'?t('modeDescNormal'):t('modeDescComp');
+  // Daily challenge display
+  var dcEl=document.getElementById('daily-challenge');
+  if(dcEl&&S.dailyChallenge){
+    var dc=S.dailyChallenge;
+    var today=new Date().toISOString().slice(0,10);
+    if(dc.date===today&&!dc.done){
+      dcEl.style.display='block';
+      dcEl.innerHTML='<div style="font-size:10px;letter-spacing:3px;opacity:.35;margin-bottom:4px">'+(lang==='es'?'RETO DIARIO':'DAILY CHALLENGE')+'</div><div style="font-size:12px;color:'+T.text+'">'+dc.text+'</div><div style="display:flex;align-items:center;gap:6px;margin-top:4px"><div style="flex:1;height:3px;border-radius:2px;background:'+T.border+'"><div style="height:100%;border-radius:2px;background:#fbbf24;width:'+Math.min(100,((dc.progress||0)/dc.target)*100)+'%"></div></div><div style="font-size:10px;color:#fbbf24">+'+ dc.reward+' ★</div></div>';
+    }else if(dc.done){
+      dcEl.style.display='block';
+      dcEl.innerHTML='<div style="font-size:10px;letter-spacing:3px;opacity:.35;margin-bottom:4px">'+(lang==='es'?'RETO DIARIO':'DAILY CHALLENGE')+'</div><div style="font-size:12px;color:#6ee7b7">✓ '+(lang==='es'?'Completado':'Complete')+'</div>';
+    }else{dcEl.style.display='none';}
+  }
 }
 function setLang(l){
   lang=l;S.lang=l;saveState();
@@ -1521,6 +1615,11 @@ function die(){
   saveState();
   if(currentMode!=='easy')saveLbEntry();
   deathCount++;
+  // Track daily challenge progress
+  checkDailyProgress('score',score);
+  checkDailyProgress('combo',combo);
+  checkDailyProgress('games',1);
+  checkDailyProgress('coins',sesCoins);
   // Ask for notification permission after 3rd game
   if(deathCount===3&&!S.user.isGuest&&'Notification' in window&&Notification.permission==='default'){
     setTimeout(function(){requestNotifPermission();},2000);
