@@ -844,6 +844,35 @@ function initFirebase(){
     toast('Firebase error: '+e.message);
   }
 }
+// ══════════════════════════════════════════
+// PUSH NOTIFICATIONS (FCM)
+// ══════════════════════════════════════════
+var fcmMessaging=null;
+function initFCM(){
+  try{
+    if(!firebase.messaging||!firebase.messaging.isSupported||!firebase.messaging.isSupported())return;
+    fcmMessaging=firebase.messaging();
+    // Listen for foreground messages
+    fcmMessaging.onMessage(function(payload){
+      var data=payload.notification||payload.data||{};
+      toast(data.body||'🚀');
+    });
+  }catch(e){console.log('FCM init skip:',e);}
+}
+
+function requestNotifPermission(){
+  if(!fcmMessaging||!S.user||!S.user.uid||S.user.isGuest)return;
+  Notification.requestPermission().then(function(perm){
+    if(perm==='granted'){
+      fcmMessaging.getToken({vapidKey:'BI4Ya4XD2j_BMIasIFBDdbB0JgEvy5pg37HabetzarIAqWW4yvAA2w7BDH7ohyiKTk8j3I3ZgCWQpw77eL8fhQQ'}).then(function(token){
+        if(token&&db){
+          db.collection('users').doc(S.user.uid).set({fcmToken:token},{merge:true});
+          toast(lang==='es'?'🔔 Notificaciones activadas':'🔔 Notifications enabled');
+        }
+      }).catch(function(e){console.log('FCM token error:',e);});
+    }
+  });
+}
 
 function saveToCloud(){
   if(!db||!S.user||!S.user.uid)return;
@@ -1492,6 +1521,10 @@ function die(){
   saveState();
   if(currentMode!=='easy')saveLbEntry();
   deathCount++;
+  // Ask for notification permission after 3rd game
+  if(deathCount===3&&!S.user.isGuest&&'Notification' in window&&Notification.permission==='default'){
+    setTimeout(function(){requestNotifPermission();},2000);
+  }
   document.getElementById('sc').style.display='none';document.getElementById('coins-hud').style.display='none';
   document.getElementById('co').style.opacity='0';document.getElementById('pause-btn').style.display='none';
   showMagnetBtn(false);
@@ -1860,7 +1893,12 @@ window.addEventListener('load',function(){
     s2.onload=function(){
       var s3=document.createElement('script');
       s3.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js';
-      s3.onload=function(){initFirebase();};
+      s3.onload=function(){
+        var s4=document.createElement('script');
+        s4.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js';
+        s4.onload=function(){initFirebase();initFCM();};
+        document.head.appendChild(s4);
+      };
       document.head.appendChild(s3);
     };
     document.head.appendChild(s2);
