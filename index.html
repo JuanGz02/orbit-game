@@ -1754,6 +1754,116 @@ window.addEventListener('resize',rsz);rsz();
 var phase='idle',score,combo,sesCoins,revived;
 var currentMode='normal';
 var lastCheckpoint=0;
+
+// ── COSMIC REFLECTIONS ────────────────────────
+// Public domain wisdom (authors 70+ years deceased)
+var ZEN_QUOTES=[
+  {t:'You have power over your mind,\nnot outside events.',a:'Marcus Aurelius'},
+  {t:'The obstacle is the way.',a:'Marcus Aurelius'},
+  {t:'Very little is needed to make a happy life.',a:'Marcus Aurelius'},
+  {t:'Knowing others is wisdom.\nKnowing yourself is enlightenment.',a:'Lao Tzu'},
+  {t:'A journey of a thousand miles\nbegins with a single step.',a:'Lao Tzu'},
+  {t:'Nature does not hurry,\nyet everything is accomplished.',a:'Lao Tzu'},
+  {t:'Out beyond ideas of wrongdoing and rightdoing\nthere is a field. I\'ll meet you there.',a:'Rumi'},
+  {t:'You are not a drop in the ocean.\nYou are the entire ocean in a drop.',a:'Rumi'},
+  {t:'Wherever you are,\nbe all there.',a:'Rumi'},
+  {t:'It is not that I\'m so smart.\nIt\'s that I stay with problems longer.',a:'Albert Einstein'},
+  {t:'Luck is what happens when\npreparation meets opportunity.',a:'Seneca'},
+  {t:'We suffer more in imagination than in reality.',a:'Seneca'},
+  {t:'Begin at once to live,\nand count each day as a separate life.',a:'Seneca'},
+  {t:'No man ever steps in the same river twice,\nfor it\'s not the same river.',a:'Heraclitus'},
+  {t:'The only constant in life is change.',a:'Heraclitus'},
+  {t:'It does not matter how slowly you go,\nas long as you do not stop.',a:'Confucius'},
+  {t:'Life is really simple,\nbut we insist on making it complicated.',a:'Confucius'},
+  {t:'To be yourself in a world that is constantly\ntrying to make you something else is the\ngreatest accomplishment.',a:'R.W. Emerson'},
+  {t:'Not all those who wander are lost.',a:'J.R.R. Tolkien'},
+  {t:'Go confidently in the direction of your dreams.\nLive the life you have imagined.',a:'H.D. Thoreau'},
+  {t:'The mind is everything.\nWhat you think, you become.',a:'Buddhist proverb'},
+  {t:'In the middle of every difficulty\nlies opportunity.',a:'Albert Einstein'},
+  {t:'Simplicity is the ultimate sophistication.',a:'Leonardo da Vinci'},
+  {t:'Make each day your masterpiece.',a:'John Wooden'},
+  {t:'The present moment always will have been.',a:'Stoic proverb'},
+  {t:'Be like water — flow around obstacles,\nfill every space, nourish all things.',a:'Lao Tzu'},
+  {t:'What you seek is seeking you.',a:'Rumi'},
+  {t:'The quieter you become,\nthe more you are able to hear.',a:'Rumi'},
+  {t:'Waste no more time arguing what a good man should be.\nBe one.',a:'Marcus Aurelius'},
+  {t:'In three words I can sum up everything\nI\'ve learned about life: it goes on.',a:'Robert Frost'},
+  {t:'Everything you can imagine is real.',a:'Pablo Picasso'},
+  {t:'The journey itself is the reward.',a:'Zen proverb'},
+  {t:'Stars can\'t shine without darkness.',a:'Anonymous'}
+];
+var zenQuote={text:'',author:'',alpha:0,phase:'idle',timer:0,used:[]};
+function triggerZenQuote(){
+  var pool=ZEN_QUOTES.filter(function(_,i){return zenQuote.used.indexOf(i)<0;});
+  if(pool.length===0){zenQuote.used=[];pool=ZEN_QUOTES.slice();}
+  var pick=pool[Math.floor(Math.random()*pool.length)];
+  var idx=ZEN_QUOTES.indexOf(pick);
+  zenQuote.used.push(idx);
+  zenQuote.text=pick.t;zenQuote.author='— '+pick.a;
+  zenQuote.alpha=0;zenQuote.phase='in';zenQuote.timer=0;
+}
+function drawZenQuote(){
+  if(zenQuote.phase==='idle'||currentMode!=='easy')return;
+  var fadeDur=90,holdDur=200; // frames
+  zenQuote.timer++;
+  if(zenQuote.phase==='in'){
+    zenQuote.alpha=Math.min(1,zenQuote.timer/fadeDur);
+    if(zenQuote.timer>=fadeDur){zenQuote.phase='hold';zenQuote.timer=0;}
+  }else if(zenQuote.phase==='hold'){
+    zenQuote.alpha=1;
+    if(zenQuote.timer>=holdDur){zenQuote.phase='out';zenQuote.timer=0;}
+  }else if(zenQuote.phase==='out'){
+    zenQuote.alpha=Math.max(0,1-zenQuote.timer/fadeDur);
+    if(zenQuote.timer>=fadeDur){zenQuote.phase='idle';zenQuote.alpha=0;return;}
+  }
+  var lines=zenQuote.text.split('\n');
+  var cx=W/2,cy=H*.42;
+  var textCol=isNight?'#e0d7ff':'#1a1a2e';
+  var glowCol=isNight?'rgba(139,92,246,0.6)':'rgba(100,80,200,0.3)';
+  ctx.save();
+  ctx.globalAlpha=zenQuote.alpha*.9;
+  // Soft backdrop pill
+  var maxW=Math.min(W*.82,340);
+  var lineH=22,totalH=lines.length*lineH+44;
+  var pillX=cx-maxW/2,pillY=cy-22;
+  ctx.beginPath();
+  var r=16;
+  ctx.moveTo(pillX+r,pillY);ctx.lineTo(pillX+maxW-r,pillY);
+  ctx.quadraticCurveTo(pillX+maxW,pillY,pillX+maxW,pillY+r);
+  ctx.lineTo(pillX+maxW,pillY+totalH-r);
+  ctx.quadraticCurveTo(pillX+maxW,pillY+totalH,pillX+maxW-r,pillY+totalH);
+  ctx.lineTo(pillX+r,pillY+totalH);
+  ctx.quadraticCurveTo(pillX,pillY+totalH,pillX,pillY+totalH-r);
+  ctx.lineTo(pillX,pillY+r);
+  ctx.quadraticCurveTo(pillX,pillY,pillX+r,pillY);
+  ctx.closePath();
+  ctx.fillStyle=isNight?'rgba(10,8,22,0.72)':'rgba(255,255,255,0.75)';
+  ctx.fill();
+  ctx.strokeStyle=isNight?'rgba(139,92,246,0.25)':'rgba(100,80,200,0.2)';
+  ctx.lineWidth=1;ctx.stroke();
+  // Label "✦ cosmic reflections"
+  ctx.globalAlpha=zenQuote.alpha*.5;
+  ctx.font='500 9px "Space Grotesk", sans-serif';
+  ctx.fillStyle=isNight?'#a78bfa':'#7c3aed';
+  ctx.textAlign='center';ctx.letterSpacing='3px';
+  ctx.fillText('✦  COSMIC REFLECTIONS  ✦',cx,cy-4);
+  // Quote lines
+  ctx.globalAlpha=zenQuote.alpha;
+  ctx.shadowColor=glowCol;ctx.shadowBlur=isNight?8:4;
+  ctx.textAlign='center';
+  for(var li=0;li<lines.length;li++){
+    ctx.font='300 '+(lines.length>1?'14':'15')+'px "Space Grotesk", sans-serif';
+    ctx.fillStyle=textCol;
+    ctx.fillText(lines[li],cx,cy+14+li*lineH);
+  }
+  // Author
+  ctx.shadowBlur=0;
+  ctx.globalAlpha=zenQuote.alpha*.65;
+  ctx.font='italic 500 11px "Space Grotesk", sans-serif';
+  ctx.fillStyle=isNight?'#a78bfa':'#7c3aed';
+  ctx.fillText(zenQuote.author,cx,cy+14+lines.length*lineH+14);
+  ctx.restore();
+}
 var sesCoinsFrac=0;
 var revivedThisRun=false;
 var reviveTimer=0;
@@ -1892,6 +2002,7 @@ function init(){
   lastMilestone=0;GAME_PAL=['#a78bfa','#6ee7b7','#f9a8d4'];
   tutStep=0;tutFrozen=false;slowMoTimer=0;slowMoFactor=1;hideTut();
   lastCheckpoint=0;
+  zenQuote.phase='idle';zenQuote.alpha=0;
   if(reviveInterval){clearInterval(reviveInterval);reviveInterval=null;}
   var pal=getPal();
   var c0={wx:0,wy:0,r:88,col:pal[0],spd:.025,ang:0,alpha:1,shockwave:null};
@@ -2137,6 +2248,7 @@ function update(dt){
           if(currentMode==='easy'&&score%10===0&&score!==lastCheckpoint){
             lastCheckpoint=score;
             showMilestonePop('CHECKPOINT '+score,score);
+            setTimeout(triggerZenQuote,1200); // quote appears after checkpoint flash
           }
           while(circles.length>3){circles.shift();if(orb.on>0)orb.on--;if(orb.lastLaunched>0)orb.lastLaunched--;i=Math.max(0,i-1);}
           addNext();
@@ -2377,6 +2489,8 @@ function draw(){
   }
   ctx.beginPath();ctx.arc(os2.x,os2.y,or2,0,6.28);ctx.fillStyle=T.orbCol;ctx.fill();
   var pal2=getPal();ctx.beginPath();ctx.arc(os2.x,os2.y,or2*.5,0,6.28);ctx.fillStyle=pal2[score%pal2.length];ctx.fill();
+  // Cosmic Reflections — drawn last so it's always on top
+  drawZenQuote();
 }
 function loop(ts){var dt=Math.min((ts-lastT)/16.67,3);lastT=ts;draw();update(dt);requestAnimationFrame(loop);}
 
