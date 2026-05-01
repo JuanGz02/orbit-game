@@ -1,0 +1,17 @@
+{
+  "appId": "com.deerrock.orbit",
+  "appName": "ORBIT",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#0a0a14"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "backgroundColor": "#0a0a14",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    }
+  }
+}

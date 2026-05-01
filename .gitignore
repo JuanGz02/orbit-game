@@ -67,3 +67,11 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# Capacitor / Android build artifacts
+www/
+android/.gradle/
+android/build/
+android/app/build/
+*.keystore
+!debug.keystore
