@@ -1719,9 +1719,11 @@ function applySpinPrize(prize,isExtra){
   ab.disabled=S.lastSpinExtra===today;ab.style.opacity=S.lastSpinExtra===today?'.35':'.7';
   spinLocked=false;
 }
-// Auto-popup: mostrar spin al abrir home si no se ha girado hoy
+// Auto-popup: solo una vez por sesión, aunque vuelvan al home varias veces
+var spinPopupShown=false;
 function checkAutoSpin(){
-  if(S.user&&!S.user.isGuest&&S.lastSpinDate!==getTodayKey()){
+  if(!spinPopupShown&&S.user&&!S.user.isGuest&&S.lastSpinDate!==getTodayKey()){
+    spinPopupShown=true;
     setTimeout(openSpin,1200);
   }
 }
