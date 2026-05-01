@@ -215,7 +215,7 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     <div class="nt on" id="sh-t1" onclick="switchShop('trail',this)">TRAILS</div>
     <div class="nt" id="sh-t2" onclick="switchShop('bundles',this)" id-label="shBundles">BUNDLES</div>
     <div class="nt" id="sh-t3" onclick="switchShop('packs',this)">PACKS</div>
-    <div class="nt" id="sh-t4" onclick="openSpin()">🎰</div>
+    <div class="nt" id="sh-t4" onclick="openSpin()">⭐</div>
   </div>
   <div class="scroll" id="sh-content"></div>
 </div>
@@ -294,7 +294,7 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
       <canvas id="spin-canvas" width="260" height="260"></canvas>
     </div>
     <div id="spin-result" style="font-size:14px;letter-spacing:2px;font-weight:700;min-height:22px;margin-bottom:14px;color:#fbbf24"></div>
-    <button id="spin-btn-free" class="btn" style="width:100%;margin-bottom:8px;animation:spinBtnPulse 2s infinite" onclick="doSpin(false)">🎰 FREE SPIN</button>
+    <button id="spin-btn-free" class="btn" style="width:100%;margin-bottom:8px;animation:spinBtnPulse 2s infinite" onclick="doSpin(false)">⭐ FREE SPIN</button>
     <button id="spin-btn-ad" class="btn bsm" style="width:100%;opacity:.65" onclick="doSpin(true)">📺 WATCH AD + SPIN</button>
   </div>
 </div>
@@ -333,7 +333,7 @@ var I18N={
     rankUp:'Rank: ',spinTitle:'DAILY SPIN',spinFree:'FREE SPIN',spinWatch:'WATCH AD + SPIN',spinDone:'Come back tomorrow!',
     bundleTitle:'BUNDLES',seasonPass:'Season Pass',seasonDesc:'2× coins · Exclusive trail · Weekly',
     rankBoost:'Rank Boost',rankBoostDesc:'Jump to next rank instantly',
-    giftCoins:'🎁 GIFT',shBundles:'BUNDLES',shSpin:'🎰 SPIN',
+    giftCoins:'🎁 GIFT',shBundles:'BUNDLES',shSpin:'⭐ SPIN',
     trailUnlocked:'🎁 Trail unlocked!',dayStreak:'day streak!',},
   es:{tag:'toca · mantén para potencia',google:'Continuar con Google',fb:'Continuar con Facebook',or:'o',
     reg:'CREAR CUENTA',login:'INICIAR SESIÓN',guest:'Jugar como invitado',hint:'toca · mantén para potencia',
@@ -357,7 +357,7 @@ var I18N={
     rankUp:'Rango: ',spinTitle:'GIRO DIARIO',spinFree:'GIRO GRATIS',spinWatch:'VER ANUNCIO + GIRAR',spinDone:'¡Vuelve mañana!',
     bundleTitle:'PAQUETES',seasonPass:'Pase de Temporada',seasonDesc:'2× monedas · Rastro exclusivo · Semanal',
     rankBoost:'Boost de Rango',rankBoostDesc:'Sube de rango al instante',
-    giftCoins:'🎁 REGALO',shBundles:'PAQUETES',shSpin:'🎰 GIRAR',
+    giftCoins:'🎁 REGALO',shBundles:'PAQUETES',shSpin:'⭐ GIRAR',
     trailUnlocked:'🎁 ¡Rastro desbloqueado!',dayStreak:'día(s) de racha!',}
 };
 var lang='en';
@@ -1035,14 +1035,17 @@ function requestNotifPermission(){
   });
 }
 function toggleNotifications(){
-  if(!('Notification' in window)){toast('Not supported');return;}
+  if(!('Notification' in window)){toast(lang==='es'?'No soportado en este navegador':'Not supported in this browser');return;}
+  if(S.user&&S.user.isGuest){toast(lang==='es'?'Crea una cuenta para notificaciones':'Create an account for notifications');return;}
+  if(!fcmMessaging){initFCM();}
   if(Notification.permission==='granted'){
-    // desactivar — borrar token
     if(db&&S.user&&S.user.uid){
       db.collection('users').doc(S.user.uid).set({fcmToken:null},{merge:true});
       toast('🔕 '+(lang==='es'?'Notificaciones desactivadas':'Notifications disabled'));
       updateNotifBtn();
     }
+  }else if(Notification.permission==='denied'){
+    toast(lang==='es'?'Actívalas en Ajustes del navegador':'Enable in browser Settings → Notifications');
   }else{
     requestNotifPermission();
   }
@@ -1327,11 +1330,11 @@ var STRIPE_LINKS={
   noads: 'https://buy.stripe.com/aFa3cxfDmbDofmJ8s68EM00',
   c3000: 'https://buy.stripe.com/4gM00l2QAgXIfmJfUy8EM01',
   c10000:'https://buy.stripe.com/7sY4gBfDm36S4I56jY8EM02',
-  season:'REPLACE_SEASON',
-  rankboost:'REPLACE_RANKBOOST',
-  'space-bundle':'REPLACE_SPACE_BUNDLE',
-  'neon-bundle':'REPLACE_NEON_BUNDLE',
-  'nature-bundle':'REPLACE_NATURE_BUNDLE'
+  season:'https://buy.stripe.com/eVqdRbaj222O8Yl5fU8EM04',
+  rankboost:'https://buy.stripe.com/aFa4gB1Mwazk5M9dMq8EM05',
+  'space-bundle':'https://buy.stripe.com/9B6bJ34YI4aWa2pfUy8EM06',
+  'neon-bundle':'https://buy.stripe.com/7sY7sN62MazkgqNcIm8EM07',
+  'nature-bundle':'https://buy.stripe.com/5kQ5kF3UE36S0rP9wa8EM03'
 };
 function buyPack(id){
   var link=STRIPE_LINKS[id];
@@ -1507,11 +1510,10 @@ function renderLbData(all){
 // ══════════════════════════════════════════
 // Premios equilibrados — menos generosos, más emocionantes
 var SPIN_PRIZES=[
-  {label:'25 ★', coins:25,  col:'#6366f1', weight:35},
+  {label:'25 ★', coins:25,  col:'#6366f1', weight:40},
   {label:'75 ★', coins:75,  col:'#8b5cf6', weight:25},
   {label:'150 ★',coins:150, col:'#a855f7', weight:18},
   {label:'300 ★',coins:300, col:'#ec4899', weight:12},
-  {label:'Trail',coins:0,   col:'#10b981', trail:true, weight:5},
   {label:'500 ★',coins:500, col:'#fbbf24', weight:4},
   {label:'2× Next',coins:0, col:'#f97316', multiplier:true, weight:1}
 ];
@@ -1540,7 +1542,7 @@ function drawSpinWheel(angle){
   ctx.fillStyle='#0a0a14';ctx.fill();
   ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=2;ctx.stroke();
   ctx.fillStyle='#fbbf24';ctx.font='bold 13px Space Grotesk,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('🎰',cx,cy);
+  ctx.fillText('⭐',cx,cy);
 }
 function getSpinPrizeAtAngle(angle){
   var n=SPIN_PRIZES.length,arc=(2*Math.PI)/n;
@@ -1557,7 +1559,7 @@ function openSpin(){
   document.getElementById('spin-title').textContent=t('spinTitle');
   document.getElementById('spin-result').textContent='';
   var fb=document.getElementById('spin-btn-free'),ab=document.getElementById('spin-btn-ad');
-  fb.textContent='🎰 '+(spun?t('spinDone'):t('spinFree'));
+  fb.textContent='⭐ '+(spun?t('spinDone'):t('spinFree'));
   fb.disabled=spun;fb.style.opacity=spun?'.35':'1';
   fb.style.animation=spun?'none':'spinBtnPulse 2s infinite';
   fb.style.background=spun?'':(isNight?'rgba(255,255,255,.12)':'rgba(20,20,40,.08)');
@@ -1627,7 +1629,7 @@ function applySpinPrize(prize,isExtra){
   if(isExtra){S.lastSpinExtra=today;}else{S.lastSpinDate=today;}
   saveState();
   var fb=document.getElementById('spin-btn-free'),ab=document.getElementById('spin-btn-ad');
-  fb.textContent='🎰 '+(S.lastSpinDate===today?t('spinDone'):t('spinFree'));
+  fb.textContent='⭐ '+(S.lastSpinDate===today?t('spinDone'):t('spinFree'));
   fb.disabled=S.lastSpinDate===today;fb.style.opacity=S.lastSpinDate===today?'.35':'1';
   ab.textContent='📺 '+(S.lastSpinExtra===today?t('spinDone'):t('spinWatch'));
   ab.disabled=S.lastSpinExtra===today;ab.style.opacity=S.lastSpinExtra===today?'.35':'.7';
