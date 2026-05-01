@@ -254,12 +254,10 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     <div id="pr-hist-lbl" style="font-size:10px;letter-spacing:3px;opacity:.35;margin-bottom:6px">RECENT</div>
     <div class="scroll" id="pr-hist" style="max-height:28vh"></div>
   </div>
-  <div style="display:flex;gap:10px;margin-top:14px;width:100%">
-    <button id="pr-notif" onclick="toggleNotifications()" title="Notifications" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 14px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-bottom:8px;width:100%;transition:opacity .2s,border .2s"><svg id="pr-notif-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="12" y1="2" x2="12" y2="3" stroke-width="2"/></svg></button>
-    <div style="display:flex;gap:10px;width:100%">
-      <button class="btn bsm" id="pr-reset" onclick="resetScore()" style="flex:1;color:#fca5a5;border:1px solid rgba(239,68,68,.28);background:rgba(239,68,68,.08)">RESET SCORE</button>
-      <button class="btn bsm" id="pr-logout" onclick="doLogout()" style="flex:1">SIGN OUT</button>
-    </div>
+  <div style="display:flex;gap:8px;margin-top:14px;width:100%;align-items:stretch">
+    <button id="pr-notif" onclick="toggleNotifications()" title="Notifications" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:0;width:38px;min-width:38px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .2s,border .2s,background .2s;flex-shrink:0"><svg id="pr-notif-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+    <button class="btn bsm" id="pr-reset" onclick="resetScore()" style="flex:1;color:#fca5a5;border:1px solid rgba(239,68,68,.28);background:rgba(239,68,68,.08)">RESET</button>
+    <button class="btn bsm" id="pr-logout" onclick="doLogout()" style="flex:1">SIGN OUT</button>
   </div>
 </div>
 <!-- LEADERBOARD FULL -->
@@ -1074,12 +1072,19 @@ var fcmMessaging=null;
 function initFCM(){
   try{
     if(!firebase.messaging||!firebase.messaging.isSupported||!firebase.messaging.isSupported())return;
-    fcmMessaging=firebase.messaging();
-    // Listen for foreground messages
-    fcmMessaging.onMessage(function(payload){
-      var data=payload.notification||payload.data||{};
-      toast(data.body||'🚀');
-    });
+    if(!('serviceWorker' in navigator))return;
+    // Register SW at THIS page's path — fixes GitHub Pages /orbit-game/ subdirectory 404
+    var swPath=location.pathname.replace(/\/[^/]*$/,'/')+' firebase-messaging-sw.js';
+    swPath=swPath.replace('/ ',''); // strip accidental space (minifier artifact)
+    // Use relative URL to be safe on any deploy path
+    navigator.serviceWorker.register('./firebase-messaging-sw.js').then(function(reg){
+      fcmMessaging=firebase.messaging();
+      fcmMessaging.useServiceWorker(reg);
+      fcmMessaging.onMessage(function(payload){
+        var data=payload.notification||payload.data||{};
+        toast((data.title?data.title+' — ':'')+data.body||'🚀');
+      });
+    }).catch(function(e){console.log('FCM SW register error:',e);});
   }catch(e){console.log('FCM init skip:',e);}
 }
 
@@ -1999,7 +2004,10 @@ function showMagnetBtn(show){
 
 function init(){
   score=0;combo=0;sesCoins=0;sesCoinsFrac=0;revived=false;revivedThisRun=false;parts=[];coins_arr=[];
-  lastMilestone=0;GAME_PAL=['#a78bfa','#6ee7b7','#f9a8d4'];
+  lastMilestone=0;
+  // Apply bg-theme palette for this game
+  var _th=currentMode==='easy'?ZEN_BG[zenBgIdx]:COMP_BG[compBgIdx];
+  GAME_PAL=(_th&&_th.pal)?_th.pal.slice():['#a78bfa','#6ee7b7','#f9a8d4'];
   tutStep=0;tutFrozen=false;slowMoTimer=0;slowMoFactor=1;hideTut();
   lastCheckpoint=0;
   zenQuote.phase='idle';zenQuote.alpha=0;
@@ -2046,11 +2054,10 @@ function setGameMode(m){
 function startGame(){
   SCRS.forEach(function(s){document.getElementById('scr-'+s).classList.remove('on');});
   currentMode=S.gameMode||'normal';
-  // Pick a fresh random background theme each game
+  // Pick a fresh random background + palette each game
   zenBgIdx=Math.floor(Math.random()*ZEN_BG.length);
   compBgIdx=Math.floor(Math.random()*COMP_BG.length);
-  bgInit=false; // re-init stars with new theme colors
-  shootStars=[];
+  bgInit=false;shootStars=[];
   phase='playing';init();startTutorial();
 }
 function togglePause(){
@@ -2378,27 +2385,30 @@ function drawHome(){
 // GALAXY BACKGROUNDS — themed, per-game-random
 // ══════════════════════════════════════════
 var ZEN_BG=[
-  // 0 — Warm Cosmos (peach · amber · coral) — like the game screenshot
+  // 0 — Warm Cosmos (peach · amber · coral)
   {c1:'#f0d8c0',c2:'#c4966a',
    neb:[{x:.28,y:.38,c:'rgba(230,120,60,.13)',r:.6},{x:.72,y:.52,c:'rgba(210,80,60,.09)',r:.65},
         {x:.5,y:.18,c:'rgba(255,190,100,.12)',r:.5},{x:.18,y:.72,c:'rgba(200,90,70,.08)',r:.55},
         {x:.85,y:.28,c:'rgba(255,160,80,.10)',r:.45},{x:.55,y:.85,c:'rgba(230,140,90,.07)',r:.5}],
    au:['rgba(255,140,60,.07)','rgba(220,100,60,.05)'],
-   sc:['#fff8ee','#ffd9a0','#ffb060','#ffe0b0']},
+   sc:['#fff8ee','#ffd9a0','#ffb060','#ffe0b0'],
+   pal:['#6d28d9','#0e7490','#b45309']},   // deep violet, dark teal, amber
   // 1 — Magenta Rift (rose · violet · fuchsia)
   {c1:'#eecce0',c2:'#b87aa8',
    neb:[{x:.32,y:.42,c:'rgba(200,60,160,.11)',r:.58},{x:.68,y:.55,c:'rgba(150,40,200,.08)',r:.65},
         {x:.5,y:.16,c:'rgba(240,80,180,.10)',r:.5},{x:.16,y:.68,c:'rgba(170,40,140,.07)',r:.55},
         {x:.82,y:.32,c:'rgba(220,100,200,.09)',r:.45},{x:.44,y:.82,c:'rgba(200,60,160,.07)',r:.5}],
    au:['rgba(210,60,180,.07)','rgba(160,40,210,.05)'],
-   sc:['#fde8f8','#f0b0e0','#d060b0','#ffc8ee']},
+   sc:['#fde8f8','#f0b0e0','#d060b0','#ffc8ee'],
+   pal:['#1d4ed8','#15803d','#a16207']},   // royal blue, forest green, golden
   // 2 — Emerald Void (jade · teal · sage)
   {c1:'#c4e0d4',c2:'#7aaa98',
    neb:[{x:.38,y:.32,c:'rgba(30,150,110,.10)',r:.58},{x:.62,y:.62,c:'rgba(20,130,100,.08)',r:.65},
         {x:.24,y:.5,c:'rgba(50,170,130,.09)',r:.5},{x:.76,y:.28,c:'rgba(25,120,90,.06)',r:.55},
         {x:.5,y:.8,c:'rgba(70,190,150,.08)',r:.45},{x:.88,y:.7,c:'rgba(40,160,120,.07)',r:.5}],
    au:['rgba(30,160,120,.07)','rgba(20,120,100,.05)'],
-   sc:['#e4f8f0','#a8e8d0','#60c8a8','#c0f0e4']}
+   sc:['#e4f8f0','#a8e8d0','#60c8a8','#c0f0e4'],
+   pal:['#7c3aed','#be185d','#c2410c']}    // purple, rose, burnt orange
 ];
 var COMP_BG=[
   // 0 — Abyss (deep purple · indigo)
@@ -2407,21 +2417,24 @@ var COMP_BG=[
         {x:.5,y:.15,c:'rgba(150,90,240,.07)',r:.55},{x:.2,y:.7,c:'rgba(90,55,180,.05)',r:.6},
         {x:.8,y:.8,c:'rgba(130,75,220,.06)',r:.5}],
    au:['rgba(90,55,200,.06)','rgba(70,35,155,.04)'],
-   sc:['#ffffff','#c8b8ff','#9080f0','#e4deff']},
+   sc:['#ffffff','#c8b8ff','#9080f0','#e4deff'],
+   pal:['#a78bfa','#6ee7b7','#f9a8d4']},
   // 1 — Crimson Star (blood red · deep orange)
   {c1:'#0e0508',c2:'#060103',
    neb:[{x:.35,y:.45,c:'rgba(210,35,35,.08)',r:.65},{x:.65,y:.5,c:'rgba(170,60,15,.06)',r:.75},
         {x:.5,y:.2,c:'rgba(230,80,30,.07)',r:.55},{x:.25,y:.65,c:'rgba(190,25,25,.05)',r:.6},
         {x:.8,y:.75,c:'rgba(210,100,15,.06)',r:.5}],
    au:['rgba(200,35,35,.06)','rgba(160,60,15,.04)'],
-   sc:['#ffffff','#ffc090','#ff7730','#ffeedd']},
+   sc:['#ffffff','#ffc090','#ff7730','#ffeedd'],
+   pal:['#f9a8d4','#fcd34d','#93c5fd']},
   // 2 — Cyber Teal (electric teal · cyan)
   {c1:'#030c0f',c2:'#010507',
    neb:[{x:.3,y:.4,c:'rgba(0,180,210,.07)',r:.65},{x:.7,y:.6,c:'rgba(0,120,200,.05)',r:.75},
         {x:.5,y:.18,c:'rgba(30,200,230,.07)',r:.55},{x:.2,y:.72,c:'rgba(0,160,185,.05)',r:.6},
         {x:.82,y:.78,c:'rgba(0,180,160,.06)',r:.5}],
    au:['rgba(0,180,210,.06)','rgba(0,115,185,.04)'],
-   sc:['#ffffff','#80ffff','#30c0e0','#b8f4ff']}
+   sc:['#ffffff','#80ffff','#30c0e0','#b8f4ff'],
+   pal:['#fbbf24','#f0abfc','#a5f3fc']}
 ];
 var zenBgIdx=0,compBgIdx=0;
 var bgStars=[],bgInit=false;
@@ -2444,13 +2457,13 @@ function initBgStars(){
   bgInit=true;
 }
 function spawnShoot(zen){
-  var a=(Math.random()*.5+.15)*Math.PI; // diagonal right-downward
+  var a=(Math.random()*.5+.15)*Math.PI;
   var spd=5+Math.random()*6;
   shootStars.push({
     x:Math.random()*W*1.2-W*.1, y:Math.random()*H*.45,
     vx:Math.cos(a)*spd, vy:Math.sin(a)*spd,
-    len:40+Math.random()*90, life:1, maxL:1,
-    col:zen?'rgba(255,245,220,.85)':'rgba(220,210,255,.90)'
+    len:40+Math.random()*90, life:1,
+    rgb:zen?'255,245,210':'210,200,255'  // store rgb only, build rgba at draw time
   });
 }
 function drawGalaxyBg(){
@@ -2535,9 +2548,10 @@ function drawGalaxyBg(){
       var ex=ss.x-ss.vx*(tail/Math.hypot(ss.vx,ss.vy));
       var ey=ss.y-ss.vy*(tail/Math.hypot(ss.vx,ss.vy));
       var ssg=ctx.createLinearGradient(ex,ey,ss.x,ss.y);
+      var a1=(ss.life*.38).toFixed(2), a2=Math.min(ss.life*.85,.85).toFixed(2);
       ssg.addColorStop(0,'transparent');
-      ssg.addColorStop(.6,ss.col.replace('.90','.'+(ss.life*.35).toFixed(2)).replace('.85','.'+(ss.life*.3).toFixed(2)));
-      ssg.addColorStop(1,ss.col);
+      ssg.addColorStop(.55,'rgba('+ss.rgb+','+a1+')');
+      ssg.addColorStop(1,'rgba('+ss.rgb+','+a2+')');
       ctx.globalAlpha=Math.min(ss.life,1)*.8;
       ctx.strokeStyle=ssg;ctx.lineWidth=1.4;
       ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(ss.x,ss.y);ctx.stroke();
@@ -2566,9 +2580,16 @@ function draw(){
     if(i===hitIdx&&hitT>0){var kick=Math.sin(hitT*Math.PI)*hitAmt*zoom;hox=Math.cos(ci.ang+Math.PI/2)*kick;hoy=Math.sin(ci.ang+Math.PI/2)*kick;}
     var s=toS(ci.wx,ci.wy),r=sR(ci.r);
     ctx.save();ctx.globalAlpha=ci.alpha;
-    if(ci.shockwave&&ci.shockwave.a>0){ctx.globalAlpha=ci.alpha*ci.shockwave.a;ctx.beginPath();ctx.arc(s.x+hox,s.y+hoy,sR(ci.shockwave.r),0,6.28);ctx.strokeStyle=ci.col;ctx.lineWidth=2.5;ctx.stroke();ctx.globalAlpha=ci.alpha;}
-    ctx.beginPath();ctx.arc(s.x+hox,s.y+hoy,r+3,0,6.28);ctx.strokeStyle=ci.col+'44';ctx.lineWidth=2;ctx.stroke();
-    ctx.beginPath();ctx.arc(s.x+hox,s.y+hoy,r,0,6.28);ctx.fillStyle=ci.col+'1a';ctx.fill();ctx.strokeStyle=ci.col+'cc';ctx.lineWidth=1.5;ctx.stroke();
+    var isZenDraw=currentMode==='easy';
+    // Zen: add glow so rings pop against warm light backgrounds
+    if(isZenDraw){ctx.shadowColor=ci.col;ctx.shadowBlur=18;}
+    if(ci.shockwave&&ci.shockwave.a>0){ctx.globalAlpha=ci.alpha*ci.shockwave.a;ctx.beginPath();ctx.arc(s.x+hox,s.y+hoy,sR(ci.shockwave.r),0,6.28);ctx.strokeStyle=ci.col;ctx.lineWidth=3;ctx.stroke();ctx.globalAlpha=ci.alpha;}
+    // Outer glow halo
+    ctx.beginPath();ctx.arc(s.x+hox,s.y+hoy,r+4,0,6.28);ctx.strokeStyle=ci.col+(isZenDraw?'66':'44');ctx.lineWidth=isZenDraw?3:2;ctx.stroke();
+    // Main ring fill + stroke
+    ctx.beginPath();ctx.arc(s.x+hox,s.y+hoy,r,0,6.28);ctx.fillStyle=ci.col+(isZenDraw?'28':'1a');ctx.fill();
+    ctx.strokeStyle=ci.col+(isZenDraw?'ff':'cc');ctx.lineWidth=isZenDraw?2.5:1.5;ctx.stroke();
+    if(isZenDraw){ctx.shadowBlur=0;}
     if(i===orb.on&&orb.timerMax>0&&orb.timer>0){
       var pct=1-(orb.timer/orb.timerMax),curR=(r-.5)*pct,danger=pct>.6;
       if(curR>1){var pulse=.55+Math.sin(Date.now()*.008)*.2;
