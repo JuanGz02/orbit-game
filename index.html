@@ -63,7 +63,8 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
 .div-line{display:flex;align-items:center;gap:10px;width:100%;margin:10px 0}
 .div-line::before,.div-line::after{content:'';flex:1;height:1px;background:rgba(128,128,128,.2)}
 .div-line span{font-size:11px;letter-spacing:2px;opacity:.35}
-#scr-auth.on,#scr-shop.on,#scr-profile.on,#scr-dead.on,#scr-pause.on,#scr-guest.on{background:var(--scr-bg,#e8e3db)}
+#scr-auth.on,#scr-guest.on{background:#0a0a14}
+#scr-shop.on,#scr-profile.on,#scr-dead.on,#scr-pause.on{background:var(--scr-bg,#0a0a14)}
 @keyframes bk{0%,100%{opacity:.2}50%{opacity:.5}}
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
 @keyframes tutBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
@@ -383,7 +384,7 @@ function getPal(){return GAME_PAL;}
 // ══════════════════════════════════════════
 // 2. STATE
 // ══════════════════════════════════════════
-var DEF={user:null,nick:'',lang:'en',coins:0,best:0,noAds:false,themeMode:'auto',tutorial:false,
+var DEF={user:null,nick:'',lang:'en',coins:0,best:0,noAds:false,themeMode:'dark',tutorial:false,
   trail:'simple',ownedTrails:['simple'],hist:[],photo:null,country:'',ownedPowerups:{magnet:0},
   streak:0,lastPlayDate:'',rank:'rookie',gameMode:'normal',lastSpinDate:'',lastSpinExtra:'',nextGameMultiplier:1};
 var S=Object.assign({},DEF);
@@ -1093,10 +1094,19 @@ function getWeekKey(){var d=new Date();d.setHours(0,0,0,0);var day=d.getDay();va
 // ══════════════════════════════════════════
 function authGoogle(){
   if(!auth){toast('Loading...');return;}
+  var inIframe=window.self!==window.top;
   var provider=new firebase.auth.GoogleAuthProvider();
+  if(inIframe){
+    // In iframe (itch.io etc): open auth in new tab
+    var w=window.open(location.href+'?auth=google','_blank');
+    if(!w){toast(lang==='es'?'Permite ventanas emergentes':'Allow popups for this site');}
+    return;
+  }
   auth.signInWithPopup(provider).catch(function(e){
-    if(e.code==='auth/popup-blocked'){
-      toast(lang==='es'?'Permite ventanas emergentes':'Allow popups for this site');
+    if(e.code==='auth/popup-blocked'||e.code==='auth/popup-closed-by-user'){
+      auth.signInWithRedirect(provider);
+    } else if(e.code==='auth/unauthorized-domain'){
+      toast(lang==='es'?'Abre el juego en pantalla completa para iniciar sesión':'Open fullscreen to sign in');
     } else if(e.code!=='auth/cancelled-popup-request'){
       toast(lang==='es'?'Error de conexión':'Connection error');
     }
