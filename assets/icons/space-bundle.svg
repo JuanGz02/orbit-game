@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#0f0a2e"/>
+      <stop offset="100%" stop-color="#0a0a14"/>
+    </radialGradient>
+    <radialGradient id="planet" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#3730a3"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="voidglow">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- Stars -->
+  <circle cx="60" cy="70" r="1.5" fill="#fff" opacity="0.6"/>
+  <circle cx="450" cy="90" r="2" fill="#818cf8" opacity="0.5"/>
+  <circle cx="480" cy="300" r="1.5" fill="#fff" opacity="0.4"/>
+  <circle cx="40" cy="400" r="2" fill="#818cf8" opacity="0.4"/>
+  <circle cx="140" cy="440" r="1.5" fill="#fff" opacity="0.3"/>
+  <circle cx="370" cy="460" r="1.5" fill="#818cf8" opacity="0.5"/>
+  <!-- Void black hole (bottom left) -->
+  <circle cx="148" cy="360" r="55" fill="#000" filter="url(#voidglow)"/>
+  <circle cx="148" cy="360" r="55" fill="none" stroke="#6366f1" stroke-width="3" opacity="0.7" filter="url(#glow)"/>
+  <circle cx="148" cy="360" r="40" fill="none" stroke="#818cf8" stroke-width="1.5" opacity="0.4"/>
+  <circle cx="148" cy="360" r="20" fill="#1e1b4b" opacity="0.9"/>
+  <!-- Lightning bolt (top right) -->
+  <polygon points="360,100 335,210 365,210 330,330 400,195 365,195 395,100" fill="#fbbf24" opacity="0.9" filter="url(#glow)"/>
+  <!-- Ghost trail (center) -->
+  <ellipse cx="256" cy="230" rx="40" ry="50" fill="#c7d2fe" opacity="0.15" filter="url(#voidglow)"/>
+  <circle cx="256" cy="185" r="38" fill="#e0e7ff" opacity="0.12" filter="url(#glow)"/>
+  <!-- Main planet -->
+  <circle cx="256" cy="230" r="80" fill="url(#planet)" filter="url(#glow)"/>
+  <circle cx="256" cy="230" r="80" fill="none" stroke="#818cf8" stroke-width="2" opacity="0.6"/>
+  <ellipse cx="235" cy="205" rx="22" ry="13" fill="#fff" opacity="0.12"/>
+  <!-- Planet ring -->
+  <ellipse cx="256" cy="230" rx="115" ry="28" fill="none" stroke="#6366f1" stroke-width="3" opacity="0.55" transform="rotate(-15,256,230)"/>
+</svg>

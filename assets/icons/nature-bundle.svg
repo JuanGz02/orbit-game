@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#001a10"/>
+      <stop offset="100%" stop-color="#0a0a14"/>
+    </radialGradient>
+    <radialGradient id="glow1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#34d399" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#34d399" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softglow">
+      <feGaussianBlur stdDeviation="16" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- Ambient glow -->
+  <circle cx="256" cy="256" r="160" fill="url(#glow1)"/>
+  <!-- Stars sparkles -->
+  <circle cx="100" cy="100" r="2.5" fill="#6ee7b7" opacity="0.7" filter="url(#glow)"/>
+  <circle cx="410" cy="80" r="2" fill="#fff" opacity="0.5"/>
+  <circle cx="450" cy="350" r="2.5" fill="#6ee7b7" opacity="0.6" filter="url(#glow)"/>
+  <circle cx="70" cy="370" r="2" fill="#fff" opacity="0.4"/>
+  <!-- Bubbles -->
+  <circle cx="370" cy="340" r="30" fill="none" stroke="#6ee7b7" stroke-width="2" opacity="0.5" filter="url(#glow)"/>
+  <circle cx="370" cy="340" r="30" fill="#10b981" opacity="0.05"/>
+  <ellipse cx="359" cy="328" rx="7" ry="4" fill="#fff" opacity="0.2"/>
+  <circle cx="150" cy="350" r="20" fill="none" stroke="#34d399" stroke-width="1.5" opacity="0.45" filter="url(#glow)"/>
+  <circle cx="410" cy="200" r="15" fill="none" stroke="#6ee7b7" stroke-width="1.5" opacity="0.4" filter="url(#glow)"/>
+  <!-- Star sparkles (4-point) -->
+  <g transform="translate(120,180)" filter="url(#glow)">
+    <polygon points="0,-14 3,-3 14,0 3,3 0,14 -3,3 -14,0 -3,-3" fill="#fbbf24" opacity="0.9"/>
+  </g>
+  <g transform="translate(390,150)" filter="url(#glow)">
+    <polygon points="0,-10 2.5,-2.5 10,0 2.5,2.5 0,10 -2.5,2.5 -10,0 -2.5,-2.5" fill="#6ee7b7" opacity="0.8"/>
+  </g>
+  <g transform="translate(350,390)" filter="url(#glow)">
+    <polygon points="0,-8 2,-2 8,0 2,2 0,8 -2,2 -8,0 -2,-2" fill="#fff" opacity="0.7"/>
+  </g>
+  <!-- Sakura petals -->
+  <!-- Petal 1 (top) -->
+  <g transform="translate(256,200) rotate(0)">
+    <ellipse cx="0" cy="-38" rx="18" ry="28" fill="#f9a8d4" opacity="0.9" filter="url(#glow)"/>
+  </g>
+  <!-- Petal 2 -->
+  <g transform="translate(256,200) rotate(72)">
+    <ellipse cx="0" cy="-38" rx="18" ry="28" fill="#f472b6" opacity="0.85" filter="url(#glow)"/>
+  </g>
+  <!-- Petal 3 -->
+  <g transform="translate(256,200) rotate(144)">
+    <ellipse cx="0" cy="-38" rx="18" ry="28" fill="#f9a8d4" opacity="0.9" filter="url(#glow)"/>
+  </g>
+  <!-- Petal 4 -->
+  <g transform="translate(256,200) rotate(216)">
+    <ellipse cx="0" cy="-38" rx="18" ry="28" fill="#f472b6" opacity="0.85" filter="url(#glow)"/>
+  </g>
+  <!-- Petal 5 -->
+  <g transform="translate(256,200) rotate(288)">
+    <ellipse cx="0" cy="-38" rx="18" ry="28" fill="#f9a8d4" opacity="0.9" filter="url(#glow)"/>
+  </g>
+  <!-- Flower center -->
+  <circle cx="256" cy="200" r="18" fill="#fbbf24" filter="url(#glow)"/>
+  <circle cx="256" cy="200" r="10" fill="#fef08a"/>
+  <!-- Floating petals -->
+  <ellipse cx="160" cy="280" rx="10" ry="15" fill="#f9a8d4" opacity="0.5" transform="rotate(30,160,280)" filter="url(#glow)"/>
+  <ellipse cx="340" cy="290" rx="8" ry="12" fill="#f472b6" opacity="0.4" transform="rotate(-20,340,290)" filter="url(#glow)"/>
+  <ellipse cx="200" cy="140" rx="7" ry="11" fill="#f9a8d4" opacity="0.45" transform="rotate(15,200,140)" filter="url(#glow)"/>
+  <!-- Bottom stars cluster -->
+  <g transform="translate(256,390)" filter="url(#softglow)">
+    <circle cx="-20" cy="0" r="3" fill="#6ee7b7" opacity="0.8"/>
+    <circle cx="0" cy="-8" r="4" fill="#34d399" opacity="0.9"/>
+    <circle cx="20" cy="0" r="3" fill="#6ee7b7" opacity="0.8"/>
+    <circle cx="10" cy="12" r="2.5" fill="#a7f3d0" opacity="0.7"/>
+    <circle cx="-10" cy="12" r="2.5" fill="#a7f3d0" opacity="0.7"/>
+  </g>
+</svg>
