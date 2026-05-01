@@ -1094,19 +1094,15 @@ function getWeekKey(){var d=new Date();d.setHours(0,0,0,0);var day=d.getDay();va
 // ══════════════════════════════════════════
 function authGoogle(){
   if(!auth){toast('Loading...');return;}
-  var inIframe=window.self!==window.top;
   var provider=new firebase.auth.GoogleAuthProvider();
-  if(inIframe){
-    // In iframe (itch.io etc): open auth in new tab
-    var w=window.open(location.href+'?auth=google','_blank');
-    if(!w){toast(lang==='es'?'Permite ventanas emergentes':'Allow popups for this site');}
-    return;
-  }
   auth.signInWithPopup(provider).catch(function(e){
     if(e.code==='auth/popup-blocked'||e.code==='auth/popup-closed-by-user'){
       auth.signInWithRedirect(provider);
     } else if(e.code==='auth/unauthorized-domain'){
-      toast(lang==='es'?'Abre el juego en pantalla completa para iniciar sesión':'Open fullscreen to sign in');
+      // Show the actual domain so user knows what to add in Firebase
+      var dom=location.hostname;
+      toast('Firebase: add "'+dom+'" to authorized domains');
+      console.warn('Unauthorized domain:',dom);
     } else if(e.code!=='auth/cancelled-popup-request'){
       toast(lang==='es'?'Error de conexión':'Connection error');
     }
