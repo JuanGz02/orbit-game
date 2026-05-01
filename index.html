@@ -803,66 +803,130 @@ function toggleSound(){
   if(!soundEnabled){stopMusic();stopMenuMusic();}
   else if(phase==='idle'||phase==='dead')startMenuMusic();
 }
-function startMusic(){
-  if(musicPlaying||!AC||!soundEnabled)return;
-  stopMenuMusic();
-  musicPlaying=true;
-  musicGain=AC.createGain();
-  musicGain.gain.value=0;
-  musicGain.connect(AC.destination);
-  musicGain.gain.linearRampToValueAtTime(0.12,AC.currentTime+2);
-  playAmbientChord();
-}
+// ── ZEN MUSIC ─────────────────────────────────
 function startZenMusic(){
   if(musicPlaying||!AC||!soundEnabled)return;
-  stopMenuMusic();
-  musicPlaying=true;
-  musicGain=AC.createGain();
-  musicGain.gain.value=0;
-  musicGain.connect(AC.destination);
-  musicGain.gain.linearRampToValueAtTime(0.10,AC.currentTime+3);
-  playZenChord();
+  stopMenuMusic();musicPlaying=true;
+  musicGain=AC.createGain();musicGain.gain.value=0;musicGain.connect(AC.destination);
+  musicGain.gain.linearRampToValueAtTime(0.11,AC.currentTime+4);
+  zenDrone();zenMelody();zenBells();
 }
-function playZenChord(){
+function zenDrone(){
   if(!musicPlaying||!AC)return;
-  var zenNotes=[261.63,293.66,329.63,392,440,523.25,587.33];
-  var note=zenNotes[Math.floor(Math.random()*zenNotes.length)];
-  var o=AC.createOscillator(),g=AC.createGain();
-  o.type='sine';
-  o.frequency.value=note*(Math.random()<.4?0.5:1);
+  // Deep A1 drone with slow vibrato
+  var o=AC.createOscillator(),g=AC.createGain(),lfo=AC.createOscillator(),lfog=AC.createGain();
+  o.type='sine';o.frequency.value=55;
+  lfo.frequency.value=0.18;lfog.gain.value=0.4;
+  lfo.connect(lfog);lfog.connect(o.frequency);lfo.start();lfo.stop(AC.currentTime+22);
   g.gain.setValueAtTime(0,AC.currentTime);
-  g.gain.linearRampToValueAtTime(.04*masterVolume,AC.currentTime+2.5);
-  g.gain.linearRampToValueAtTime(0,AC.currentTime+9);
-  o.connect(g);g.connect(musicGain);
-  o.start();o.stop(AC.currentTime+9.5);
-  if(Math.random()>.6){
-    var o2=AC.createOscillator(),g2=AC.createGain();
-    o2.type='sine';o2.frequency.value=note*1.5;
-    g2.gain.setValueAtTime(0,AC.currentTime);
-    g2.gain.linearRampToValueAtTime(.015*masterVolume,AC.currentTime+3);
-    g2.gain.linearRampToValueAtTime(0,AC.currentTime+8);
-    o2.connect(g2);g2.connect(musicGain);
-    o2.start();o2.stop(AC.currentTime+8.5);
+  g.gain.linearRampToValueAtTime(0.055*masterVolume,AC.currentTime+5);
+  g.gain.linearRampToValueAtTime(0,AC.currentTime+20);
+  o.connect(g);g.connect(musicGain);o.start();o.stop(AC.currentTime+22);
+  // Octave layer
+  var o2=AC.createOscillator(),g2=AC.createGain();
+  o2.type='sine';o2.frequency.value=110;
+  g2.gain.setValueAtTime(0,AC.currentTime);
+  g2.gain.linearRampToValueAtTime(0.025*masterVolume,AC.currentTime+6);
+  g2.gain.linearRampToValueAtTime(0,AC.currentTime+19);
+  o2.connect(g2);g2.connect(musicGain);o2.start();o2.stop(AC.currentTime+20);
+  setTimeout(function(){zenDrone();},19000);
+}
+function zenMelody(){
+  if(!musicPlaying||!AC)return;
+  // A minor pentatonic: A3 C4 D4 E4 G4 A4
+  var scale=[220,261.63,293.66,329.63,392,440,523.25];
+  var note=scale[Math.floor(Math.random()*scale.length)];
+  var o=AC.createOscillator(),g=AC.createGain();
+  o.type='sine';o.frequency.value=note;
+  var dur=7+Math.random()*5;
+  g.gain.setValueAtTime(0,AC.currentTime);
+  g.gain.linearRampToValueAtTime(0.038*masterVolume,AC.currentTime+dur*.3);
+  g.gain.linearRampToValueAtTime(0,AC.currentTime+dur);
+  o.connect(g);g.connect(musicGain);o.start();o.stop(AC.currentTime+dur+.2);
+  // Harmony fifth
+  if(Math.random()>.5){
+    var o3=AC.createOscillator(),g3=AC.createGain();
+    o3.type='sine';o3.frequency.value=note*1.498;
+    g3.gain.setValueAtTime(0,AC.currentTime);
+    g3.gain.linearRampToValueAtTime(0.016*masterVolume,AC.currentTime+dur*.4);
+    g3.gain.linearRampToValueAtTime(0,AC.currentTime+dur*.9);
+    o3.connect(g3);g3.connect(musicGain);o3.start();o3.stop(AC.currentTime+dur);
   }
-  setTimeout(function(){playZenChord();},4000+Math.random()*4000);
+  setTimeout(function(){zenMelody();},5000+Math.random()*6000);
 }
-function playAmbientChord(){
+function zenBells(){
   if(!musicPlaying||!AC)return;
-  var notes=[130.81,164.81,196,261.63,329.63,392,246.94];
-  var note=notes[Math.floor(Math.random()*notes.length)];
+  // Crystal bell hits (high overtones)
+  var bellFreqs=[1046.5,1318.5,1567.98,2093];
+  var f=bellFreqs[Math.floor(Math.random()*bellFreqs.length)];
   var o=AC.createOscillator(),g=AC.createGain();
-  o.type=Math.random()<.6?'sine':'triangle';
-  o.frequency.value=note*(Math.random()<.3?2:1);
+  o.type='sine';o.frequency.value=f;
+  g.gain.setValueAtTime(0.025*masterVolume,AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+3.5);
+  o.connect(g);g.connect(musicGain);o.start();o.stop(AC.currentTime+3.6);
+  setTimeout(function(){zenBells();},8000+Math.random()*12000);
+}
+// ── COMPETITIVE MUSIC ──────────────────────────
+var compBeatTimer=null;
+function startMusic(){
+  if(musicPlaying||!AC||!soundEnabled)return;
+  stopMenuMusic();musicPlaying=true;
+  musicGain=AC.createGain();musicGain.gain.value=0;musicGain.connect(AC.destination);
+  musicGain.gain.linearRampToValueAtTime(0.14,AC.currentTime+1.5);
+  compBass();compArp();
+  var beat=0;
+  var bInterval=60000/124; // 124 BPM
+  compBeatTimer=setInterval(function(){
+    if(!musicPlaying){clearInterval(compBeatTimer);return;}
+    compKick(beat);beat=(beat+1)%8;
+  },bInterval);
+}
+function compKick(beat){
+  if(!AC||!musicGain)return;
+  var now=AC.currentTime;
+  if(beat===0||beat===4){ // kick
+    var o=AC.createOscillator(),g=AC.createGain();
+    o.type='sine';o.frequency.setValueAtTime(140,now);o.frequency.exponentialRampToValueAtTime(38,now+0.12);
+    g.gain.setValueAtTime(0.18*masterVolume,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.22);
+    o.connect(g);g.connect(musicGain);o.start(now);o.stop(now+0.25);
+  }
+  if(beat===2||beat===6){ // snare noise burst
+    var buf=AC.createBuffer(1,Math.floor(AC.sampleRate*.06),AC.sampleRate);
+    var d=buf.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*.5;
+    var src=AC.createBufferSource(),hg=AC.createGain(),hf=AC.createBiquadFilter();
+    hf.type='bandpass';hf.frequency.value=3000;hf.Q.value=0.8;
+    hg.gain.setValueAtTime(0.12*masterVolume,now);hg.gain.exponentialRampToValueAtTime(0.001,now+0.06);
+    src.buffer=buf;src.connect(hf);hf.connect(hg);hg.connect(musicGain);src.start(now);
+  }
+}
+function compBass(){
+  if(!musicPlaying||!AC)return;
+  var bassSeq=[55,55,65.41,55,73.42,55,65.41,82.41];
+  var note=bassSeq[Math.floor(Math.random()*bassSeq.length)];
+  var o=AC.createOscillator(),g=AC.createGain();
+  o.type='sawtooth';o.frequency.value=note;
   g.gain.setValueAtTime(0,AC.currentTime);
-  g.gain.linearRampToValueAtTime(.06*masterVolume,AC.currentTime+1.5);
-  g.gain.linearRampToValueAtTime(0,AC.currentTime+6);
-  o.connect(g);g.connect(musicGain);
-  o.start();o.stop(AC.currentTime+6.5);
-  setTimeout(function(){playAmbientChord();},2000+Math.random()*3000);
+  g.gain.linearRampToValueAtTime(0.07*masterVolume,AC.currentTime+0.04);
+  g.gain.linearRampToValueAtTime(0,AC.currentTime+0.45);
+  o.connect(g);g.connect(musicGain);o.start();o.stop(AC.currentTime+0.5);
+  setTimeout(function(){compBass();},480+Math.random()*80);
+}
+function compArp(){
+  if(!musicPlaying||!AC)return;
+  var arp=[329.63,392,440,523.25,587.33,659.25,784];
+  var note=arp[Math.floor(Math.random()*arp.length)];
+  var o=AC.createOscillator(),g=AC.createGain();
+  o.type='square';o.frequency.value=note;
+  g.gain.setValueAtTime(0,AC.currentTime);
+  g.gain.linearRampToValueAtTime(0.018*masterVolume,AC.currentTime+0.02);
+  g.gain.linearRampToValueAtTime(0,AC.currentTime+0.22);
+  o.connect(g);g.connect(musicGain);o.start();o.stop(AC.currentTime+0.25);
+  setTimeout(function(){compArp();},240+Math.random()*160);
 }
 function stopMusic(){
   musicPlaying=false;
-  if(musicGain){musicGain.gain.linearRampToValueAtTime(0,AC.currentTime+1);}
+  if(compBeatTimer){clearInterval(compBeatTimer);compBeatTimer=null;}
+  if(musicGain){musicGain.gain.linearRampToValueAtTime(0,AC.currentTime+1.5);}
 }
 // Menu lo-fi music
 var menuGain=null;
@@ -2201,29 +2265,56 @@ function initBgStars(){
 function drawGalaxyBg(){
   if(!bgInit)initBgStars();
   var time=Date.now()*.001;
-  // Subtle nebula clouds — very faint opal colors
+  var isZen=currentMode==='easy';
+  // Nebula clouds — richer in Zen mode
   var nebulas=isNight?
     [{x:.3,y:.4,col:'rgba(167,139,250,.04)'},{x:.7,y:.6,col:'rgba(110,231,183,.03)'},{x:.5,y:.2,col:'rgba(249,168,212,.03)'}]:
     [{x:.3,y:.4,col:'rgba(100,80,180,.03)'},{x:.7,y:.6,col:'rgba(60,160,120,.025)'},{x:.5,y:.2,col:'rgba(180,100,140,.025)'}];
+  if(isZen){
+    // Extra zen nebula layers — slow aurora
+    nebulas=nebulas.concat([
+      {x:.5,y:.5,col:'rgba(139,92,246,.06)'},
+      {x:.2,y:.7,col:'rgba(99,102,241,.05)'},
+      {x:.8,y:.3,col:'rgba(167,139,250,.05)'},
+      {x:.6,y:.8,col:'rgba(196,181,253,.04)'}
+    ]);
+  }
+  var speedMult=isZen?.4:1;
   for(var n=0;n<nebulas.length;n++){
     var nb=nebulas[n];
-    var nx=nb.x*W+Math.sin(time*.15+n*2)*W*.08;
-    var ny=nb.y*H+Math.cos(time*.12+n*1.7)*H*.06;
-    var nr=Math.min(W,H)*.35;
+    var nx=nb.x*W+Math.sin(time*.15*speedMult+n*2)*W*(isZen?.12:.08);
+    var ny=nb.y*H+Math.cos(time*.12*speedMult+n*1.7)*H*(isZen?.10:.06);
+    var nr=Math.min(W,H)*(isZen?.5:.35);
     var grad=ctx.createRadialGradient(nx,ny,0,nx,ny,nr);
     grad.addColorStop(0,nb.col);
     grad.addColorStop(1,'transparent');
     ctx.fillStyle=grad;
     ctx.fillRect(0,0,W,H);
   }
-  // Distant stars — soft twinkle
+  // Aurora wave in zen mode
+  if(isZen){
+    var auroraY=H*.35+Math.sin(time*.2)*H*.08;
+    var ag=ctx.createLinearGradient(0,auroraY-60,0,auroraY+60);
+    ag.addColorStop(0,'transparent');
+    ag.addColorStop(.5,'rgba(139,92,246,0.04)');
+    ag.addColorStop(1,'transparent');
+    ctx.fillStyle=ag;ctx.fillRect(0,auroraY-60,W,120);
+    var auroraY2=H*.65+Math.cos(time*.15)*H*.06;
+    var ag2=ctx.createLinearGradient(0,auroraY2-40,0,auroraY2+40);
+    ag2.addColorStop(0,'transparent');
+    ag2.addColorStop(.5,'rgba(99,102,241,0.03)');
+    ag2.addColorStop(1,'transparent');
+    ctx.fillStyle=ag2;ctx.fillRect(0,auroraY2-40,W,80);
+  }
+  // Stars — slower twinkle in zen
   for(var s=0;s<bgStars.length;s++){
     var st=bgStars[s];
     var sx=st.x*W,sy=st.y*H;
-    var twinkle=.3+Math.sin(time*1.5+st.phase)*.25;
-    ctx.globalAlpha=twinkle*(isNight?.6:.25);
-    ctx.beginPath();ctx.arc(sx,sy,st.r,0,6.28);
-    ctx.fillStyle=isNight?'#ffffff':'rgba(80,60,120,.8)';
+    var twinkleSpeed=isZen?.6:1.5;
+    var twinkle=.3+Math.sin(time*twinkleSpeed+st.phase)*.25;
+    ctx.globalAlpha=twinkle*(isNight?(isZen?.8:.6):.25);
+    ctx.beginPath();ctx.arc(sx,sy,st.r*(isZen?1.2:1),0,6.28);
+    ctx.fillStyle=isZen?(Math.random()>.5?'#c4b5fd':'#a5b4fc'):isNight?'#ffffff':'rgba(80,60,120,.8)';
     ctx.fill();
   }
   ctx.globalAlpha=1;
