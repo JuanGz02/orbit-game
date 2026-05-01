@@ -255,7 +255,7 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     <div class="scroll" id="pr-hist" style="max-height:28vh"></div>
   </div>
   <div style="display:flex;gap:10px;margin-top:14px;width:100%">
-    <button id="pr-notif" onclick="toggleNotifications()" class="btn bsm" style="width:100%;margin-bottom:8px">🔔 NOTIFICATIONS</button>
+    <button id="pr-notif" onclick="toggleNotifications()" title="Notifications" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 14px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-bottom:8px;width:100%;transition:opacity .2s,border .2s"><svg id="pr-notif-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="12" y1="2" x2="12" y2="3" stroke-width="2"/></svg></button>
     <div style="display:flex;gap:10px;width:100%">
       <button class="btn bsm" id="pr-reset" onclick="resetScore()" style="flex:1;color:#fca5a5;border:1px solid rgba(239,68,68,.28);background:rgba(239,68,68,.08)">RESET SCORE</button>
       <button class="btn bsm" id="pr-logout" onclick="doLogout()" style="flex:1">SIGN OUT</button>
@@ -386,7 +386,7 @@ function getPal(){return GAME_PAL;}
 // ══════════════════════════════════════════
 var DEF={user:null,nick:'',lang:'en',coins:0,best:0,noAds:false,themeMode:'dark',tutorial:false,
   trail:'simple',ownedTrails:['simple'],hist:[],photo:null,country:'',ownedPowerups:{magnet:0},
-  streak:0,lastPlayDate:'',rank:'rookie',gameMode:'normal',lastSpinDate:'',lastSpinExtra:'',nextGameMultiplier:1};
+  streak:0,lastPlayDate:'',rank:'rookie',gameMode:'normal',lastSpinDate:'',lastSpinExtra:'',nextGameMultiplier:1,notifEnabled:false};
 var S=Object.assign({},DEF);
 function loadState(){try{var d=localStorage.getItem('orb7');if(d)S=Object.assign({},DEF,JSON.parse(d));}catch(e){}}
 function saveState(){localStorage.setItem('orb7',JSON.stringify(S));saveToCloud();}
@@ -1090,7 +1090,8 @@ function requestNotifPermission(){
       fcmMessaging.getToken({vapidKey:'BI4Ya4XD2j_BMIasIFBDdbB0JgEvy5pg37HabetzarIAqWW4yvAA2w7BDH7ohyiKTk8j3I3ZgCWQpw77eL8fhQQ'}).then(function(token){
         if(token&&db){
           db.collection('users').doc(S.user.uid).set({fcmToken:token},{merge:true});
-          toast('🔔 '+(lang==='es'?'Notificaciones activadas':'Notifications enabled'));
+          S.notifEnabled=true;saveState();
+          toast(lang==='es'?'Notificaciones activadas':'Notifications enabled');
           updateNotifBtn();
         }
       }).catch(function(e){console.log('FCM token error:',e);});
@@ -1103,12 +1104,15 @@ function toggleNotifications(){
   if(!('Notification' in window)){toast(lang==='es'?'No soportado en este navegador':'Not supported in this browser');return;}
   if(S.user&&S.user.isGuest){toast(lang==='es'?'Crea una cuenta para notificaciones':'Create an account for notifications');return;}
   if(!fcmMessaging){initFCM();}
-  if(Notification.permission==='granted'){
+  if(S.notifEnabled){
+    // Turn off: clear token from Firestore
+    S.notifEnabled=false;
+    saveState();
     if(db&&S.user&&S.user.uid){
       db.collection('users').doc(S.user.uid).set({fcmToken:null},{merge:true});
-      toast('🔕 '+(lang==='es'?'Notificaciones desactivadas':'Notifications disabled'));
-      updateNotifBtn();
     }
+    toast(lang==='es'?'Notificaciones desactivadas':'Notifications disabled');
+    updateNotifBtn();
   }else if(Notification.permission==='denied'){
     toast(lang==='es'?'Actívalas en Ajustes del navegador':'Enable in browser Settings → Notifications');
   }else{
@@ -1118,10 +1122,11 @@ function toggleNotifications(){
 function updateNotifBtn(){
   var btn=document.getElementById('pr-notif');
   if(!btn)return;
-  var on=('Notification' in window)&&Notification.permission==='granted';
-  btn.textContent=on?'🔔 NOTIFICATIONS ON':'🔕 NOTIFICATIONS OFF';
-  btn.style.opacity=on?'1':'.55';
-  btn.style.border=on?'1px solid rgba(251,191,36,.4)':'';
+  var on=!!(S.notifEnabled);
+  btn.style.opacity=on?'1':'.5';
+  btn.style.border=on?'1px solid rgba(251,191,36,.5)':'1px solid rgba(255,255,255,.12)';
+  var ic=document.getElementById('pr-notif-icon');
+  if(ic)ic.style.color=on?'#fbbf24':'currentColor';
 }
 
 function saveToCloud(){
@@ -1757,54 +1762,66 @@ var lastCheckpoint=0;
 
 // ── COSMIC REFLECTIONS ────────────────────────
 // Public domain wisdom (authors 70+ years deceased)
+// Each entry: t=english, es=spanish, a=author
 var ZEN_QUOTES=[
-  {t:'You have power over your mind,\nnot outside events.',a:'Marcus Aurelius'},
-  {t:'The obstacle is the way.',a:'Marcus Aurelius'},
-  {t:'Very little is needed to make a happy life.',a:'Marcus Aurelius'},
-  {t:'Knowing others is wisdom.\nKnowing yourself is enlightenment.',a:'Lao Tzu'},
-  {t:'A journey of a thousand miles\nbegins with a single step.',a:'Lao Tzu'},
-  {t:'Nature does not hurry,\nyet everything is accomplished.',a:'Lao Tzu'},
-  {t:'Out beyond ideas of wrongdoing and rightdoing\nthere is a field. I\'ll meet you there.',a:'Rumi'},
-  {t:'You are not a drop in the ocean.\nYou are the entire ocean in a drop.',a:'Rumi'},
-  {t:'Wherever you are,\nbe all there.',a:'Rumi'},
-  {t:'It is not that I\'m so smart.\nIt\'s that I stay with problems longer.',a:'Albert Einstein'},
-  {t:'Luck is what happens when\npreparation meets opportunity.',a:'Seneca'},
-  {t:'We suffer more in imagination than in reality.',a:'Seneca'},
-  {t:'Begin at once to live,\nand count each day as a separate life.',a:'Seneca'},
-  {t:'No man ever steps in the same river twice,\nfor it\'s not the same river.',a:'Heraclitus'},
-  {t:'The only constant in life is change.',a:'Heraclitus'},
-  {t:'It does not matter how slowly you go,\nas long as you do not stop.',a:'Confucius'},
-  {t:'Life is really simple,\nbut we insist on making it complicated.',a:'Confucius'},
-  {t:'To be yourself in a world that is constantly\ntrying to make you something else is the\ngreatest accomplishment.',a:'R.W. Emerson'},
-  {t:'Not all those who wander are lost.',a:'J.R.R. Tolkien'},
-  {t:'Go confidently in the direction of your dreams.\nLive the life you have imagined.',a:'H.D. Thoreau'},
-  {t:'The mind is everything.\nWhat you think, you become.',a:'Buddhist proverb'},
-  {t:'In the middle of every difficulty\nlies opportunity.',a:'Albert Einstein'},
-  {t:'Simplicity is the ultimate sophistication.',a:'Leonardo da Vinci'},
-  {t:'Make each day your masterpiece.',a:'John Wooden'},
-  {t:'The present moment always will have been.',a:'Stoic proverb'},
-  {t:'Be like water — flow around obstacles,\nfill every space, nourish all things.',a:'Lao Tzu'},
-  {t:'What you seek is seeking you.',a:'Rumi'},
-  {t:'The quieter you become,\nthe more you are able to hear.',a:'Rumi'},
-  {t:'Waste no more time arguing what a good man should be.\nBe one.',a:'Marcus Aurelius'},
-  {t:'In three words I can sum up everything\nI\'ve learned about life: it goes on.',a:'Robert Frost'},
-  {t:'Everything you can imagine is real.',a:'Pablo Picasso'},
-  {t:'The journey itself is the reward.',a:'Zen proverb'},
-  {t:'Stars can\'t shine without darkness.',a:'Anonymous'}
+  {t:'You have power over your mind,\nnot outside events.',es:'Tienes poder sobre tu mente,\nno sobre los eventos externos.',a:'Marco Aurelio'},
+  {t:'The obstacle is the way.',es:'El obstáculo es el camino.',a:'Marco Aurelio'},
+  {t:'Very little is needed\nto make a happy life.',es:'Se necesita muy poco\npara tener una vida feliz.',a:'Marco Aurelio'},
+  {t:'Knowing others is wisdom.\nKnowing yourself is enlightenment.',es:'Conocer a los demás es sabiduría.\nConocerte a ti mismo es iluminación.',a:'Lao Tzu'},
+  {t:'A journey of a thousand miles\nbegins with a single step.',es:'Un viaje de mil millas\ncomienza con un solo paso.',a:'Lao Tzu'},
+  {t:'Nature does not hurry,\nyet everything is accomplished.',es:'La naturaleza no tiene prisa,\ny sin embargo todo se logra.',a:'Lao Tzu'},
+  {t:'You are not a drop in the ocean.\nYou are the entire ocean in a drop.',es:'No eres una gota en el océano.\nEres el océano entero en una gota.',a:'Rumi'},
+  {t:'Wherever you are, be all there.',es:'Dondequiera que estés,\nestá completamente.',a:'Rumi'},
+  {t:'What you seek is seeking you.',es:'Lo que buscas te está buscando.',a:'Rumi'},
+  {t:'The quieter you become,\nthe more you are able to hear.',es:'Cuanto más silencioso te vuelves,\nmás puedes escuchar.',a:'Rumi'},
+  {t:'We suffer more in imagination\nthan in reality.',es:'Sufrimos más en la imaginación\nque en la realidad.',a:'Séneca'},
+  {t:'Begin at once to live,\nand count each day as a separate life.',es:'Comienza a vivir ahora,\ny cuenta cada día como una vida.',a:'Séneca'},
+  {t:'The only constant in life is change.',es:'Lo único constante en la vida\nes el cambio.',a:'Heráclito'},
+  {t:'It does not matter how slowly you go,\nas long as you do not stop.',es:'No importa qué tan lento vayas,\nsiempre que no te detengas.',a:'Confucio'},
+  {t:'Life is really simple, but we insist\non making it complicated.',es:'La vida es realmente simple,\npero insistimos en complicarla.',a:'Confucio'},
+  {t:'Not all those who wander are lost.',es:'No todos los que vagan están perdidos.',a:'J.R.R. Tolkien'},
+  {t:'Go confidently in the direction of your dreams.',es:'Avanza con confianza\nhacia tus sueños.',a:'H.D. Thoreau'},
+  {t:'The mind is everything.\nWhat you think, you become.',es:'La mente lo es todo.\nEn lo que piensas, te conviertes.',a:'Buda'},
+  {t:'In the middle of every difficulty\nlies opportunity.',es:'En el centro de toda dificultad\nyace una oportunidad.',a:'Einstein'},
+  {t:'Simplicity is the ultimate sophistication.',es:'La simplicidad es\nla última sofisticación.',a:'Leonardo da Vinci'},
+  {t:'The present moment always will have been.',es:'El momento presente\nsiempre habrá sido.',a:'Proverbio estoico'},
+  {t:'Be like water — flow, fill, nourish.',es:'Sé como el agua —\nfluye, llena, nutre.',a:'Lao Tzu'},
+  {t:'In three words: life goes on.',es:'En tres palabras: la vida continúa.',a:'Robert Frost'},
+  {t:'Everything you can imagine is real.',es:'Todo lo que puedes imaginar es real.',a:'Picasso'},
+  {t:'The journey itself is the reward.',es:'El viaje en sí es la recompensa.',a:'Proverbio zen'},
+  {t:'Stars can\'t shine without darkness.',es:'Las estrellas no brillan\nsin la oscuridad.',a:'Anónimo'},
+  {t:'Breathe. You are exactly where\nyou need to be.',es:'Respira. Estás exactamente\ndonde necesitas estar.',a:'Proverbio zen'},
+  {t:'The universe is under no obligation\nto make sense to you.',es:'El universo no tiene obligación\nde hacerle sentido.',a:'Neil deGrasse Tyson'},
+  {t:'Look up at the stars, not down at your feet.',es:'Mira las estrellas, no el suelo.',a:'Stephen Hawking'},
+  {t:'We are all made of star stuff.',es:'Todos estamos hechos\nde materia de estrellas.',a:'Carl Sagan'},
+  {t:'Somewhere, something incredible\nis waiting to be known.',es:'En algún lugar, algo increíble\nespera ser descubierto.',a:'Carl Sagan'},
+  {t:'Keep going.',es:'Sigue adelante.',a:''},
+  {t:'Float.',es:'Flota.',a:''}
 ];
-var zenQuote={text:'',author:'',alpha:0,phase:'idle',timer:0,used:[]};
+var zenQuote={text:'',author:'',alpha:0,phase:'idle',timer:0,used:[],px:0,py:0};
 function triggerZenQuote(){
   var pool=ZEN_QUOTES.filter(function(_,i){return zenQuote.used.indexOf(i)<0;});
   if(pool.length===0){zenQuote.used=[];pool=ZEN_QUOTES.slice();}
   var pick=pool[Math.floor(Math.random()*pool.length)];
-  var idx=ZEN_QUOTES.indexOf(pick);
-  zenQuote.used.push(idx);
-  zenQuote.text=pick.t;zenQuote.author='— '+pick.a;
+  zenQuote.used.push(ZEN_QUOTES.indexOf(pick));
+  var txt=lang==='es'?(pick.es||pick.t):pick.t;
+  zenQuote.text=txt;
+  zenQuote.author=(pick.a?'— '+pick.a:'');
   zenQuote.alpha=0;zenQuote.phase='in';zenQuote.timer=0;
+  // Anchor to current planet position — offset above it
+  var ci=circles[orb.on>=0?orb.on:0];
+  if(ci){
+    var ps=toS(ci.wx,ci.wy);
+    var offY=sR(ci.r)+55;
+    zenQuote.px=Math.min(Math.max(ps.x,W*.15),W*.85);
+    zenQuote.py=Math.min(Math.max(ps.y-offY,H*.12),H*.55);
+  }else{
+    zenQuote.px=W/2;zenQuote.py=H*.35;
+  }
 }
 function drawZenQuote(){
   if(zenQuote.phase==='idle'||currentMode!=='easy')return;
-  var fadeDur=90,holdDur=200; // frames
+  var fadeDur=80,holdDur=320; // frames (~5.3s hold at 60fps)
   zenQuote.timer++;
   if(zenQuote.phase==='in'){
     zenQuote.alpha=Math.min(1,zenQuote.timer/fadeDur);
@@ -1817,52 +1834,31 @@ function drawZenQuote(){
     if(zenQuote.timer>=fadeDur){zenQuote.phase='idle';zenQuote.alpha=0;return;}
   }
   var lines=zenQuote.text.split('\n');
-  var cx=W/2,cy=H*.42;
-  var textCol=isNight?'#e0d7ff':'#1a1a2e';
-  var glowCol=isNight?'rgba(139,92,246,0.6)':'rgba(100,80,200,0.3)';
+  var cx=zenQuote.px,cy=zenQuote.py;
+  // Text color adapts to theme — shadow creates halo readable on any bg
+  var textCol=isNight?'rgba(224,215,255,0.95)':'rgba(20,15,50,0.9)';
+  var shadowCol=isNight?'rgba(0,0,0,0.9)':'rgba(255,255,255,0.95)';
+  var authorCol=isNight?'rgba(167,139,250,0.75)':'rgba(109,40,217,0.7)';
   ctx.save();
-  ctx.globalAlpha=zenQuote.alpha*.9;
-  // Soft backdrop pill
-  var maxW=Math.min(W*.82,340);
-  var lineH=22,totalH=lines.length*lineH+44;
-  var pillX=cx-maxW/2,pillY=cy-22;
-  ctx.beginPath();
-  var r=16;
-  ctx.moveTo(pillX+r,pillY);ctx.lineTo(pillX+maxW-r,pillY);
-  ctx.quadraticCurveTo(pillX+maxW,pillY,pillX+maxW,pillY+r);
-  ctx.lineTo(pillX+maxW,pillY+totalH-r);
-  ctx.quadraticCurveTo(pillX+maxW,pillY+totalH,pillX+maxW-r,pillY+totalH);
-  ctx.lineTo(pillX+r,pillY+totalH);
-  ctx.quadraticCurveTo(pillX,pillY+totalH,pillX,pillY+totalH-r);
-  ctx.lineTo(pillX,pillY+r);
-  ctx.quadraticCurveTo(pillX,pillY,pillX+r,pillY);
-  ctx.closePath();
-  ctx.fillStyle=isNight?'rgba(10,8,22,0.72)':'rgba(255,255,255,0.75)';
-  ctx.fill();
-  ctx.strokeStyle=isNight?'rgba(139,92,246,0.25)':'rgba(100,80,200,0.2)';
-  ctx.lineWidth=1;ctx.stroke();
-  // Label "✦ cosmic reflections"
-  ctx.globalAlpha=zenQuote.alpha*.5;
-  ctx.font='500 9px "Space Grotesk", sans-serif';
-  ctx.fillStyle=isNight?'#a78bfa':'#7c3aed';
-  ctx.textAlign='center';ctx.letterSpacing='3px';
-  ctx.fillText('✦  COSMIC REFLECTIONS  ✦',cx,cy-4);
-  // Quote lines
   ctx.globalAlpha=zenQuote.alpha;
-  ctx.shadowColor=glowCol;ctx.shadowBlur=isNight?8:4;
   ctx.textAlign='center';
+  // Quote text — clean, no frame
+  var lineH=19,fs=lines.length>2?12:13;
+  ctx.font='300 '+fs+'px "Space Grotesk", sans-serif';
+  ctx.shadowColor=shadowCol;ctx.shadowBlur=14;
+  ctx.fillStyle=textCol;
   for(var li=0;li<lines.length;li++){
-    ctx.font='300 '+(lines.length>1?'14':'15')+'px "Space Grotesk", sans-serif';
-    ctx.fillStyle=textCol;
-    ctx.fillText(lines[li],cx,cy+14+li*lineH);
+    ctx.fillText(lines[li].trim(),cx,cy+li*lineH);
   }
-  // Author
-  ctx.shadowBlur=0;
-  ctx.globalAlpha=zenQuote.alpha*.65;
-  ctx.font='italic 500 11px "Space Grotesk", sans-serif';
-  ctx.fillStyle=isNight?'#a78bfa':'#7c3aed';
-  ctx.fillText(zenQuote.author,cx,cy+14+lines.length*lineH+14);
-  ctx.restore();
+  // Author — italic, smaller, offset
+  if(zenQuote.author){
+    ctx.shadowBlur=10;
+    ctx.globalAlpha=zenQuote.alpha*.7;
+    ctx.font='italic 300 10px "Space Grotesk", sans-serif';
+    ctx.fillStyle=authorCol;
+    ctx.fillText(zenQuote.author,cx,cy+lines.length*lineH+10);
+  }
+  ctx.shadowBlur=0;ctx.restore();
 }
 var sesCoinsFrac=0;
 var revivedThisRun=false;
@@ -2270,7 +2266,8 @@ function update(dt){
       }
     }
   }
-  camX+=(tCamX-camX)*.07*dt;camY+=(tCamY-camY)*.07*dt;zoom+=(tZoom-zoom)*.06*dt;
+  var zBoost=(zenQuote.phase!=='idle'&&currentMode==='easy')?0.07*zenQuote.alpha:0;
+  camX+=(tCamX-camX)*.07*dt;camY+=(tCamY-camY)*.07*dt;zoom+=(tZoom+zBoost-zoom)*.06*dt;
   orb.trail.push({wx:orb.wx,wy:orb.wy});if(orb.trail.length>40)orb.trail.shift();
   parts.forEach(function(p){p.wx+=p.vx*dt;p.wy+=p.vy*dt;p.vx*=Math.pow(.91,dt);p.vy*=Math.pow(.91,dt);p.vy+=.07*dt;p.life-=.028*dt;});
   parts=parts.filter(function(p){return p.life>0;});
