@@ -127,24 +127,24 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
 
 <!-- HOME -->
 <div class="scr" id="scr-home">
-  <div style="font-size:50px;font-weight:100;letter-spacing:14px;margin-bottom:6px">ORBIT</div>
-  <div id="h-hint" class="bk" style="font-size:11px;letter-spacing:5px;opacity:.35;margin-bottom:44px">tap · hold for power</div>
-  <div style="text-align:center;margin-bottom:28px">
-    <div id="h-best-lbl" style="font-size:10px;letter-spacing:4px;opacity:.3;margin-bottom:5px">BEST</div>
-    <div id="h-best" style="font-size:34px;font-weight:100;color:#fbbf24">0</div>
+  <div style="font-size:60px;font-weight:100;letter-spacing:16px;margin-bottom:8px">ORBIT</div>
+  <div id="h-hint" class="bk" style="font-size:12px;letter-spacing:5px;opacity:.35;margin-bottom:48px">tap · hold for power</div>
+  <div style="text-align:center;margin-bottom:32px">
+    <div id="h-best-lbl" style="font-size:11px;letter-spacing:4px;opacity:.3;margin-bottom:6px">BEST</div>
+    <div id="h-best" style="font-size:40px;font-weight:100;color:#fbbf24">0</div>
   </div>
-  <div style="display:flex;flex-direction:column;gap:11px;width:100%;max-width:280px">
+  <div style="display:flex;flex-direction:column;gap:13px;width:100%;max-width:320px">
     <div id="daily-challenge" style="display:none;width:100%;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.15);border-radius:12px;padding:10px 14px;margin-bottom:6px"></div>
     <div id="mode-selector" style="display:flex;gap:0;border-radius:24px;overflow:hidden;width:100%;border:1px solid rgba(128,128,128,.2)">
-      <div id="mode-easy" onclick="setGameMode('easy')" style="flex:1;padding:9px 4px;text-align:center;font-size:10px;letter-spacing:1px;cursor:pointer;transition:all .2s;opacity:.45" id-label="modeNormal">NORMAL</div>
-      <div id="mode-normal" onclick="setGameMode('normal')" style="flex:1;padding:9px 4px;text-align:center;font-size:10px;letter-spacing:1px;cursor:pointer;transition:all .2s;opacity:1;font-weight:600" id-label="modeComp">COMPETITIVE</div>
+      <div id="mode-easy" onclick="setGameMode('easy')" style="flex:1;padding:11px 4px;text-align:center;font-size:11px;letter-spacing:1px;cursor:pointer;transition:all .2s;opacity:.45" id-label="modeNormal">NORMAL</div>
+      <div id="mode-normal" onclick="setGameMode('normal')" style="flex:1;padding:11px 4px;text-align:center;font-size:11px;letter-spacing:1px;cursor:pointer;transition:all .2s;opacity:1;font-weight:600" id-label="modeComp">COMPETITIVE</div>
     </div>
-    <div id="mode-desc" style="font-size:10px;letter-spacing:1px;opacity:.4;margin-bottom:6px;text-align:center;min-height:14px"></div>
+    <div id="mode-desc" style="font-size:11px;letter-spacing:1px;opacity:.4;margin-bottom:6px;text-align:center;min-height:15px"></div>
     <button class="btn btn-play" id="h-play" onclick="startGame()">PLAY</button>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-      <button class="btn bsm" id="h-top" onclick="showScr('leaderboard')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>TOP</button>
-      <button class="btn bsm" id="h-shop" onclick="showScr('shop')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>SHOP</button>
-      <button class="btn bsm" id="h-prof" onclick="showScr('profile')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>PROFILE</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <button class="btn bsm" id="h-top" onclick="showScr('leaderboard')" style="padding:11px 8px;font-size:11px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>TOP</button>
+      <button class="btn bsm" id="h-shop" onclick="showScr('shop')" style="padding:11px 8px;font-size:11px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>SHOP</button>
+      <button class="btn bsm" id="h-prof" onclick="showScr('profile')" style="padding:11px 8px;font-size:11px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>PROFILE</button>
     </div>
   </div>
   <div style="position:absolute;top:18px;right:16px;display:flex;align-items:center;gap:5px;border-radius:20px;padding:5px 12px">
@@ -454,7 +454,7 @@ var AVC=['#a78bfa','#6ee7b7','#f9a8d4','#67e8f9','#fbbf24','#86efac'];
 function avCol(n){var h=0;for(var i=0;i<(n||'?').length;i++)h+=(n||'?').charCodeAt(i);return AVC[h%AVC.length];}
 function ini(n){return(n||'?').slice(0,2).toUpperCase();}
 var toastT;
-function toast(msg){var e=document.getElementById('toast');if(!e)return;e.textContent=msg;e.style.opacity='1';clearTimeout(toastT);toastT=setTimeout(function(){e.style.opacity='0';},3000);}
+function toast(msg,dur){var e=document.getElementById('toast');if(!e)return;e.textContent=msg;e.style.opacity='1';clearTimeout(toastT);toastT=setTimeout(function(){e.style.opacity='0';},dur||3000);}
 
 // Country flag emoji
 var CF={'Romania':'🇷🇴','Spain':'🇪🇸','Colombia':'🇨🇴','Mexico':'🇲🇽','USA':'🇺🇸','Brazil':'🇧🇷','Argentina':'🇦🇷','Chile':'🇨🇱','Peru':'🇵🇪','Germany':'🇩🇪','France':'🇫🇷','UK':'🇬🇧','Italy':'🇮🇹','Portugal':'🇵🇹','Japan':'🇯🇵','China':'🇨🇳','India':'🇮🇳','Canada':'🇨🇦','Australia':'🇦🇺','Netherlands':'🇳🇱','Belgium':'🇧🇪','Sweden':'🇸🇪','Poland':'🇵🇱','Turkey':'🇹🇷','Russia':'🇷🇺','Ukraine':'🇺🇦','Korea':'🇰🇷','Indonesia':'🇮🇩','Philippines':'🇵🇭','Thailand':'🇹🇭','Vietnam':'🇻🇳','Egypt':'🇪🇬','Nigeria':'🇳🇬','Kenya':'🇰🇪','South Africa':'🇿🇦','Israel':'🇮🇱','UAE':'🇦🇪','Saudi Arabia':'🇸🇦','Ecuador':'🇪🇨','Venezuela':'🇻🇪','Uruguay':'🇺🇾','Paraguay':'🇵🇾','Bolivia':'🇧🇴','Costa Rica':'🇨🇷','Panama':'🇵🇦','Guatemala':'🇬🇹','Honduras':'🇭🇳','Dominican Republic':'🇩🇴','Cuba':'🇨🇺','Puerto Rico':'🇵🇷','Ireland':'🇮🇪','Austria':'🇦🇹','Switzerland':'🇨🇭','Norway':'🇳🇴','Denmark':'🇩🇰','Finland':'🇫🇮','Greece':'🇬🇷','Czech Republic':'🇨🇿','Hungary':'🇭🇺','Croatia':'🇭🇷','Bulgaria':'🇧🇬','Serbia':'🇷🇸','Moldova':'🇲🇩','Local':'🌍'};
@@ -1101,8 +1101,12 @@ function requestNotifPermission(){
   });
 }
 function toggleNotifications(){
-  if(!('Notification' in window)){toast(lang==='es'?'No soportado en este navegador':'Not supported in this browser');return;}
-  if(S.user&&S.user.isGuest){toast(lang==='es'?'Crea una cuenta para notificaciones':'Create an account for notifications');return;}
+  if(!('Notification' in window)||!('serviceWorker' in navigator)||!('PushManager' in window)){
+    var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+    var msg=isIOS?(lang==='es'?'En iPhone: agrega ORBIT a tu pantalla de inicio y ábrela desde ahí':'On iPhone: add ORBIT to your Home Screen, then open it from there'):(lang==='es'?'Notificaciones no soportadas en este navegador':'Push notifications not supported in this browser');
+    toast(msg,3500);return;
+  }
+  if(S.user&&S.user.isGuest){toast(lang==='es'?'Crea una cuenta para activar notificaciones':'Create an account to enable notifications');return;}
   if(!fcmMessaging){initFCM();}
   if(S.notifEnabled){
     // Turn off: clear token from Firestore
@@ -2039,7 +2043,16 @@ function setGameMode(m){
     if(desc)desc.textContent=t('modeDescComp');
   }
 }
-function startGame(){SCRS.forEach(function(s){document.getElementById('scr-'+s).classList.remove('on');});currentMode=S.gameMode||'normal';phase='playing';init();startTutorial();}
+function startGame(){
+  SCRS.forEach(function(s){document.getElementById('scr-'+s).classList.remove('on');});
+  currentMode=S.gameMode||'normal';
+  // Pick a fresh random background theme each game
+  zenBgIdx=Math.floor(Math.random()*ZEN_BG.length);
+  compBgIdx=Math.floor(Math.random()*COMP_BG.length);
+  bgInit=false; // re-init stars with new theme colors
+  shootStars=[];
+  phase='playing';init();startTutorial();
+}
 function togglePause(){
   if(phase==='playing'){phase='paused';document.getElementById('scr-pause').classList.add('on');document.getElementById('scr-pause').style.background=T.bg;document.getElementById('pause-btn').style.display='none';}
   else if(phase==='paused'){phase='playing';document.getElementById('scr-pause').classList.remove('on');document.getElementById('pause-btn').style.display='flex';}
@@ -2361,72 +2374,176 @@ function drawHome(){
     ctx.beginPath();ctx.arc(bx+Math.cos(ba)*br,by+Math.sin(ba)*br,W*.008,0,6.28);ctx.fillStyle=col;ctx.fill();
   }
 }
-// Galaxy background — subtle opal shimmer
-var bgStars=[];
-var bgInit=false;
+// ══════════════════════════════════════════
+// GALAXY BACKGROUNDS — themed, per-game-random
+// ══════════════════════════════════════════
+var ZEN_BG=[
+  // 0 — Warm Cosmos (peach · amber · coral) — like the game screenshot
+  {c1:'#f0d8c0',c2:'#c4966a',
+   neb:[{x:.28,y:.38,c:'rgba(230,120,60,.13)',r:.6},{x:.72,y:.52,c:'rgba(210,80,60,.09)',r:.65},
+        {x:.5,y:.18,c:'rgba(255,190,100,.12)',r:.5},{x:.18,y:.72,c:'rgba(200,90,70,.08)',r:.55},
+        {x:.85,y:.28,c:'rgba(255,160,80,.10)',r:.45},{x:.55,y:.85,c:'rgba(230,140,90,.07)',r:.5}],
+   au:['rgba(255,140,60,.07)','rgba(220,100,60,.05)'],
+   sc:['#fff8ee','#ffd9a0','#ffb060','#ffe0b0']},
+  // 1 — Magenta Rift (rose · violet · fuchsia)
+  {c1:'#eecce0',c2:'#b87aa8',
+   neb:[{x:.32,y:.42,c:'rgba(200,60,160,.11)',r:.58},{x:.68,y:.55,c:'rgba(150,40,200,.08)',r:.65},
+        {x:.5,y:.16,c:'rgba(240,80,180,.10)',r:.5},{x:.16,y:.68,c:'rgba(170,40,140,.07)',r:.55},
+        {x:.82,y:.32,c:'rgba(220,100,200,.09)',r:.45},{x:.44,y:.82,c:'rgba(200,60,160,.07)',r:.5}],
+   au:['rgba(210,60,180,.07)','rgba(160,40,210,.05)'],
+   sc:['#fde8f8','#f0b0e0','#d060b0','#ffc8ee']},
+  // 2 — Emerald Void (jade · teal · sage)
+  {c1:'#c4e0d4',c2:'#7aaa98',
+   neb:[{x:.38,y:.32,c:'rgba(30,150,110,.10)',r:.58},{x:.62,y:.62,c:'rgba(20,130,100,.08)',r:.65},
+        {x:.24,y:.5,c:'rgba(50,170,130,.09)',r:.5},{x:.76,y:.28,c:'rgba(25,120,90,.06)',r:.55},
+        {x:.5,y:.8,c:'rgba(70,190,150,.08)',r:.45},{x:.88,y:.7,c:'rgba(40,160,120,.07)',r:.5}],
+   au:['rgba(30,160,120,.07)','rgba(20,120,100,.05)'],
+   sc:['#e4f8f0','#a8e8d0','#60c8a8','#c0f0e4']}
+];
+var COMP_BG=[
+  // 0 — Abyss (deep purple · indigo)
+  {c1:'#08060e',c2:'#030208',
+   neb:[{x:.3,y:.4,c:'rgba(110,70,210,.08)',r:.65},{x:.7,y:.55,c:'rgba(70,35,160,.06)',r:.75},
+        {x:.5,y:.15,c:'rgba(150,90,240,.07)',r:.55},{x:.2,y:.7,c:'rgba(90,55,180,.05)',r:.6},
+        {x:.8,y:.8,c:'rgba(130,75,220,.06)',r:.5}],
+   au:['rgba(90,55,200,.06)','rgba(70,35,155,.04)'],
+   sc:['#ffffff','#c8b8ff','#9080f0','#e4deff']},
+  // 1 — Crimson Star (blood red · deep orange)
+  {c1:'#0e0508',c2:'#060103',
+   neb:[{x:.35,y:.45,c:'rgba(210,35,35,.08)',r:.65},{x:.65,y:.5,c:'rgba(170,60,15,.06)',r:.75},
+        {x:.5,y:.2,c:'rgba(230,80,30,.07)',r:.55},{x:.25,y:.65,c:'rgba(190,25,25,.05)',r:.6},
+        {x:.8,y:.75,c:'rgba(210,100,15,.06)',r:.5}],
+   au:['rgba(200,35,35,.06)','rgba(160,60,15,.04)'],
+   sc:['#ffffff','#ffc090','#ff7730','#ffeedd']},
+  // 2 — Cyber Teal (electric teal · cyan)
+  {c1:'#030c0f',c2:'#010507',
+   neb:[{x:.3,y:.4,c:'rgba(0,180,210,.07)',r:.65},{x:.7,y:.6,c:'rgba(0,120,200,.05)',r:.75},
+        {x:.5,y:.18,c:'rgba(30,200,230,.07)',r:.55},{x:.2,y:.72,c:'rgba(0,160,185,.05)',r:.6},
+        {x:.82,y:.78,c:'rgba(0,180,160,.06)',r:.5}],
+   au:['rgba(0,180,210,.06)','rgba(0,115,185,.04)'],
+   sc:['#ffffff','#80ffff','#30c0e0','#b8f4ff']}
+];
+var zenBgIdx=0,compBgIdx=0;
+var bgStars=[],bgInit=false;
+// Shooting stars
+var shootStars=[];var shootTimer=0;
 function initBgStars(){
   bgStars=[];
-  for(var i=0;i<80;i++){
-    bgStars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.5+.3,spd:Math.random()*.0003+.0001,phase:Math.random()*6.28});
+  var isZ=currentMode==='easy';
+  var th=isZ?ZEN_BG[zenBgIdx]:COMP_BG[compBgIdx];
+  var cols=th.sc;
+  for(var i=0;i<90;i++){
+    bgStars.push({
+      x:Math.random(),y:Math.random(),
+      r:Math.random()*1.6+.3,
+      phase:Math.random()*6.28,
+      spd:Math.random()*.0003+.0001,
+      col:cols[Math.floor(Math.random()*cols.length)]
+    });
   }
   bgInit=true;
+}
+function spawnShoot(zen){
+  var a=(Math.random()*.5+.15)*Math.PI; // diagonal right-downward
+  var spd=5+Math.random()*6;
+  shootStars.push({
+    x:Math.random()*W*1.2-W*.1, y:Math.random()*H*.45,
+    vx:Math.cos(a)*spd, vy:Math.sin(a)*spd,
+    len:40+Math.random()*90, life:1, maxL:1,
+    col:zen?'rgba(255,245,220,.85)':'rgba(220,210,255,.90)'
+  });
 }
 function drawGalaxyBg(){
   if(!bgInit)initBgStars();
   var time=Date.now()*.001;
   var isZen=currentMode==='easy';
-  // Nebula clouds — richer in Zen mode
-  var nebulas=isNight?
-    [{x:.3,y:.4,col:'rgba(167,139,250,.04)'},{x:.7,y:.6,col:'rgba(110,231,183,.03)'},{x:.5,y:.2,col:'rgba(249,168,212,.03)'}]:
-    [{x:.3,y:.4,col:'rgba(100,80,180,.03)'},{x:.7,y:.6,col:'rgba(60,160,120,.025)'},{x:.5,y:.2,col:'rgba(180,100,140,.025)'}];
-  if(isZen){
-    // Extra zen nebula layers — slow aurora
-    nebulas=nebulas.concat([
-      {x:.5,y:.5,col:'rgba(139,92,246,.06)'},
-      {x:.2,y:.7,col:'rgba(99,102,241,.05)'},
-      {x:.8,y:.3,col:'rgba(167,139,250,.05)'},
-      {x:.6,y:.8,col:'rgba(196,181,253,.04)'}
-    ]);
+  var isPlaying=(phase==='playing'||phase==='paused');
+  var th=isZen?ZEN_BG[zenBgIdx]:(isNight?COMP_BG[compBgIdx]:null);
+
+  // ── Painted base gradient (zen + dark competitive only) ──
+  if(th){
+    var bg=ctx.createLinearGradient(0,0,W*.6,H);
+    bg.addColorStop(0,th.c1);bg.addColorStop(1,th.c2);
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    // Bright hot-spot radial
+    var hot=ctx.createRadialGradient(W*.35,H*.3,0,W*.35,H*.3,Math.min(W,H)*.65);
+    hot.addColorStop(0,isZen?'rgba(255,255,255,.18)':'rgba(255,255,255,.08)');
+    hot.addColorStop(1,'transparent');
+    ctx.fillStyle=hot;ctx.fillRect(0,0,W,H);
   }
-  var speedMult=isZen?.4:1;
-  for(var n=0;n<nebulas.length;n++){
-    var nb=nebulas[n];
-    var nx=nb.x*W+Math.sin(time*.15*speedMult+n*2)*W*(isZen?.12:.08);
-    var ny=nb.y*H+Math.cos(time*.12*speedMult+n*1.7)*H*(isZen?.10:.06);
-    var nr=Math.min(W,H)*(isZen?.5:.35);
-    var grad=ctx.createRadialGradient(nx,ny,0,nx,ny,nr);
-    grad.addColorStop(0,nb.col);
-    grad.addColorStop(1,'transparent');
-    ctx.fillStyle=grad;
-    ctx.fillRect(0,0,W,H);
+
+  // ── Nebula clouds ──
+  var speedMult=isZen?.35:1;
+  var nebs=th?th.neb:(isNight?
+    [{x:.3,y:.4,c:'rgba(140,100,220,.05)',r:.55},{x:.7,y:.6,c:'rgba(80,200,160,.04)',r:.6},{x:.5,y:.2,c:'rgba(200,120,160,.04)',r:.5}]:
+    [{x:.3,y:.4,c:'rgba(100,80,180,.03)',r:.5},{x:.7,y:.6,c:'rgba(60,160,120,.025)',r:.55},{x:.5,y:.2,c:'rgba(180,100,140,.025)',r:.45}]);
+  for(var n=0;n<nebs.length;n++){
+    var nb=nebs[n];
+    var nx=nb.x*W+Math.sin(time*.14*speedMult+n*2.1)*W*(isZen?.13:.07);
+    var ny=nb.y*H+Math.cos(time*.11*speedMult+n*1.8)*H*(isZen?.11:.05);
+    var nr=Math.min(W,H)*((nb.r||.5)*(isZen?.95:.85));
+    var grd=ctx.createRadialGradient(nx,ny,0,nx,ny,nr);
+    grd.addColorStop(0,nb.c);grd.addColorStop(1,'transparent');
+    ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
   }
-  // Aurora wave in zen mode
-  if(isZen){
-    var auroraY=H*.35+Math.sin(time*.2)*H*.08;
-    var ag=ctx.createLinearGradient(0,auroraY-60,0,auroraY+60);
-    ag.addColorStop(0,'transparent');
-    ag.addColorStop(.5,'rgba(139,92,246,0.04)');
-    ag.addColorStop(1,'transparent');
-    ctx.fillStyle=ag;ctx.fillRect(0,auroraY-60,W,120);
-    var auroraY2=H*.65+Math.cos(time*.15)*H*.06;
-    var ag2=ctx.createLinearGradient(0,auroraY2-40,0,auroraY2+40);
-    ag2.addColorStop(0,'transparent');
-    ag2.addColorStop(.5,'rgba(99,102,241,0.03)');
-    ag2.addColorStop(1,'transparent');
-    ctx.fillStyle=ag2;ctx.fillRect(0,auroraY2-40,W,80);
+
+  // ── Aurora ribbons ──
+  var acs=th?th.au:(isNight?['rgba(110,70,200,.04)','rgba(70,40,160,.03)']:['rgba(90,60,180,.03)','rgba(60,40,130,.02)']);
+  for(var ai=0;ai<2;ai++){
+    var aY=(ai===0?H*.32:H*.66)+Math.sin(time*(ai===0?.18:.14)+ai)*H*(ai===0?.09:.07);
+    var aH=ai===0?100:70;
+    var ag=ctx.createLinearGradient(0,aY-aH,0,aY+aH);
+    ag.addColorStop(0,'transparent');ag.addColorStop(.5,acs[ai]);ag.addColorStop(1,'transparent');
+    // Warp the ribbon horizontally with a sin wave
+    ctx.save();ctx.beginPath();
+    for(var xi=0;xi<=W;xi+=8){
+      var yw=aY+Math.sin(xi*.008+time*.3+ai*2)*aH*.4;
+      xi===0?ctx.moveTo(xi,yw-aH*.6):ctx.lineTo(xi,yw-aH*.6);
+    }
+    for(var xi2=W;xi2>=0;xi2-=8){
+      var yw2=aY+Math.sin(xi2*.008+time*.3+ai*2)*aH*.4;
+      ctx.lineTo(xi2,yw2+aH*.6);
+    }
+    ctx.closePath();
+    var rib=ctx.createLinearGradient(0,aY-aH,0,aY+aH);
+    rib.addColorStop(0,'transparent');rib.addColorStop(.5,acs[ai]);rib.addColorStop(1,'transparent');
+    ctx.fillStyle=rib;ctx.fill();ctx.restore();
   }
-  // Stars — slower twinkle in zen
+
+  // ── Stars ──
+  var starAlphaMult=th?(isZen?.55:.75):(isNight?.45:.2);
+  var twSpd=isZen?.55:1.6;
   for(var s=0;s<bgStars.length;s++){
     var st=bgStars[s];
-    var sx=st.x*W,sy=st.y*H;
-    var twinkleSpeed=isZen?.6:1.5;
-    var twinkle=.3+Math.sin(time*twinkleSpeed+st.phase)*.25;
-    ctx.globalAlpha=twinkle*(isNight?(isZen?.8:.6):.25);
-    ctx.beginPath();ctx.arc(sx,sy,st.r*(isZen?1.2:1),0,6.28);
-    ctx.fillStyle=isZen?(Math.random()>.5?'#c4b5fd':'#a5b4fc'):isNight?'#ffffff':'rgba(80,60,120,.8)';
-    ctx.fill();
+    var twinkle=.25+Math.sin(time*twSpd+st.phase)*.25;
+    ctx.globalAlpha=twinkle*starAlphaMult;
+    ctx.beginPath();ctx.arc(st.x*W,st.y*H,st.r*(isZen?1.25:1),0,6.28);
+    ctx.fillStyle=st.col;ctx.fill();
   }
   ctx.globalAlpha=1;
+
+  // ── Shooting stars (rare — only during gameplay) ──
+  if(isPlaying){
+    shootTimer++;
+    var spawnChance=isZen?0.0015:0.0008;
+    if(Math.random()<spawnChance&&shootStars.length<3)spawnShoot(isZen);
+    for(var si=shootStars.length-1;si>=0;si--){
+      var ss=shootStars[si];
+      ss.x+=ss.vx;ss.y+=ss.vy;ss.life-=0.018;
+      if(ss.life<=0||ss.x>W*1.2||ss.y>H*1.2){shootStars.splice(si,1);continue;}
+      var tail=ss.len*Math.min(1,ss.life*3);
+      var ex=ss.x-ss.vx*(tail/Math.hypot(ss.vx,ss.vy));
+      var ey=ss.y-ss.vy*(tail/Math.hypot(ss.vx,ss.vy));
+      var ssg=ctx.createLinearGradient(ex,ey,ss.x,ss.y);
+      ssg.addColorStop(0,'transparent');
+      ssg.addColorStop(.6,ss.col.replace('.90','.'+(ss.life*.35).toFixed(2)).replace('.85','.'+(ss.life*.3).toFixed(2)));
+      ssg.addColorStop(1,ss.col);
+      ctx.globalAlpha=Math.min(ss.life,1)*.8;
+      ctx.strokeStyle=ssg;ctx.lineWidth=1.4;
+      ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(ss.x,ss.y);ctx.stroke();
+      ctx.globalAlpha=1;
+    }
+  }
 }
 function draw(){
   ctx.fillStyle=T.bg;ctx.fillRect(0,0,W,H);
