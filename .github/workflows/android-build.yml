@@ -8,9 +8,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -21,23 +28,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Sync Capacitor
-        run: npx cap sync android
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Sync Capacitor web assets
+        run: npx cap sync android --inline
 
       - name: Build Debug APK
+        working-directory: android
         run: |
-          cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon --stacktrace
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
