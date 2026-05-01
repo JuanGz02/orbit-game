@@ -2328,11 +2328,22 @@ window.addEventListener('load',function(){
   };
   document.head.appendChild(s1);
 
-  // AdMob
+  // H5 Games Ads
   var adScript=document.createElement('script');
   adScript.async=true;
   adScript.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5027187235162706';
   adScript.crossOrigin='anonymous';
+  adScript.onload=function(){
+    try{
+      if(typeof adConfig==='function'){
+        adConfig({
+          preloadAdBreaks:'on',
+          sound:'on',
+          onReady:function(){console.log('H5 Ads ready');}
+        });
+      }
+    }catch(e){}
+  };
   adScript.onerror=function(){console.log('AdMob blocked by client - normal with ad blockers');};
   document.head.appendChild(adScript);
 });
