@@ -1011,7 +1011,12 @@ function initFirebase(){
 
     auth.onAuthStateChanged(function(user){
       if(user){
-        if(user.isAnonymous&&S.user&&S.user.isGuest&&S.nick){updateHomeUI();showScr('home');return;}
+        // Anónimo = siempre guest, sin importar el estado de S
+        if(user.isAnonymous){
+          S.user={uid:user.uid,email:'guest',isGuest:true};
+          if(!S.nick||S.nick==='Player')S.nick=localStorage.getItem('orb_guestnick')||'Guest';
+          updateHomeUI();showScr('home');return;
+        }
         S.user={uid:user.uid,email:user.email||'',photo:user.photoURL||null};
         db.collection('users').doc(user.uid).get().then(function(doc){
           if(doc.exists){
@@ -1149,7 +1154,8 @@ function saveToCloud(){
 }
 function saveLbEntry(){
   if(!db||!S.user||!S.user.uid||!S.best)return;
-  if(S.user.isGuest) return; // Guests can't enter leaderboard
+  if(S.user.isGuest||S.user.email==='guest') return; // Guests can't enter leaderboard
+  if(!S.nick||S.nick==='Player'||S.nick==='Guest') return; // bloquear nicks por defecto sin nombre real
   if(!db||!S.user||!S.user.uid||!S.best)return;
   var country=S.country||userCountry||'Unknown';
   db.collection('leaderboard').doc(S.user.uid).set({
@@ -1242,6 +1248,7 @@ function finishGuestSetup(nick){
   auth.signInAnonymously().then(function(r){
     S.user={uid:r.user.uid,email:'guest',isGuest:true};
     S.nick=nick;S.country=userCountry;
+    localStorage.setItem('orb_guestnick',nick); // persiste el nick entre sesiones anónimas
     if(guestPhotoData)S.photo=guestPhotoData;
     saveState();saveToCloud();updateHomeUI();showScr('home');
   }).catch(function(e){
