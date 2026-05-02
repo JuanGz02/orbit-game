@@ -1719,12 +1719,14 @@ function applySpinPrize(prize,isExtra){
   ab.disabled=S.lastSpinExtra===today;ab.style.opacity=S.lastSpinExtra===today?'.35':'.7';
   spinLocked=false;
 }
-// Auto-popup: una vez por día calendario, persiste entre sesiones
+// Auto-popup: una vez por día — clave propia en localStorage,
+// sobrevive logout y cambios de cuenta (es a nivel dispositivo)
+function getSpinShownDate(){return localStorage.getItem('orb_spinshown')||'';}
+function setSpinShownDate(d){localStorage.setItem('orb_spinshown',d);}
 function checkAutoSpin(){
   var today=getTodayKey();
-  if(S.user&&!S.user.isGuest&&S.lastSpinShown!==today){
-    S.lastSpinShown=today;
-    saveState();
+  if(S.user&&!S.user.isGuest&&getSpinShownDate()!==today){
+    setSpinShownDate(today);
     setTimeout(openSpin,1200);
   }
 }
