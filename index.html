@@ -1154,8 +1154,7 @@ function saveToCloud(){
 }
 function saveLbEntry(){
   if(!db||!S.user||!S.user.uid||!S.best)return;
-  if(S.user.isGuest||S.user.email==='guest') return; // Guests can't enter leaderboard
-  if(!S.nick||S.nick==='Player'||S.nick==='Guest') return; // bloquear nicks por defecto sin nombre real
+  if(S.user.isGuest||S.user.email==='guest') return; // invitados fuera del leaderboard
   if(!db||!S.user||!S.user.uid||!S.best)return;
   var country=S.country||userCountry||'Unknown';
   db.collection('leaderboard').doc(S.user.uid).set({
@@ -2145,7 +2144,7 @@ function die(){
     updateRank();
   }
   saveState();
-  if(currentMode!=='easy')saveLbEntry();
+  saveLbEntry(); // todos los modos guardan al leaderboard
   deathCount++;
   // Track daily challenge progress
   checkDailyProgress('score',score);
