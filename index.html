@@ -150,17 +150,12 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
   <div style="position:absolute;top:18px;right:16px;display:flex;align-items:center;gap:5px;border-radius:20px;padding:5px 12px">
     <span style="color:#fbbf24">★</span><span id="h-coins" style="color:#fbbf24;font-size:13px;font-weight:600">0</span>
   </div>
-  <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:12px">
-    <div id="theme-sw" style="display:flex;gap:6px;background:rgba(128,128,128,.12);border-radius:24px;padding:5px">
-      <div onclick="toggleSound()" id="snd-toggle" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;transition:all .2s;opacity:.6">♫</div>
-      <div onclick="setThemeMode('light')" id="tm-light" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all .2s">☀️</div>
-      <div onclick="setThemeMode('auto')" id="tm-auto" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all .2s">⚡</div>
-      <div onclick="setThemeMode('dark')" id="tm-dark" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all .2s">🌙</div>
-    </div>
+  <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px">
     <div class="lang-switch" id="home-lsw">
       <div class="lang-opt on" id="hls-en" onclick="setLang('en')">EN</div>
       <div class="lang-opt" id="hls-es" onclick="setLang('es')">ES</div>
     </div>
+    <div onclick="toggleSound()" id="snd-toggle" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:all .2s;opacity:.5;background:rgba(128,128,128,.12)">♫</div>
   </div>
 </div>
 
@@ -407,8 +402,7 @@ var isNight=false;
 var T=TH_DAY;
 
 function resolveNight(){
-  var m=S.themeMode||'auto';
-  if(m==='dark')return true;
+  return true; // siempre oscuro en UI — fondos los controla el modo de juego
   if(m==='light')return false;
   var h=new Date().getHours();
   return h>=20||h<7;
@@ -1603,6 +1597,11 @@ var SPIN_PRIZES=[
 ];
 var spinAngle=0,spinVelocity=0,spinAnimId=null,spinLocked=false;
 function getTodayKey(){return new Date().toISOString().slice(0,10);}
+// Spin dates en claves propias — sobreviven logout (no están en S{})
+function getSpinDate(){return localStorage.getItem('orb_spindate')||'';}
+function setSpinDate(d){localStorage.setItem('orb_spindate',d);}
+function getSpinExtra(){return localStorage.getItem('orb_spinextra')||'';}
+function setSpinExtra(d){localStorage.setItem('orb_spinextra',d);}
 function drawSpinWheel(angle){
   var canvas=document.getElementById('spin-canvas');
   if(!canvas)return;
@@ -1639,7 +1638,7 @@ function openSpin(){
   var box=document.getElementById('spin-box');
   if(box){box.style.background=T.bg;box.style.color=T.text;}
   document.getElementById('spin-modal').style.display='flex';
-  var today=getTodayKey(),spun=S.lastSpinDate===today,extraSpun=S.lastSpinExtra===today;
+  var today=getTodayKey(),spun=getSpinDate()===today,extraSpun=getSpinExtra()===today;
   document.getElementById('spin-title').textContent=t('spinTitle');
   document.getElementById('spin-result').textContent='';
   var fb=document.getElementById('spin-btn-free'),ab=document.getElementById('spin-btn-ad');
@@ -1659,10 +1658,10 @@ function closeSpin(){
 function doSpin(useAd){
   var today=getTodayKey();
   if(useAd){
-    if(S.lastSpinExtra===today){toast(t('spinDone'));return;}
+    if(getSpinExtra()===today){toast(t('spinDone'));return;}
     showRewardedAd(function(){executeSpin(true);},function(){});
   }else{
-    if(S.lastSpinDate===today){toast(t('spinDone'));return;}
+    if(getSpinDate()===today){toast(t('spinDone'));return;}
     executeSpin(false);
   }
 }
@@ -1710,13 +1709,14 @@ function applySpinPrize(prize,isExtra){
     var ch=document.getElementById('h-coins');if(ch)ch.textContent=S.coins;
     var sc=document.getElementById('sh-coins');if(sc)sc.textContent=S.coins;
   }
-  if(isExtra){S.lastSpinExtra=today;}else{S.lastSpinDate=today;}
+  if(isExtra){setSpinExtra(today);}else{setSpinDate(today);}
   saveState();
   var fb=document.getElementById('spin-btn-free'),ab=document.getElementById('spin-btn-ad');
-  fb.textContent='⭐ '+(S.lastSpinDate===today?t('spinDone'):t('spinFree'));
-  fb.disabled=S.lastSpinDate===today;fb.style.opacity=S.lastSpinDate===today?'.35':'1';
-  ab.textContent='📺 '+(S.lastSpinExtra===today?t('spinDone'):t('spinWatch'));
-  ab.disabled=S.lastSpinExtra===today;ab.style.opacity=S.lastSpinExtra===today?'.35':'.7';
+  var spunNow=getSpinDate()===today,extraNow=getSpinExtra()===today;
+  fb.textContent='⭐ '+(spunNow?t('spinDone'):t('spinFree'));
+  fb.disabled=spunNow;fb.style.opacity=spunNow?'.35':'1';
+  ab.textContent='📺 '+(extraNow?t('spinDone'):t('spinWatch'));
+  ab.disabled=extraNow;ab.style.opacity=extraNow?'.35':'.7';
   spinLocked=false;
 }
 // Auto-popup: una vez por día — clave propia en localStorage,
@@ -2476,7 +2476,7 @@ function drawGalaxyBg(){
   var time=Date.now()*.001;
   var isZen=currentMode==='easy';
   var isPlaying=(phase==='playing'||phase==='paused');
-  var th=isZen?ZEN_BG[zenBgIdx]:(isNight?COMP_BG[compBgIdx]:null);
+  var th=isZen?ZEN_BG[zenBgIdx]:COMP_BG[compBgIdx];
 
   // ── Painted base gradient (zen + dark competitive only) ──
   if(th){
