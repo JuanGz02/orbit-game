@@ -384,7 +384,7 @@ function getPal(){return GAME_PAL;}
 // ══════════════════════════════════════════
 var DEF={user:null,nick:'',lang:'en',coins:0,best:0,noAds:false,themeMode:'dark',tutorial:false,
   trail:'simple',ownedTrails:['simple'],hist:[],photo:null,country:'',ownedPowerups:{magnet:0},
-  streak:0,lastPlayDate:'',rank:'rookie',gameMode:'normal',lastSpinDate:'',lastSpinExtra:'',nextGameMultiplier:1,notifEnabled:false};
+  streak:0,lastPlayDate:'',rank:'rookie',gameMode:'normal',lastSpinDate:'',lastSpinExtra:'',lastSpinShown:'',nextGameMultiplier:1,notifEnabled:false};
 var S=Object.assign({},DEF);
 function loadState(){try{var d=localStorage.getItem('orb7');if(d)S=Object.assign({},DEF,JSON.parse(d));}catch(e){}}
 function saveState(){localStorage.setItem('orb7',JSON.stringify(S));saveToCloud();}
@@ -1594,11 +1594,11 @@ function renderLbData(all){
 // ══════════════════════════════════════════
 // Premios equilibrados — menos generosos, más emocionantes
 var SPIN_PRIZES=[
-  {label:'25 ★', coins:25,  col:'#6366f1', weight:40},
-  {label:'75 ★', coins:75,  col:'#8b5cf6', weight:25},
-  {label:'150 ★',coins:150, col:'#a855f7', weight:18},
-  {label:'300 ★',coins:300, col:'#ec4899', weight:12},
-  {label:'500 ★',coins:500, col:'#fbbf24', weight:4},
+  {label:'25 ★', coins:25,  col:'#6366f1', weight:52},
+  {label:'75 ★', coins:75,  col:'#8b5cf6', weight:28},
+  {label:'150 ★',coins:150, col:'#a855f7', weight:13},
+  {label:'300 ★',coins:300, col:'#ec4899', weight:5},
+  {label:'500 ★',coins:500, col:'#fbbf24', weight:1},
   {label:'2× Next',coins:0, col:'#f97316', multiplier:true, weight:1}
 ];
 var spinAngle=0,spinVelocity=0,spinAnimId=null,spinLocked=false;
@@ -1719,11 +1719,12 @@ function applySpinPrize(prize,isExtra){
   ab.disabled=S.lastSpinExtra===today;ab.style.opacity=S.lastSpinExtra===today?'.35':'.7';
   spinLocked=false;
 }
-// Auto-popup: solo una vez por sesión, aunque vuelvan al home varias veces
-var spinPopupShown=false;
+// Auto-popup: una vez por día calendario, persiste entre sesiones
 function checkAutoSpin(){
-  if(!spinPopupShown&&S.user&&!S.user.isGuest&&S.lastSpinDate!==getTodayKey()){
-    spinPopupShown=true;
+  var today=getTodayKey();
+  if(S.user&&!S.user.isGuest&&S.lastSpinShown!==today){
+    S.lastSpinShown=today;
+    saveState();
     setTimeout(openSpin,1200);
   }
 }
