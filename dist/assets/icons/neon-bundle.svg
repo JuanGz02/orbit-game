@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1a0014"/>
+      <stop offset="100%" stop-color="#0a0a14"/>
+    </radialGradient>
+    <linearGradient id="prism1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0abfc"/>
+      <stop offset="50%" stop-color="#ec4899"/>
+      <stop offset="100%" stop-color="#a21caf"/>
+    </linearGradient>
+    <linearGradient id="ray1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f87171" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#f87171" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ray2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fb923c" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#fb923c" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ray3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#facc15" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#facc15" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ray4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4ade80" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#4ade80" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ray5" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#60a5fa" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ray6" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="9" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="prismbig">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- Rainbow rays from prism -->
+  <polygon points="256,256 440,210 480,230" fill="url(#ray1)" opacity="0.85"/>
+  <polygon points="256,256 440,235 478,255" fill="url(#ray2)" opacity="0.85"/>
+  <polygon points="256,256 440,258 476,278" fill="url(#ray3)" opacity="0.85"/>
+  <polygon points="256,256 436,280 472,302" fill="url(#ray4)" opacity="0.85"/>
+  <polygon points="256,256 428,302 460,326" fill="url(#ray5)" opacity="0.85"/>
+  <polygon points="256,256 415,322 444,348" fill="url(#ray6)" opacity="0.85"/>
+  <!-- Light beam entering -->
+  <polygon points="80,180 256,248 256,264 80,220" fill="#f5d0fe" opacity="0.3"/>
+  <!-- Prism diamond -->
+  <polygon points="256,120 330,256 256,370 182,256" fill="url(#prism1)" filter="url(#glow)"/>
+  <polygon points="256,120 330,256 256,370 182,256" fill="none" stroke="#f0abfc" stroke-width="2" opacity="0.9"/>
+  <!-- Inner shine -->
+  <polygon points="256,140 310,240 256,200" fill="#fff" opacity="0.15"/>
+  <!-- Sparkles -->
+  <circle cx="120" cy="120" r="4" fill="#f0abfc" filter="url(#glow)" opacity="0.8"/>
+  <circle cx="390" cy="100" r="3" fill="#f87171" filter="url(#glow)" opacity="0.7"/>
+  <circle cx="460" cy="400" r="4" fill="#4ade80" filter="url(#glow)" opacity="0.7"/>
+  <circle cx="80" cy="420" r="3" fill="#60a5fa" filter="url(#glow)" opacity="0.6"/>
+  <!-- Glow halo -->
+  <polygon points="256,120 330,256 256,370 182,256" fill="#ec4899" opacity="0.06" filter="url(#prismbig)"/>
+</svg>

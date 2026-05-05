@@ -1,0 +1,28 @@
+{
+  "name": "ORBIT",
+  "short_name": "ORBIT",
+  "description": "Orbit. Jump. Survive. The most addictive 1-tap space game.",
+  "start_url": "/orbit-game/",
+  "scope": "/orbit-game/",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#0a0a14",
+  "theme_color": "#0a0a14",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games"],
+  "lang": "en",
+  "id": "/orbit-game/"
+}
