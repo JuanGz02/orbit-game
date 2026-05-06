@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deer Rock Studios</title>
+  <meta name="description" content="Deer Rock Studios builds high-impact apps and games that connect digital products with real-world outcomes.">
+  <link rel="icon" href="./deer-rock-logo-512.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#home">
+      <img src="./deer-rock-logo-512.png" alt="Deer Rock Studios logo">
+      <span>Deer Rock Studios</span>
+    </a>
+    <nav>
+      <a href="#about" data-i18n="nav_about">About</a>
+      <a href="#products" data-i18n="nav_products">Products</a>
+      <a href="#press" data-i18n="nav_press">Press</a>
+      <a href="#investors" data-i18n="nav_investors">Investors</a>
+      <a href="#support" data-i18n="nav_support">Support</a>
+    </nav>
+    <button id="lang-btn" class="lang-btn">ES</button>
+  </header>
+
+  <main id="home">
+    <section class="hero">
+      <div>
+        <p class="eyebrow" data-i18n="hero_eyebrow">Digital products with real-world impact</p>
+        <h1 data-i18n="hero_title">We build apps and games people actually use daily.</h1>
+        <p class="lead" data-i18n="hero_text">Deer Rock Studios is a product-focused company creating practical, high-quality software that bridges creativity, utility, and business outcomes.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#products" data-i18n="hero_cta_1">Explore Products</a>
+          <a class="btn btn-secondary" href="#support" data-i18n="hero_cta_2">Contact Support</a>
+        </div>
+      </div>
+      <div class="hero-card">
+        <h3 data-i18n="hero_card_title">Company Snapshot</h3>
+        <ul>
+          <li><strong id="metric-products">0</strong> <span data-i18n="metric_products">Live products</span></li>
+          <li><strong data-i18n="metric_focus_value">Apps + Games</strong> <span data-i18n="metric_focus">Product focus</span></li>
+          <li><strong data-i18n="metric_model_value">B2C + Partnerships</strong> <span data-i18n="metric_model">Business model</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="about" class="section">
+      <h2 data-i18n="about_title">Corporate Profile</h2>
+      <p data-i18n="about_text">We are a software studio dedicated to building apps with a clear mission: connect digital experiences to the real world. Our process blends product strategy, design, and engineering to launch software that is both useful and memorable.</p>
+    </section>
+
+    <section id="products" class="section">
+      <div class="section-head">
+        <h2 data-i18n="products_title">Apps & Games</h2>
+        <span class="pill" data-i18n="products_pill">Update-ready catalog</span>
+      </div>
+      <div id="products-grid" class="products-grid"></div>
+      <p class="hint" data-i18n="products_hint">To update products, edit only the file <code>products.json</code>.</p>
+    </section>
+
+    <section id="press" class="section">
+      <h2 data-i18n="press_title">Press</h2>
+      <p data-i18n="press_text">For media inquiries, interviews, brand assets, and press materials, contact us by email and include "Press" in the subject line.</p>
+      <a class="link" href="mailto:jucapegu02@gmail.com?subject=Press%20Inquiry">jucapegu02@gmail.com</a>
+    </section>
+
+    <section id="investors" class="section">
+      <h2 data-i18n="investors_title">Investors</h2>
+      <p data-i18n="investors_text">We are open to strategic conversations with investors and partners interested in scalable app ecosystems, product growth, and long-term software value creation.</p>
+      <a class="link" href="mailto:jucapegu02@gmail.com?subject=Investor%20Inquiry">jucapegu02@gmail.com</a>
+    </section>
+
+    <section id="support" class="section">
+      <h2 data-i18n="support_title">Support & Contact</h2>
+      <p data-i18n="support_text">Need help with a product, account, purchase, or technical issue? Reach us directly and we will respond as soon as possible.</p>
+      <a class="link" href="mailto:jucapegu02@gmail.com?subject=Support%20Request">jucapegu02@gmail.com</a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>© <span id="year"></span> Deer Rock Studios</span>
+    <a href="./privacy-policy.html" data-i18n="footer_privacy">Privacy Policy</a>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+[
+  {
+    "name": "ORBIT",
+    "type": "Game",
+    "badge": "Live",
+    "description_en": "A one-tap space game focused on flow, challenge, and replayability.",
+    "description_es": "Un juego espacial de un toque enfocado en ritmo, reto y rejugabilidad.",
+    "url": "https://deerrockstudios.github.io/orbit-game/"
+  },
+  {
+    "name": "Next Product",
+    "type": "App",
+    "badge": "Coming Soon",
+    "description_en": "Reserved slot for your next launch. Replace this content in products.json.",
+    "description_es": "Espacio reservado para tu próximo lanzamiento. Cambia este contenido en products.json.",
+    "url": "#"
+  }
+]
