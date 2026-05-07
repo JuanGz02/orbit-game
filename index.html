@@ -5686,6 +5686,7 @@
         orb.lastLaunched = orb.on;
         orb.graceFrames = 10;
         orb.last = -1;
+        c.cracked = false;
         orb.on = -1;
       }
       function setGameMode(m) {
@@ -6120,9 +6121,12 @@
                 }
               }
               if (i === circles.length - 1) {
-                // Planet cracks on max impact (competitive only) — planet stays
-                if (isMaxImpact && currentMode !== "easy") {
+                // Planet cracks on hard impact (competitive/normal) — scales with force
+                if (impactForce > 0.5 && currentMode !== "easy") {
                   ci.cracked = true;
+                  ci.crackAngle = orb.ang;
+                  ci.crackForce = impactForce;
+                  ci.ckSeed = Math.random() * 1000;
                 }
                 if (tutStep > 0) tutLanded();
                 if (currentMode === "easy") {
@@ -6875,30 +6879,64 @@
             ctx.fillStyle = ci.col + "ee";
             ctx.fill();
           }
-          // ── Planet cracks (max-force hit, competitive) ──
+          // ── Planet cracks (glass fracture at impact point, scales with force) ──
           if (ci.cracked) {
             ctx.save();
             ctx.translate(s.x + hox, s.y + hoy);
-            var numCk = 7, ckSeed = ci.ckSeed || (ci.ckSeed = Math.random() * 6.28);
-            for (var ck = 0; ck < numCk; ck++) {
-              var cba = ckSeed + (ck / numCk) * Math.PI * 2;
-              var clen = r * (0.45 + Math.sin(ck * 1.7) * 0.3);
-              var cmx = Math.cos(cba + 0.28) * clen * 0.55;
-              var cmy = Math.sin(cba + 0.28) * clen * 0.55;
-              ctx.beginPath();
-              ctx.moveTo(Math.cos(cba) * r * 0.12, Math.sin(cba) * r * 0.12);
-              ctx.lineTo(cmx, cmy);
-              ctx.lineTo(Math.cos(cba + 0.52) * clen, Math.sin(cba + 0.52) * clen);
-              ctx.strokeStyle = "rgba(255,255,255,0.65)";
-              ctx.lineWidth = 1;
-              ctx.stroke();
+            var ca = ci.crackAngle || 0;
+            var cf = ci.crackForce || 0.6;
+            var ckS = ci.ckSeed || 42;
+            // Seeded pseudo-random: deterministic per-crack pattern
+            function ckRnd(n) { var v = Math.sin(ckS + n * 127.1) * 43758.5453; return v - Math.floor(v); }
+            // Impact point on ring surface
+            var ipx = Math.cos(ca) * r, ipy = Math.sin(ca) * r;
+            // Glow at impact point
+            var glowR = r * (0.10 + cf * 0.14);
+            var grd = ctx.createRadialGradient(ipx, ipy, 0, ipx, ipy, glowR);
+            grd.addColorStop(0, "rgba(255,180,50," + (cf * 0.75) + ")");
+            grd.addColorStop(1, "rgba(255,80,30,0)");
+            ctx.beginPath(); ctx.arc(ipx, ipy, glowR, 0, 6.28);
+            ctx.fillStyle = grd; ctx.fill();
+            // Primary radial cracks from impact point inward/sideways
+            var numPrimary = Math.floor(3 + cf * 7); // 3–10 cracks
+            for (var ck = 0; ck < numPrimary; ck++) {
+              // Spread: biased toward center (ca + PI), ±120°
+              var cDir = ca + Math.PI + (ckRnd(ck) - 0.5) * 2.2;
+              var cLen = r * (0.22 + ckRnd(ck + 10) * 0.6) * (0.45 + cf * 0.55);
+              // Jagged midpoint jitter (glass zigzag)
+              var jx = (ckRnd(ck + 20) - 0.5) * r * 0.12;
+              var jy = (ckRnd(ck + 30) - 0.5) * r * 0.12;
+              var mx = ipx + Math.cos(cDir) * cLen * 0.42 + jx;
+              var my = ipy + Math.sin(cDir) * cLen * 0.42 + jy;
+              var ex = ipx + Math.cos(cDir) * cLen;
+              var ey = ipy + Math.sin(cDir) * cLen;
+              var alpha = 0.35 + cf * 0.5;
+              ctx.strokeStyle = "rgba(255,255,255," + alpha + ")";
+              ctx.lineWidth = 0.8 + cf * 0.6;
+              ctx.beginPath(); ctx.moveTo(ipx, ipy); ctx.lineTo(mx, my); ctx.lineTo(ex, ey); ctx.stroke();
+              // Sub-branches for heavy hits
+              if (cf > 0.55 && ckRnd(ck + 40) > 0.3) {
+                var bt = 0.35 + ckRnd(ck + 50) * 0.35;
+                var bx = ipx + Math.cos(cDir) * cLen * bt;
+                var by = ipy + Math.sin(cDir) * cLen * bt;
+                var bAngle = cDir + (ckRnd(ck + 60) - 0.5) * 1.5;
+                var bLen = cLen * (0.18 + ckRnd(ck + 70) * 0.28) * cf;
+                ctx.strokeStyle = "rgba(255,255,255," + (alpha * 0.6) + ")";
+                ctx.lineWidth = 0.5;
+                ctx.beginPath(); ctx.moveTo(bx, by);
+                ctx.lineTo(bx + Math.cos(bAngle) * bLen, by + Math.sin(bAngle) * bLen);
+                ctx.stroke();
+              }
             }
-            // Inner glow
-            ctx.beginPath();
-            ctx.arc(0, 0, r * 0.22, 0, 6.28);
-            ctx.strokeStyle = "rgba(255,200,80,0.5)";
-            ctx.lineWidth = 2;
-            ctx.stroke();
+            // Concentric arc rings around impact (spider-web effect)
+            var numRings = Math.floor(1 + cf * 3);
+            for (var rk = 1; rk <= numRings; rk++) {
+              var arcR2 = r * rk * (0.08 + cf * 0.07);
+              var arcSpan = (0.6 + cf * 0.8) / rk;
+              ctx.strokeStyle = "rgba(255,210,80," + (0.2 + cf * 0.25 - rk * 0.05) + ")";
+              ctx.lineWidth = 0.6;
+              ctx.beginPath(); ctx.arc(ipx, ipy, arcR2, 0, Math.PI * 2); ctx.stroke();
+            }
             ctx.restore();
           }
           ctx.restore();
