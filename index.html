@@ -1617,8 +1617,8 @@
           gravActive: "🌀 Field activated",
           rankUp: "Rank: ",
           spinTitle: "DAILY SPIN",
-          spinFree: "FREE SPIN",
-          spinWatch: "WATCH AD + SPIN",
+          spinFree: "⭐ FREE SPIN",
+          spinWatch: "📺 WATCH AD + SPIN",
           spinDone: "Come back tomorrow!",
           bundleTitle: "BUNDLES",
           seasonPass: "Season Pass",
@@ -1630,6 +1630,10 @@
           shSpin: "⭐ SPIN",
           trailUnlocked: "🎁 Trail unlocked!",
           dayStreak: "day streak!",
+          setupProfile: "set up your profile",
+          enterOrbit: "ENTER ORBIT",
+          lbGlobal: "🌍 GLOBAL",
+          lbLocal: "📍 LOCAL",
         },
         es: {
           tag: "toca · mantén para potencia",
@@ -1707,8 +1711,8 @@
           gravActive: "🌀 Campo activado",
           rankUp: "Rango: ",
           spinTitle: "GIRO DIARIO",
-          spinFree: "GIRO GRATIS",
-          spinWatch: "VER ANUNCIO + GIRAR",
+          spinFree: "⭐ GIRO GRATIS",
+          spinWatch: "📺 VER ANUNCIO + GIRAR",
           spinDone: "¡Vuelve mañana!",
           bundleTitle: "PAQUETES",
           seasonPass: "Pase de Temporada",
@@ -1720,6 +1724,10 @@
           shSpin: "⭐ GIRAR",
           trailUnlocked: "🎁 ¡Rastro desbloqueado!",
           dayStreak: "día(s) de racha!",
+          setupProfile: "configura tu perfil",
+          enterOrbit: "ENTRAR A ÓRBITA",
+          lbGlobal: "🌍 GLOBAL",
+          lbLocal: "📍 LOCAL",
         },
       };
       var lang = "en";
@@ -3856,6 +3864,16 @@
           "d-retry": "retry",
           "d-menu": "menu",
           "d-revive": "revive",
+          "d-share": "share",
+          "gs-sub": "setupProfile",
+          "gs-save": "enterOrbit",
+          "mode-easy": "modeNormal",
+          "mode-normal": "modeComp",
+          "spin-title": "spinTitle",
+          "spin-btn-free": "spinFree",
+          "spin-btn-ad": "spinWatch",
+          "lbs-global": "lbGlobal",
+          "lbs-local": "lbLocal",
         };
         Object.keys(map).forEach(function (id) {
           var e = document.getElementById(id);
@@ -6076,24 +6094,9 @@
                 }
               }
               if (i === circles.length - 1) {
-                // Planet fragmentation on max impact (competitive only)
+                // Planet cracks on max impact (competitive only) — planet stays
                 if (isMaxImpact && currentMode !== "easy") {
-                  ci.fragmented = true;
-                  var numFrags = 12 + Math.floor(Math.random() * 6);
-                  for (var fi = 0; fi < numFrags; fi++) {
-                    var fAngle = (Math.PI * 2 * fi) / numFrags + rnd(-0.3, 0.3);
-                    var fDist = rnd(0.2, 0.9);
-                    var fSpeed2 = rnd(2.5, 5.5 + impactForce * 3);
-                    parts.push({
-                      wx: ci.wx + Math.cos(fAngle) * ci.r * fDist,
-                      wy: ci.wy + Math.sin(fAngle) * ci.r * fDist,
-                      vx: Math.cos(fAngle) * fSpeed2,
-                      vy: Math.sin(fAngle) * fSpeed2,
-                      life: 0.8 + Math.random() * 0.4,
-                      col: fi % 4 === 0 ? "#ffffff" : (fi % 4 === 1 ? "#fbbf24" : ci.col),
-                      r: rnd(ci.r * 0.08, ci.r * 0.22),
-                    });
-                  }
+                  ci.cracked = true;
                 }
                 if (tutStep > 0) tutLanded();
                 if (currentMode === "easy") {
@@ -6774,7 +6777,6 @@
         }
         for (var i = 0; i < circles.length; i++) {
           var ci = circles[i];
-          if (ci.fragmented) continue;
           var hox = 0,
             hoy = 0;
           if (i === hitIdx && hitT > 0) {
@@ -6846,6 +6848,32 @@
             ctx.arc(ds.x, ds.y, 5, 0, 6.28);
             ctx.fillStyle = ci.col + "ee";
             ctx.fill();
+          }
+          // ── Planet cracks (max-force hit, competitive) ──
+          if (ci.cracked) {
+            ctx.save();
+            ctx.translate(s.x + hox, s.y + hoy);
+            var numCk = 7, ckSeed = ci.ckSeed || (ci.ckSeed = Math.random() * 6.28);
+            for (var ck = 0; ck < numCk; ck++) {
+              var cba = ckSeed + (ck / numCk) * Math.PI * 2;
+              var clen = r * (0.45 + Math.sin(ck * 1.7) * 0.3);
+              var cmx = Math.cos(cba + 0.28) * clen * 0.55;
+              var cmy = Math.sin(cba + 0.28) * clen * 0.55;
+              ctx.beginPath();
+              ctx.moveTo(Math.cos(cba) * r * 0.12, Math.sin(cba) * r * 0.12);
+              ctx.lineTo(cmx, cmy);
+              ctx.lineTo(Math.cos(cba + 0.52) * clen, Math.sin(cba + 0.52) * clen);
+              ctx.strokeStyle = "rgba(255,255,255,0.65)";
+              ctx.lineWidth = 1;
+              ctx.stroke();
+            }
+            // Inner glow
+            ctx.beginPath();
+            ctx.arc(0, 0, r * 0.22, 0, 6.28);
+            ctx.strokeStyle = "rgba(255,200,80,0.5)";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.restore();
           }
           ctx.restore();
         }
