@@ -2695,113 +2695,174 @@
       }
       function zenDrone() {
         if (!musicPlaying || !AC) return;
-        // Deep A1 drone with slow vibrato
-        var o = AC.createOscillator(),
-          g = AC.createGain(),
-          lfo = AC.createOscillator(),
-          lfog = AC.createGain();
-        o.type = "sine";
-        o.frequency.value = 55;
-        lfo.frequency.value = 0.18;
-        lfog.gain.value = 0.4;
-        lfo.connect(lfog);
-        lfog.connect(o.frequency);
-        lfo.start();
-        lfo.stop(AC.currentTime + 22);
-        g.gain.setValueAtTime(0, AC.currentTime);
-        g.gain.linearRampToValueAtTime(
-          0.055 * masterVolume,
-          AC.currentTime + 5,
-        );
-        g.gain.linearRampToValueAtTime(0, AC.currentTime + 20);
-        o.connect(g);
-        g.connect(musicGain);
-        o.start();
-        o.stop(AC.currentTime + 22);
-        // Octave layer
-        var o2 = AC.createOscillator(),
-          g2 = AC.createGain();
-        o2.type = "sine";
+        var now = AC.currentTime;
+        // Reverb-like delay chain
+        var delay = AC.createDelay(2.0);
+        delay.delayTime.value = 0.38;
+        var fbGain = AC.createGain();
+        fbGain.gain.value = 0.42;
+        var wetGain = AC.createGain();
+        wetGain.gain.value = 0.28;
+        delay.connect(fbGain);
+        fbGain.connect(delay);
+        delay.connect(wetGain);
+        wetGain.connect(musicGain);
+        // Sub bass A1 — sine, deep foundation
+        var sub = AC.createOscillator(), subG = AC.createGain();
+        sub.type = "sine";
+        sub.frequency.value = 55;
+        subG.gain.setValueAtTime(0, now);
+        subG.gain.linearRampToValueAtTime(0.075 * masterVolume, now + 4.5);
+        subG.gain.linearRampToValueAtTime(0.04 * masterVolume, now + 18);
+        subG.gain.linearRampToValueAtTime(0, now + 23);
+        sub.connect(subG); subG.connect(musicGain); subG.connect(delay);
+        sub.start(now); sub.stop(now + 24);
+        // A2 octave — triangle, warm mid
+        var o2 = AC.createOscillator(), g2 = AC.createGain();
+        o2.type = "triangle";
         o2.frequency.value = 110;
-        g2.gain.setValueAtTime(0, AC.currentTime);
-        g2.gain.linearRampToValueAtTime(
-          0.025 * masterVolume,
-          AC.currentTime + 6,
-        );
-        g2.gain.linearRampToValueAtTime(0, AC.currentTime + 19);
-        o2.connect(g2);
-        g2.connect(musicGain);
-        o2.start();
-        o2.stop(AC.currentTime + 20);
-        setTimeout(function () {
-          zenDrone();
-        }, 19000);
+        var lfo2 = AC.createOscillator(), lfog2 = AC.createGain();
+        lfo2.frequency.value = 0.13; lfog2.gain.value = 0.6;
+        lfo2.connect(lfog2); lfog2.connect(o2.frequency);
+        lfo2.start(now); lfo2.stop(now + 23);
+        g2.gain.setValueAtTime(0, now);
+        g2.gain.linearRampToValueAtTime(0.032 * masterVolume, now + 5);
+        g2.gain.linearRampToValueAtTime(0, now + 21);
+        o2.connect(g2); g2.connect(musicGain); g2.connect(delay);
+        o2.start(now); o2.stop(now + 22);
+        // E2 fifth harmony — sine, harmonic color
+        var o3 = AC.createOscillator(), g3 = AC.createGain();
+        o3.type = "sine";
+        o3.frequency.value = 82.41;
+        var lfo3 = AC.createOscillator(), lfog3 = AC.createGain();
+        lfo3.frequency.value = 0.09; lfog3.gain.value = 1.2;
+        lfo3.connect(lfog3); lfog3.connect(o3.frequency);
+        lfo3.start(now); lfo3.stop(now + 22);
+        g3.gain.setValueAtTime(0, now);
+        g3.gain.linearRampToValueAtTime(0.022 * masterVolume, now + 6);
+        g3.gain.linearRampToValueAtTime(0, now + 20);
+        o3.connect(g3); g3.connect(musicGain); g3.connect(delay);
+        o3.start(now); o3.stop(now + 21);
+        // A4 shimmer — triangle, upper air
+        var o4 = AC.createOscillator(), g4 = AC.createGain();
+        o4.type = "triangle";
+        o4.frequency.value = 440;
+        var lfo4 = AC.createOscillator(), lfog4 = AC.createGain();
+        lfo4.frequency.value = 0.07; lfog4.gain.value = 1.5;
+        lfo4.connect(lfog4); lfog4.connect(o4.frequency);
+        lfo4.start(now); lfo4.stop(now + 22);
+        g4.gain.setValueAtTime(0, now);
+        g4.gain.linearRampToValueAtTime(0.013 * masterVolume, now + 8);
+        g4.gain.linearRampToValueAtTime(0, now + 21);
+        o4.connect(g4); g4.connect(wetGain);
+        o4.start(now); o4.stop(now + 22);
+        setTimeout(function () { zenDrone(); }, 20000);
       }
       function zenMelody() {
         if (!musicPlaying || !AC) return;
-        // A minor pentatonic: A3 C4 D4 E4 G4 A4
-        var scale = [220, 261.63, 293.66, 329.63, 392, 440, 523.25];
+        var now = AC.currentTime;
+        // Delay for spatial depth
+        var delay = AC.createDelay(1.2);
+        delay.delayTime.value = 0.52;
+        var fb = AC.createGain(); fb.gain.value = 0.28;
+        var wet = AC.createGain(); wet.gain.value = 0.32;
+        delay.connect(fb); fb.connect(delay);
+        delay.connect(wet); wet.connect(musicGain);
+        // Extended A minor pentatonic + upper octave
+        var scale = [220, 261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25, 880];
         var note = scale[Math.floor(Math.random() * scale.length)];
-        var o = AC.createOscillator(),
-          g = AC.createGain();
-        o.type = "sine";
+        var dur = 5 + Math.random() * 8;
+        // Main — triangle, warm lead
+        var o = AC.createOscillator(), g = AC.createGain();
+        o.type = "triangle";
         o.frequency.value = note;
-        var dur = 7 + Math.random() * 5;
-        g.gain.setValueAtTime(0, AC.currentTime);
-        g.gain.linearRampToValueAtTime(
-          0.038 * masterVolume,
-          AC.currentTime + dur * 0.3,
-        );
-        g.gain.linearRampToValueAtTime(0, AC.currentTime + dur);
-        o.connect(g);
-        g.connect(musicGain);
-        o.start();
-        o.stop(AC.currentTime + dur + 0.2);
-        // Harmony fifth
-        if (Math.random() > 0.5) {
-          var o3 = AC.createOscillator(),
-            g3 = AC.createGain();
+        g.gain.setValueAtTime(0, now);
+        g.gain.linearRampToValueAtTime(0.055 * masterVolume, now + dur * 0.12);
+        g.gain.linearRampToValueAtTime(0.03 * masterVolume, now + dur * 0.7);
+        g.gain.linearRampToValueAtTime(0, now + dur);
+        o.connect(g); g.connect(musicGain); g.connect(delay);
+        o.start(now); o.stop(now + dur + 0.2);
+        // Octave up — sine, sparkle
+        var o5 = AC.createOscillator(), g5 = AC.createGain();
+        o5.type = "sine";
+        o5.frequency.value = note * 2;
+        g5.gain.setValueAtTime(0, now);
+        g5.gain.linearRampToValueAtTime(0.018 * masterVolume, now + dur * 0.18);
+        g5.gain.linearRampToValueAtTime(0, now + dur * 0.65);
+        o5.connect(g5); g5.connect(delay);
+        o5.start(now); o5.stop(now + dur);
+        // Fifth harmony
+        if (Math.random() > 0.35) {
+          var o3 = AC.createOscillator(), g3 = AC.createGain();
           o3.type = "sine";
           o3.frequency.value = note * 1.498;
-          g3.gain.setValueAtTime(0, AC.currentTime);
-          g3.gain.linearRampToValueAtTime(
-            0.016 * masterVolume,
-            AC.currentTime + dur * 0.4,
-          );
-          g3.gain.linearRampToValueAtTime(0, AC.currentTime + dur * 0.9);
-          o3.connect(g3);
-          g3.connect(musicGain);
-          o3.start();
-          o3.stop(AC.currentTime + dur);
+          g3.gain.setValueAtTime(0, now);
+          g3.gain.linearRampToValueAtTime(0.028 * masterVolume, now + dur * 0.25);
+          g3.gain.linearRampToValueAtTime(0, now + dur * 0.88);
+          o3.connect(g3); g3.connect(musicGain); g3.connect(delay);
+          o3.start(now); o3.stop(now + dur);
         }
-        setTimeout(
-          function () {
-            zenMelody();
-          },
-          5000 + Math.random() * 6000,
-        );
+        // Minor third chord tone for richness
+        if (Math.random() > 0.55) {
+          var o6 = AC.createOscillator(), g6 = AC.createGain();
+          o6.type = "sine";
+          o6.frequency.value = note * 1.189;
+          g6.gain.setValueAtTime(0, now);
+          g6.gain.linearRampToValueAtTime(0.018 * masterVolume, now + dur * 0.35);
+          g6.gain.linearRampToValueAtTime(0, now + dur * 0.9);
+          o6.connect(g6); g6.connect(musicGain);
+          o6.start(now); o6.stop(now + dur);
+        }
+        setTimeout(function () { zenMelody(); }, 3000 + Math.random() * 5000);
       }
       function zenBells() {
         if (!musicPlaying || !AC) return;
-        // Crystal bell hits (high overtones)
-        var bellFreqs = [1046.5, 1318.5, 1567.98, 2093];
+        var now = AC.currentTime;
+        // Delay reverb
+        var delay = AC.createDelay(1.5);
+        delay.delayTime.value = 0.28;
+        var fb = AC.createGain(); fb.gain.value = 0.38;
+        var wet = AC.createGain(); wet.gain.value = 0.42;
+        delay.connect(fb); fb.connect(delay);
+        delay.connect(wet); wet.connect(musicGain);
+        // Richer bell range — C5 to E7
+        var bellFreqs = [523.25, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.5, 1567.98];
         var f = bellFreqs[Math.floor(Math.random() * bellFreqs.length)];
-        var o = AC.createOscillator(),
-          g = AC.createGain();
+        // Main bell tone
+        var o = AC.createOscillator(), g = AC.createGain();
         o.type = "sine";
         o.frequency.value = f;
-        g.gain.setValueAtTime(0.025 * masterVolume, AC.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + 3.5);
-        o.connect(g);
-        g.connect(musicGain);
-        o.start();
-        o.stop(AC.currentTime + 3.6);
-        setTimeout(
-          function () {
-            zenBells();
-          },
-          8000 + Math.random() * 12000,
-        );
+        g.gain.setValueAtTime(0.042 * masterVolume, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 5.0);
+        o.connect(g); g.connect(musicGain); g.connect(delay);
+        o.start(now); o.stop(now + 5.1);
+        // Inharmonic partial at 2.756× for metallic shimmer
+        var o2 = AC.createOscillator(), g2 = AC.createGain();
+        o2.type = "sine";
+        o2.frequency.value = f * 2.756;
+        g2.gain.setValueAtTime(0.016 * masterVolume, now);
+        g2.gain.exponentialRampToValueAtTime(0.0001, now + 2.2);
+        o2.connect(g2); g2.connect(musicGain); g2.connect(delay);
+        o2.start(now); o2.stop(now + 2.3);
+        // 5th partial for brightness
+        var o3 = AC.createOscillator(), g3 = AC.createGain();
+        o3.type = "sine";
+        o3.frequency.value = f * 5.404;
+        g3.gain.setValueAtTime(0.008 * masterVolume, now);
+        g3.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
+        o3.connect(g3); g3.connect(musicGain);
+        o3.start(now); o3.stop(now + 1.0);
+        // Attack transient noise
+        var buf = AC.createBuffer(1, Math.floor(AC.sampleRate * 0.018), AC.sampleRate);
+        var d = buf.getChannelData(0);
+        for (var ii = 0; ii < d.length; ii++) d[ii] = (Math.random() * 2 - 1) * 0.4;
+        var ns = AC.createBufferSource(), nf = AC.createBiquadFilter(), ng = AC.createGain();
+        nf.type = "bandpass"; nf.frequency.value = f; nf.Q.value = 6;
+        ng.gain.setValueAtTime(0.028 * masterVolume, now);
+        ng.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+        ns.buffer = buf; ns.connect(nf); nf.connect(ng); ng.connect(musicGain);
+        ns.start(now);
+        setTimeout(function () { zenBells(); }, 5000 + Math.random() * 8000);
       }
       // ── COMPETITIVE MUSIC ──────────────────────────
       var compBeatTimer = null;
@@ -2812,11 +2873,13 @@
         musicGain = AC.createGain();
         musicGain.gain.value = 0;
         musicGain.connect(AC.destination);
-        musicGain.gain.linearRampToValueAtTime(0.14, AC.currentTime + 1.5);
+        musicGain.gain.linearRampToValueAtTime(0.15, AC.currentTime + 1.5);
         compBass();
         compArp();
+        compPad();
+        compHihat();
         var beat = 0;
-        var bInterval = 60000 / 124; // 124 BPM
+        var bInterval = 60000 / 138; // 138 BPM — epic pace
         compBeatTimer = setInterval(function () {
           if (!musicPlaying) {
             clearInterval(compBeatTimer);
@@ -2830,93 +2893,136 @@
         if (!AC || !musicGain) return;
         var now = AC.currentTime;
         if (beat === 0 || beat === 4) {
-          // kick
-          var o = AC.createOscillator(),
-            g = AC.createGain();
+          // Deep kick — punchy transient + sub tail
+          var o = AC.createOscillator(), g = AC.createGain();
           o.type = "sine";
-          o.frequency.setValueAtTime(140, now);
-          o.frequency.exponentialRampToValueAtTime(38, now + 0.12);
-          g.gain.setValueAtTime(0.18 * masterVolume, now);
-          g.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-          o.connect(g);
-          g.connect(musicGain);
-          o.start(now);
-          o.stop(now + 0.25);
+          o.frequency.setValueAtTime(165, now);
+          o.frequency.exponentialRampToValueAtTime(32, now + 0.18);
+          g.gain.setValueAtTime(0.28 * masterVolume, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+          o.connect(g); g.connect(musicGain);
+          o.start(now); o.stop(now + 0.35);
+          // Click transient
+          var oc = AC.createOscillator(), gc = AC.createGain();
+          oc.type = "sine"; oc.frequency.value = 3200;
+          gc.gain.setValueAtTime(0.09 * masterVolume, now);
+          gc.gain.exponentialRampToValueAtTime(0.001, now + 0.012);
+          oc.connect(gc); gc.connect(musicGain);
+          oc.start(now); oc.stop(now + 0.015);
         }
         if (beat === 2 || beat === 6) {
-          // snare noise burst
-          var buf = AC.createBuffer(
-            1,
-            Math.floor(AC.sampleRate * 0.06),
-            AC.sampleRate,
-          );
+          // Snare — noise + tone
+          var buf = AC.createBuffer(1, Math.floor(AC.sampleRate * 0.14), AC.sampleRate);
           var d = buf.getChannelData(0);
-          for (var i = 0; i < d.length; i++)
-            d[i] = (Math.random() * 2 - 1) * 0.5;
-          var src = AC.createBufferSource(),
-            hg = AC.createGain(),
-            hf = AC.createBiquadFilter();
-          hf.type = "bandpass";
-          hf.frequency.value = 3000;
-          hf.Q.value = 0.8;
-          hg.gain.setValueAtTime(0.12 * masterVolume, now);
-          hg.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
-          src.buffer = buf;
-          src.connect(hf);
-          hf.connect(hg);
-          hg.connect(musicGain);
+          for (var ki = 0; ki < d.length; ki++) d[ki] = (Math.random() * 2 - 1) * 0.75;
+          var src = AC.createBufferSource(), hg = AC.createGain(), hf = AC.createBiquadFilter();
+          hf.type = "bandpass"; hf.frequency.value = 2600; hf.Q.value = 0.65;
+          hg.gain.setValueAtTime(0.2 * masterVolume, now);
+          hg.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+          src.buffer = buf; src.connect(hf); hf.connect(hg); hg.connect(musicGain);
           src.start(now);
+          // Snare body tone
+          var so = AC.createOscillator(), sg = AC.createGain();
+          so.type = "triangle"; so.frequency.value = 220;
+          sg.gain.setValueAtTime(0.09 * masterVolume, now);
+          sg.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+          so.connect(sg); sg.connect(musicGain);
+          so.start(now); so.stop(now + 0.12);
         }
       }
       function compBass() {
         if (!musicPlaying || !AC) return;
-        var bassSeq = [55, 55, 65.41, 55, 73.42, 55, 65.41, 82.41];
+        var now = AC.currentTime;
+        var bassSeq = [55, 55, 65.41, 55, 73.42, 55, 65.41, 82.41, 49, 55, 61.74];
         var note = bassSeq[Math.floor(Math.random() * bassSeq.length)];
-        var o = AC.createOscillator(),
-          g = AC.createGain();
-        o.type = "sawtooth";
-        o.frequency.value = note;
-        g.gain.setValueAtTime(0, AC.currentTime);
-        g.gain.linearRampToValueAtTime(
-          0.07 * masterVolume,
-          AC.currentTime + 0.04,
-        );
-        g.gain.linearRampToValueAtTime(0, AC.currentTime + 0.45);
-        o.connect(g);
-        g.connect(musicGain);
-        o.start();
-        o.stop(AC.currentTime + 0.5);
-        setTimeout(
-          function () {
-            compBass();
-          },
-          480 + Math.random() * 80,
-        );
+        // Sawtooth with filter sweep for growl
+        var o = AC.createOscillator(), flt = AC.createBiquadFilter(), g = AC.createGain();
+        o.type = "sawtooth"; o.frequency.value = note;
+        flt.type = "lowpass"; flt.Q.value = 3.5;
+        flt.frequency.setValueAtTime(700, now);
+        flt.frequency.exponentialRampToValueAtTime(160, now + 0.42);
+        g.gain.setValueAtTime(0, now);
+        g.gain.linearRampToValueAtTime(0.12 * masterVolume, now + 0.03);
+        g.gain.linearRampToValueAtTime(0.07 * masterVolume, now + 0.3);
+        g.gain.linearRampToValueAtTime(0, now + 0.46);
+        o.connect(flt); flt.connect(g); g.connect(musicGain);
+        o.start(now); o.stop(now + 0.5);
+        // Sub octave sine for weight
+        var o2 = AC.createOscillator(), g2 = AC.createGain();
+        o2.type = "sine"; o2.frequency.value = note / 2;
+        g2.gain.setValueAtTime(0, now);
+        g2.gain.linearRampToValueAtTime(0.08 * masterVolume, now + 0.025);
+        g2.gain.linearRampToValueAtTime(0, now + 0.44);
+        o2.connect(g2); g2.connect(musicGain);
+        o2.start(now); o2.stop(now + 0.5);
+        setTimeout(function () { compBass(); }, 400 + Math.random() * 60);
       }
       function compArp() {
         if (!musicPlaying || !AC) return;
-        var arp = [329.63, 392, 440, 523.25, 587.33, 659.25, 784];
+        var now = AC.currentTime;
+        // A minor scale — full range, aggressive
+        var arp = [220, 246.94, 261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25, 784, 880];
         var note = arp[Math.floor(Math.random() * arp.length)];
-        var o = AC.createOscillator(),
-          g = AC.createGain();
-        o.type = "square";
-        o.frequency.value = note;
-        g.gain.setValueAtTime(0, AC.currentTime);
-        g.gain.linearRampToValueAtTime(
-          0.018 * masterVolume,
-          AC.currentTime + 0.02,
-        );
-        g.gain.linearRampToValueAtTime(0, AC.currentTime + 0.22);
-        o.connect(g);
-        g.connect(musicGain);
-        o.start();
-        o.stop(AC.currentTime + 0.25);
-        setTimeout(
-          function () {
-            compArp();
-          },
-          240 + Math.random() * 160,
-        );
+        var o = AC.createOscillator(), flt = AC.createBiquadFilter(), g = AC.createGain();
+        o.type = "sawtooth"; o.frequency.value = note;
+        flt.type = "bandpass"; flt.frequency.value = note * 2.5; flt.Q.value = 1.8;
+        g.gain.setValueAtTime(0, now);
+        g.gain.linearRampToValueAtTime(0.032 * masterVolume, now + 0.008);
+        g.gain.linearRampToValueAtTime(0.016 * masterVolume, now + 0.1);
+        g.gain.linearRampToValueAtTime(0, now + 0.19);
+        o.connect(flt); flt.connect(g); g.connect(musicGain);
+        o.start(now); o.stop(now + 0.22);
+        setTimeout(function () { compArp(); }, 185 + Math.random() * 100);
+      }
+      function compPad() {
+        if (!musicPlaying || !AC) return;
+        var now = AC.currentTime;
+        // Epic chord pads — Am, F, C, G progression
+        var chords = [
+          [110, 130.81, 164.81, 220],   // Am
+          [174.61, 196, 220, 261.63],    // F
+          [130.81, 164.81, 196, 261.63], // C
+          [98, 123.47, 146.83, 196],     // Gm
+        ];
+        var chord = chords[Math.floor(Math.random() * chords.length)];
+        var dur = 3.8;
+        var flt = AC.createBiquadFilter();
+        flt.type = "lowpass"; flt.frequency.value = 1200; flt.Q.value = 0.8;
+        flt.connect(musicGain);
+        chord.forEach(function (f) {
+          var o = AC.createOscillator(), g = AC.createGain();
+          o.type = "triangle"; o.frequency.value = f;
+          // Slight detune for width
+          o.detune.value = (Math.random() - 0.5) * 8;
+          g.gain.setValueAtTime(0, now);
+          g.gain.linearRampToValueAtTime(0.014 * masterVolume, now + 0.55);
+          g.gain.linearRampToValueAtTime(0.009 * masterVolume, now + dur - 0.4);
+          g.gain.linearRampToValueAtTime(0, now + dur);
+          o.connect(g); g.connect(flt);
+          o.start(now); o.stop(now + dur + 0.1);
+        });
+        setTimeout(function () { compPad(); }, (dur - 0.15) * 1000);
+      }
+      function compHihat() {
+        if (!musicPlaying || !AC) return;
+        var now = AC.currentTime;
+        var eighthSec = (60 / 138) / 2; // 8th note duration in seconds
+        // Schedule 8 hi-hats (4 beats of 8th notes)
+        for (var hi = 0; hi < 8; hi++) {
+          var t = now + hi * eighthSec;
+          var isDownbeat = hi % 2 === 0;
+          var buf = AC.createBuffer(1, Math.floor(AC.sampleRate * 0.022), AC.sampleRate);
+          var d = buf.getChannelData(0);
+          for (var hj = 0; hj < d.length; hj++) d[hj] = (Math.random() * 2 - 1);
+          var src = AC.createBufferSource(), hg = AC.createGain(), hf = AC.createBiquadFilter();
+          hf.type = "highpass"; hf.frequency.value = 9000;
+          var vol = (isDownbeat ? 0.065 : 0.038) * masterVolume;
+          hg.gain.setValueAtTime(vol, t);
+          hg.gain.exponentialRampToValueAtTime(0.001, t + 0.022);
+          src.buffer = buf; src.connect(hf); hf.connect(hg); hg.connect(musicGain);
+          src.start(t);
+        }
+        setTimeout(function () { compHihat(); }, eighthSec * 8 * 1000 - 40);
       }
       function stopMusic() {
         musicPlaying = false;
@@ -5970,6 +6076,25 @@
                 }
               }
               if (i === circles.length - 1) {
+                // Planet fragmentation on max impact (competitive only)
+                if (isMaxImpact && currentMode !== "easy") {
+                  ci.fragmented = true;
+                  var numFrags = 12 + Math.floor(Math.random() * 6);
+                  for (var fi = 0; fi < numFrags; fi++) {
+                    var fAngle = (Math.PI * 2 * fi) / numFrags + rnd(-0.3, 0.3);
+                    var fDist = rnd(0.2, 0.9);
+                    var fSpeed2 = rnd(2.5, 5.5 + impactForce * 3);
+                    parts.push({
+                      wx: ci.wx + Math.cos(fAngle) * ci.r * fDist,
+                      wy: ci.wy + Math.sin(fAngle) * ci.r * fDist,
+                      vx: Math.cos(fAngle) * fSpeed2,
+                      vy: Math.sin(fAngle) * fSpeed2,
+                      life: 0.8 + Math.random() * 0.4,
+                      col: fi % 4 === 0 ? "#ffffff" : (fi % 4 === 1 ? "#fbbf24" : ci.col),
+                      r: rnd(ci.r * 0.08, ci.r * 0.22),
+                    });
+                  }
+                }
                 if (tutStep > 0) tutLanded();
                 if (currentMode === "easy") {
                   zenProgress++;
@@ -6649,6 +6774,7 @@
         }
         for (var i = 0; i < circles.length; i++) {
           var ci = circles[i];
+          if (ci.fragmented) continue;
           var hox = 0,
             hoy = 0;
           if (i === hitIdx && hitT > 0) {
@@ -6801,40 +6927,7 @@
         ctx.arc(os2.x, os2.y, or2 * 0.5, 0, 6.28);
         ctx.fillStyle = pal2[palIdx % pal2.length];
         ctx.fill();
-        // ── Grietas al cargar al máximo (solo competitivo) ──
-        if (charging && currentMode !== "easy" && orb.on >= 0) {
-          var chHeld = Math.min(Date.now() - chargeStart, MAX_CHARGE);
-          var chPct = chHeld / MAX_CHARGE;
-          if (chPct > 0.82) {
-            var crAlpha = (chPct - 0.82) / 0.18;
-            ctx.save();
-            ctx.translate(os2.x, os2.y);
-            var numCracks = 6;
-            for (var ck = 0; ck < numCracks; ck++) {
-              var baseAngle = (ck / numCracks) * Math.PI * 2 + chPct * 1.8;
-              var len1 = or2 * (0.35 + crAlpha * 0.3);
-              var len2 = or2 * (0.75 + crAlpha * 0.5);
-              var midX = Math.cos(baseAngle + 0.22) * (len1 + len2) * 0.5;
-              var midY = Math.sin(baseAngle + 0.22) * (len1 + len2) * 0.5;
-              ctx.beginPath();
-              ctx.moveTo(Math.cos(baseAngle) * len1, Math.sin(baseAngle) * len1);
-              ctx.lineTo(midX, midY);
-              ctx.lineTo(Math.cos(baseAngle + 0.44) * len2, Math.sin(baseAngle + 0.44) * len2);
-              ctx.strokeStyle = "rgba(255," + Math.floor(80 + crAlpha * 120) + ",30," + (crAlpha * 0.85) + ")";
-              ctx.lineWidth = 1 + crAlpha * 1.5;
-              ctx.stroke();
-            }
-            // Glow rojo-naranja al llegar al límite
-            if (crAlpha > 0.6) {
-              ctx.beginPath();
-              ctx.arc(0, 0, or2 + 4 * crAlpha, 0, 6.28);
-              ctx.strokeStyle = "rgba(255,80,20," + (crAlpha - 0.6) * 0.7 + ")";
-              ctx.lineWidth = 2;
-              ctx.stroke();
-            }
-            ctx.restore();
-          }
-        }
+
         // Cosmic Reflections — drawn last so it's always on top
         drawZenQuote();
       }
