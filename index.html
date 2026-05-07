@@ -940,14 +940,14 @@
       >
         CRASH
       </div>
-      <div style="display: flex; gap: 10px; margin-bottom: 12px">
+      <div style="display: flex; gap: 8px; margin-bottom: 8px">
         <div
           class="sb"
-          style="min-width: 72px; border-radius: 14px; padding: 12px 16px"
+          style="min-width: 64px; border-radius: 14px; padding: 10px 12px"
         >
           <div
             id="d-score"
-            style="font-size: 26px; font-weight: 200; color: #fbbf24"
+            style="font-size: 22px; font-weight: 200; color: #fbbf24"
           >
             0
           </div>
@@ -955,11 +955,11 @@
         </div>
         <div
           class="sb"
-          style="min-width: 72px; border-radius: 14px; padding: 12px 16px"
+          style="min-width: 64px; border-radius: 14px; padding: 10px 12px"
         >
           <div
             id="d-best"
-            style="font-size: 26px; font-weight: 200; color: #fbbf24"
+            style="font-size: 22px; font-weight: 200; color: #fbbf24"
           >
             0
           </div>
@@ -967,24 +967,15 @@
         </div>
         <div
           class="sb"
-          style="min-width: 72px; border-radius: 14px; padding: 12px 16px"
+          style="min-width: 64px; border-radius: 14px; padding: 10px 12px"
         >
           <div
             id="d-earned"
-            style="font-size: 26px; font-weight: 200; color: #fbbf24"
+            style="font-size: 22px; font-weight: 200; color: #fbbf24"
           >
             0
           </div>
-          <div
-            style="
-              font-size: 10px;
-              letter-spacing: 3px;
-              opacity: 0.4;
-              margin-top: 3px;
-            "
-          >
-            ★
-          </div>
+          <div style="font-size: 10px; letter-spacing: 3px; opacity: 0.4; margin-top: 3px">★</div>
         </div>
       </div>
       <div style="width: 100%; margin-bottom: 14px">
@@ -1053,11 +1044,11 @@
           WATCH AD — REVIVE
         </button>
       </div>
-      <div style="display: flex; gap: 10px; margin-bottom: 12px">
+      <div style="display: flex; gap: 8px; margin-bottom: 8px">
         <button
           class="btn"
           id="d-retry"
-          style="padding: 16px 48px; font-weight: 700; font-size: 14px"
+          style="padding: 13px 40px; font-weight: 700; font-size: 13px"
           onclick="startGame()"
         >
           RETRY
@@ -1070,7 +1061,7 @@
         class="btn bsm"
         id="d-share"
         onclick="shareScore()"
-        style="margin-bottom: 14px; letter-spacing: 2px; opacity: 0.7"
+        style="margin-bottom: 10px; letter-spacing: 2px; opacity: 0.7"
       >
         ↗ SHARE
       </button>
@@ -3175,6 +3166,18 @@
                   updateThemeSwitcher();
                   updateHomeUI();
                   showScr("home");
+                  if (!S.tutorial) {
+                    S.tutorial = true;
+                    saveState();
+                    setTimeout(function () {
+                      toast(
+                        lang === "es"
+                          ? "🍃 ZEN = explorar sin presión · 🏅 COMP = competir por ranking"
+                          : "🍃 ZEN = explore freely · 🏅 COMP = compete for the leaderboard",
+                        5500,
+                      );
+                    }, 1500);
+                  }
                 })
                 .catch(function () {
                   updateHomeUI();
@@ -4469,6 +4472,7 @@
           h2 +=
             '<div style="display:flex;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid ' +
             T.border +
+            (r.isMe ? ";border-left:3px solid #fbbf24;padding-left:6px;border-radius:3px;animation:shareSlideUp .4s ease" : "") +
             '">';
           h2 +=
             '<div style="width:18px;text-align:center;font-size:11px;color:' +
@@ -4636,6 +4640,8 @@
         ab.style.opacity = extraSpun ? ".35" : ".7";
         spinLocked = false;
         drawSpinWheel(spinAngle);
+        // Partículas doradas al abrir
+        burst(W / 2, H * 0.42, "#fbbf24", 20);
       }
       function closeSpin() {
         if (spinAnimId) {
@@ -4838,6 +4844,7 @@
         revived;
       var currentMode = "normal";
       var lastCheckpoint = 0;
+      var zenProgress = 0; // planeta counter en zen (score no sube en zen)
 
       // ── COSMIC REFLECTIONS ────────────────────────
       // Public domain wisdom (authors 70+ years deceased)
@@ -5120,6 +5127,9 @@
         hitAmt = 0;
       var magnetActive = false,
         magnetBtn = null;
+      // ── Coin Magnet ──
+      var coinMagnetActive = false, coinMagnetTimer = 0, coinMagnetDuration = 420; // ~7s @60fps
+      var coinMagnetCharges = 0, coinMagnetEl = null;
       var gravFieldActive = false,
         gravFieldUsed = 0,
         gravFieldMax = 3;
@@ -5349,8 +5359,77 @@
         updateGravBtn();
       }
 
+      // ── Coin Magnet functions ──
+      function spawnCoinMagnetEl() {
+        if (coinMagnetEl) return;
+        coinMagnetEl = document.createElement("button");
+        coinMagnetEl.style.cssText =
+          "position:absolute;bottom:100px;right:16px;width:48px;height:48px;border-radius:50%;" +
+          "background:rgba(251,191,36,.12);border:1.5px solid rgba(251,191,36,.5);color:#fbbf24;" +
+          "font-size:22px;cursor:pointer;display:none;align-items:center;justify-content:center;" +
+          "transition:all .2s;pointer-events:all;z-index:3";
+        coinMagnetEl.innerHTML =
+          '<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center">' +
+          "🧲" +
+          '<div id="magnet-count" style="position:absolute;top:-2px;right:-2px;background:#fbbf24;' +
+          "color:#0a0a14;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;" +
+          'display:flex;align-items:center;justify-content:center">1</div></div>';
+        coinMagnetEl.onclick = activateCoinMagnet;
+        document.body.appendChild(coinMagnetEl);
+      }
+      function showCoinMagnetBtn(show) {
+        if (!coinMagnetEl) spawnCoinMagnetEl();
+        coinMagnetEl.style.display = show ? "flex" : "none";
+        updateCoinMagnetBtn();
+      }
+      function updateCoinMagnetBtn() {
+        if (!coinMagnetEl) return;
+        var el = document.getElementById("magnet-count");
+        if (el) el.textContent = coinMagnetCharges;
+        if (coinMagnetActive) {
+          coinMagnetEl.style.background = "rgba(251,191,36,.35)";
+          coinMagnetEl.style.boxShadow = "0 0 16px rgba(251,191,36,.5)";
+          coinMagnetEl.style.opacity = "1";
+        } else {
+          coinMagnetEl.style.background = "rgba(251,191,36,.12)";
+          coinMagnetEl.style.boxShadow = "none";
+          coinMagnetEl.style.opacity = coinMagnetCharges > 0 ? "1" : ".25";
+        }
+      }
+      function activateCoinMagnet() {
+        if (coinMagnetActive || coinMagnetCharges <= 0 || phase !== "playing") return;
+        coinMagnetCharges--;
+        coinMagnetActive = true;
+        coinMagnetTimer = coinMagnetDuration;
+        updateCoinMagnetBtn();
+        toast(lang === "es" ? "🧲 Imán activado!" : "🧲 Magnet on!", 1800);
+      }
+      function updateCoinMagnet(dt) {
+        if (!coinMagnetActive) return;
+        coinMagnetTimer -= dt;
+        if (coinMagnetTimer <= 0) {
+          coinMagnetActive = false;
+          updateCoinMagnetBtn();
+          return;
+        }
+        // Atraer monedas cercanas hacia el orbe
+        var pullRadius = 220;
+        for (var m = 0; m < coins_arr.length; m++) {
+          var cn = coins_arr[m];
+          if (cn.done) continue;
+          var dx = orb.wx - cn.wx, dy = orb.wy - cn.wy;
+          var dist = Math.hypot(dx, dy);
+          if (dist > 0 && dist < pullRadius) {
+            var pull = 6 * (1 - dist / pullRadius);
+            cn.wx += (dx / dist) * pull * dt;
+            cn.wy += (dy / dist) * pull * dt;
+          }
+        }
+      }
+
       function init() {
         score = 0;
+        zenProgress = 0;
         combo = 0;
         sesCoins = 0;
         sesCoinsFrac = 0;
@@ -5413,7 +5492,7 @@
         tCamY = 0;
         zoom = 0.58;
         tZoom = 0.58;
-        document.getElementById("sc").style.display = "block";
+        document.getElementById("sc").style.display = currentMode === "easy" ? "none" : "block";
         document.getElementById("sc").textContent = "0";
         document.getElementById("sc").style.color = T.text;
         document.getElementById("co").style.opacity = "0";
@@ -5423,6 +5502,11 @@
         document.getElementById("pause-btn").style.display = "flex";
         document.getElementById("revive-wrap").style.display = "block";
         showMagnetBtn(currentMode !== "easy");
+        // Coin magnet: 1 carga gratis por partida competitiva
+        coinMagnetActive = false;
+        coinMagnetTimer = 0;
+        coinMagnetCharges = currentMode !== "easy" ? 1 : 0;
+        showCoinMagnetBtn(currentMode !== "easy");
       }
       function startCharge() {
         if (phase !== "playing" || orb.on === -1) return;
@@ -5573,6 +5657,7 @@
             document.getElementById("coins-hud").style.display = "block";
             document.getElementById("pause-btn").style.display = "flex";
             showMagnetBtn(currentMode !== "easy");
+            showCoinMagnetBtn(currentMode !== "easy");
             toast("✓ Revived!");
           },
           function () {
@@ -5613,7 +5698,6 @@
           camY = last.wy;
           tCamX = last.wx;
           tCamY = last.wy;
-          document.getElementById("sc").textContent = score;
           combo = 0;
           toast(
             lang === "es"
@@ -5648,7 +5732,7 @@
         saveLbEntry(); // todos los modos guardan al leaderboard
         deathCount++;
         // Track daily challenge progress
-        checkDailyProgress("score", score);
+        checkDailyProgress("score", currentMode === "easy" ? zenProgress : score);
         checkDailyProgress("combo", combo);
         checkDailyProgress("games", 1);
         checkDailyProgress("coins", sesCoins);
@@ -5668,13 +5752,16 @@
         document.getElementById("co").style.opacity = "0";
         document.getElementById("pause-btn").style.display = "none";
         showMagnetBtn(false);
+        showCoinMagnetBtn(false);
         function showDead() {
           document.getElementById("scr-dead").classList.add("on");
           document.getElementById("scr-dead").style.background = T.bg;
+          var isZenMode = currentMode === "easy";
+          var displayScore = isZenMode ? zenProgress : score;
           document.getElementById("d-title").textContent =
-            score >= S.best && score > 0 ? t("newRec") : t("crash");
-          document.getElementById("d-score").textContent = score;
-          document.getElementById("d-best").textContent = S.best;
+            isZenMode ? "🍃 ZEN" : (score >= S.best && score > 0 ? t("newRec") : t("crash"));
+          document.getElementById("d-score").textContent = displayScore;
+          document.getElementById("d-best").textContent = isZenMode ? "—" : S.best;
           document.getElementById("d-earned").textContent = sesCoins;
           var reviveWrap = document.getElementById("revive-wrap");
           var reviveBtn = document.getElementById("d-revive");
@@ -5684,7 +5771,7 @@
             reviveBtn.style.boxShadow = "";
             reviveBtn.style.animation = "";
           }
-          if (revivedThisRun || (score < 10 && combo < 3)) {
+          if (revivedThisRun || (displayScore < 10 && combo < 3)) {
             reviveWrap.style.display = "none";
           } else {
             reviveWrap.style.display = "block";
@@ -5884,13 +5971,17 @@
               }
               if (i === circles.length - 1) {
                 if (tutStep > 0) tutLanded();
-                score++;
+                if (currentMode === "easy") {
+                  zenProgress++;
+                } else {
+                  score++;
+                  document.getElementById("sc").textContent = score;
+                  if (score > S.best) S.best = score;
+                }
                 combo++;
                 snd(true);
-                screenShake(Math.min(3 + score * 0.15 + impactForce * 10, 16));
-                if (navigator.vibrate) navigator.vibrate(score > 20 ? 30 : 15);
-                document.getElementById("sc").textContent = score;
-                if (currentMode !== "easy" && score > S.best) S.best = score;
+                screenShake(Math.min(3 + (currentMode === "easy" ? zenProgress : score) * 0.15 + impactForce * 10, 16));
+                if (navigator.vibrate) navigator.vibrate((currentMode === "easy" ? zenProgress : score) > 20 ? 30 : 15);
                 if (combo >= 3) {
                   var ce = document.getElementById("co");
                   ce.textContent = "x" + combo + " COMBO";
@@ -5902,15 +5993,15 @@
                   }, 900);
                 }
                 checkMilestone();
-                // Easy mode checkpoint every 10
+                // Zen: checkpoint cada 10 planetas
                 if (
                   currentMode === "easy" &&
-                  score % 10 === 0 &&
-                  score !== lastCheckpoint
+                  zenProgress % 10 === 0 &&
+                  zenProgress !== lastCheckpoint
                 ) {
-                  lastCheckpoint = score;
-                  showMilestonePop("CHECKPOINT " + score, score);
-                  setTimeout(triggerZenQuote, 1200); // quote appears after checkpoint flash
+                  lastCheckpoint = zenProgress;
+                  showMilestonePop("CHECKPOINT " + zenProgress, zenProgress);
+                  setTimeout(triggerZenQuote, 1200);
                 }
                 while (circles.length > 3) {
                   circles.shift();
@@ -5967,6 +6058,7 @@
           return p.life > 0;
         });
         updateMagnetTimer(dt);
+        updateCoinMagnet(dt);
       }
 
       function drawTrail() {
@@ -6324,11 +6416,21 @@
         compBgIdx = 0;
       var bgStars = [],
         bgInit = false;
+      // Offscreen canvas — fondo estático (gradiente + estrellas)
+      var staticBgCanvas = null, staticBgCtx = null, staticBgDirty = true;
+      function ensureStaticBg() {
+        if (!staticBgCanvas) {
+          staticBgCanvas = document.createElement("canvas");
+          staticBgCanvas.width = W; staticBgCanvas.height = H;
+          staticBgCtx = staticBgCanvas.getContext("2d");
+        }
+      }
       // Shooting stars
       var shootStars = [];
       var shootTimer = 0;
       function initBgStars() {
         bgStars = [];
+        staticBgDirty = true; // forzar re-render del canvas estático
         var isZ = currentMode === "easy";
         var th = isZ ? ZEN_BG[zenBgIdx] : COMP_BG[compBgIdx];
         var cols = th.sc;
@@ -6364,30 +6466,29 @@
         var isPlaying = phase === "playing" || phase === "paused";
         var th = isZen ? ZEN_BG[zenBgIdx] : COMP_BG[compBgIdx];
 
-        // ── Painted base gradient (zen + dark competitive only) ──
-        if (th) {
-          var bg = ctx.createLinearGradient(0, 0, W * 0.6, H);
-          bg.addColorStop(0, th.c1);
-          bg.addColorStop(1, th.c2);
-          ctx.fillStyle = bg;
-          ctx.fillRect(0, 0, W, H);
-          // Bright hot-spot radial
-          var hot = ctx.createRadialGradient(
-            W * 0.35,
-            H * 0.3,
-            0,
-            W * 0.35,
-            H * 0.3,
-            Math.min(W, H) * 0.65,
-          );
-          hot.addColorStop(
-            0,
-            isZen ? "rgba(255,255,255,.18)" : "rgba(255,255,255,.08)",
-          );
-          hot.addColorStop(1, "transparent");
-          ctx.fillStyle = hot;
-          ctx.fillRect(0, 0, W, H);
+        // ── Canvas estático: gradiente base + hot-spot (se recalcula sólo cuando dirty) ──
+        ensureStaticBg();
+        if (staticBgDirty) {
+          staticBgDirty = false;
+          var sc = staticBgCtx;
+          sc.clearRect(0, 0, W, H);
+          if (th) {
+            var sbg = sc.createLinearGradient(0, 0, W * 0.6, H);
+            sbg.addColorStop(0, th.c1);
+            sbg.addColorStop(1, th.c2);
+            sc.fillStyle = sbg;
+            sc.fillRect(0, 0, W, H);
+            var shot = sc.createRadialGradient(W * 0.35, H * 0.3, 0, W * 0.35, H * 0.3, Math.min(W, H) * 0.65);
+            shot.addColorStop(0, isZen ? "rgba(255,255,255,.18)" : "rgba(255,255,255,.08)");
+            shot.addColorStop(1, "transparent");
+            sc.fillStyle = shot;
+            sc.fillRect(0, 0, W, H);
+          } else {
+            sc.fillStyle = "#0a0a14";
+            sc.fillRect(0, 0, W, H);
+          }
         }
+        ctx.drawImage(staticBgCanvas, 0, 0);
 
         // ── Nebula clouds ──
         var speedMult = isZen ? 0.35 : 1;
@@ -6695,10 +6796,45 @@
         ctx.fillStyle = T.orbCol;
         ctx.fill();
         var pal2 = getPal();
+        var palIdx = currentMode === "easy" ? zenProgress : score;
         ctx.beginPath();
         ctx.arc(os2.x, os2.y, or2 * 0.5, 0, 6.28);
-        ctx.fillStyle = pal2[score % pal2.length];
+        ctx.fillStyle = pal2[palIdx % pal2.length];
         ctx.fill();
+        // ── Grietas al cargar al máximo (solo competitivo) ──
+        if (charging && currentMode !== "easy" && orb.on >= 0) {
+          var chHeld = Math.min(Date.now() - chargeStart, MAX_CHARGE);
+          var chPct = chHeld / MAX_CHARGE;
+          if (chPct > 0.82) {
+            var crAlpha = (chPct - 0.82) / 0.18;
+            ctx.save();
+            ctx.translate(os2.x, os2.y);
+            var numCracks = 6;
+            for (var ck = 0; ck < numCracks; ck++) {
+              var baseAngle = (ck / numCracks) * Math.PI * 2 + chPct * 1.8;
+              var len1 = or2 * (0.35 + crAlpha * 0.3);
+              var len2 = or2 * (0.75 + crAlpha * 0.5);
+              var midX = Math.cos(baseAngle + 0.22) * (len1 + len2) * 0.5;
+              var midY = Math.sin(baseAngle + 0.22) * (len1 + len2) * 0.5;
+              ctx.beginPath();
+              ctx.moveTo(Math.cos(baseAngle) * len1, Math.sin(baseAngle) * len1);
+              ctx.lineTo(midX, midY);
+              ctx.lineTo(Math.cos(baseAngle + 0.44) * len2, Math.sin(baseAngle + 0.44) * len2);
+              ctx.strokeStyle = "rgba(255," + Math.floor(80 + crAlpha * 120) + ",30," + (crAlpha * 0.85) + ")";
+              ctx.lineWidth = 1 + crAlpha * 1.5;
+              ctx.stroke();
+            }
+            // Glow rojo-naranja al llegar al límite
+            if (crAlpha > 0.6) {
+              ctx.beginPath();
+              ctx.arc(0, 0, or2 + 4 * crAlpha, 0, 6.28);
+              ctx.strokeStyle = "rgba(255,80,20," + (crAlpha - 0.6) * 0.7 + ")";
+              ctx.lineWidth = 2;
+              ctx.stroke();
+            }
+            ctx.restore();
+          }
+        }
         // Cosmic Reflections — drawn last so it's always on top
         drawZenQuote();
       }
