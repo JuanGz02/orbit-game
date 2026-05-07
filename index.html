@@ -3344,6 +3344,14 @@
                   (data.title ? data.title + " — " : "") + data.body || "🚀",
                 );
               });
+              // Auto-refresh token when FCM rotates it
+              fcmMessaging.onTokenRefresh(function () {
+                fcmSaveToken();
+              });
+              // Silent token refresh on load if user already enabled notifications
+              if (S.notifEnabled && S.user && !S.user.isGuest) {
+                fcmSaveToken();
+              }
             })
             .catch(function (e) {
               console.log("FCM SW register error:", e);
@@ -3353,6 +3361,24 @@
         }
       }
 
+      function fcmSaveToken() {
+        if (!fcmMessaging || !S.user || !S.user.uid || S.user.isGuest) return;
+        fcmMessaging
+          .getToken({
+            vapidKey:
+              "BI4Ya4XD2j_BMIasIFBDdbB0JgEvy5pg37HabetzarIAqWW4yvAA2w7BDH7ohyiKTk8j3I3ZgCWQpw77eL8fhQQ",
+          })
+          .then(function (token) {
+            if (token && db) {
+              db.collection("users")
+                .doc(S.user.uid)
+                .set({ fcmToken: token }, { merge: true });
+            }
+          })
+          .catch(function (e) {
+            console.log("FCM token refresh error:", e);
+          });
+      }
       function requestNotifPermission() {
         if (!fcmMessaging || !S.user || !S.user.uid || S.user.isGuest) return;
         Notification.requestPermission().then(function (perm) {
