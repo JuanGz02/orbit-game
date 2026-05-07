@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Deer Rock Studios — Apps & Games</title>
-  <meta name="description" content="Deer Rock Studios builds 50 apps and games people actually use. App #1: ORBIT — now live on Android and Web.">
+  <title>Deer Rock Studios — We Ship the Future</title>
+  <meta name="description" content="Deer Rock Studios builds apps and games at the intersection of human creativity and artificial intelligence. 50 products. One mission.">
   <meta property="og:title" content="Deer Rock Studios">
-  <meta property="og:description" content="We're building 50 apps and games. App #1: ORBIT is live.">
+  <meta property="og:description" content="Human-directed. AI-powered. We don't build apps — we deploy experiences.">
   <meta property="og:image" content="https://deerrockstudios.github.io/orbit-game/icon-512.png">
   <link rel="icon" href="./deer-rock-logo-512.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +16,6 @@
 </head>
 <body>
 
-  <!-- Stars background -->
   <div class="stars" aria-hidden="true">
     <div class="stars-s"></div>
     <div class="stars-m"></div>
@@ -30,7 +29,8 @@
     </a>
     <nav>
       <a href="#products" data-i18n="nav_products">Products</a>
-      <a href="#about" data-i18n="nav_about">About</a>
+      <a href="#about" data-i18n="nav_about">The Studio</a>
+      <a href="#milestones" data-i18n="nav_milestones">Milestones</a>
       <a href="#support" data-i18n="nav_support">Contact</a>
     </nav>
     <button id="lang-btn" class="lang-btn" aria-label="Switch language">ES</button>
@@ -41,12 +41,12 @@
     <!-- HERO -->
     <section class="hero">
       <div class="hero-text">
-        <p class="eyebrow" data-i18n="hero_eyebrow">Independent game & app studio</p>
-        <h1 data-i18n="hero_title">50 apps.<br>One studio.<br>Built to last.</h1>
-        <p class="lead" data-i18n="hero_text">Deer Rock Studios is on a mission to ship 50 apps and games people actually use. Every product is live, monetized, and built to grow.</p>
+        <p class="eyebrow" data-i18n="hero_eyebrow">Human-directed · AI-powered · Always shipping</p>
+        <h1 data-i18n="hero_title">We don't build apps.<br>We deploy<br><span class="gradient-word">experiences.</span></h1>
+        <p class="lead" data-i18n="hero_text">Deer Rock Studios sits at the intersection of human creativity and machine intelligence. Our mission: compress years of development into weeks, and ship products built to last decades.</p>
         <div class="cta-row">
-          <a class="btn btn-primary" href="#products" data-i18n="hero_cta_1">See Our Apps</a>
-          <a class="btn btn-secondary" href="#support" data-i18n="hero_cta_2">Get in Touch</a>
+          <a class="btn btn-primary" href="#products" data-i18n="hero_cta_1">See Our Work</a>
+          <a class="btn btn-secondary" href="#about" data-i18n="hero_cta_2">The Studio</a>
         </div>
         <div class="social-row">
           <a href="https://www.instagram.com/deerrockstudios/" target="_blank" rel="noopener" aria-label="Instagram" class="social-icon">
@@ -65,21 +65,37 @@
       </div>
 
       <div class="hero-right">
-        <!-- Mission progress -->
+        <!-- Mission counter -->
         <div class="mission-card">
           <div class="mission-header">
-            <span class="mission-label" data-i18n="mission_label">Apps shipped</span>
+            <span class="mission-label" data-i18n="mission_label">Mission progress</span>
             <span class="mission-fraction"><span id="shipped-count">0</span><span class="mission-total"> / 50</span></span>
           </div>
           <div class="mission-bar-bg">
             <div class="mission-bar-fill" id="mission-bar"></div>
           </div>
-          <p class="mission-sub" data-i18n="mission_sub">Building in public. One product at a time.</p>
+          <p class="mission-sub" data-i18n="mission_sub">Products deployed. The clock doesn't stop.</p>
         </div>
 
-        <!-- Latest release -->
+        <!-- AI badge -->
+        <div class="ai-card">
+          <div class="ai-header">
+            <span class="ai-dot"></span>
+            <span class="ai-live" data-i18n="ai_live">AI pipeline active</span>
+          </div>
+          <p class="ai-title" data-i18n="ai_title">20+ specialized agents<br>in production</p>
+          <p class="ai-sub" data-i18n="ai_sub">Design · Code · QA · Deploy · Iterate — all running in parallel, orchestrated by human creative direction.</p>
+          <div class="ai-tags">
+            <span class="ai-tag">Claude AI</span>
+            <span class="ai-tag">Multi-agent</span>
+            <span class="ai-tag">CI/CD</span>
+            <span class="ai-tag">Always on</span>
+          </div>
+        </div>
+
+        <!-- Latest -->
         <div class="latest-card">
-          <span class="latest-eyebrow" data-i18n="latest_eyebrow">Latest release</span>
+          <span class="latest-eyebrow" data-i18n="latest_eyebrow">Latest deployment</span>
           <div class="latest-row">
             <img src="https://deerrockstudios.github.io/orbit-game/icon-512.png" alt="ORBIT icon" class="latest-icon">
             <div>
@@ -104,42 +120,90 @@
     <!-- PRODUCTS -->
     <section id="products" class="section">
       <div class="section-head">
-        <h2 data-i18n="products_title">Apps & Games</h2>
-        <span class="pill" data-i18n="products_pill">Growing catalog</span>
+        <h2 data-i18n="products_title">Deployed Products</h2>
+        <span class="pill" data-i18n="products_pill">Live operations</span>
       </div>
       <div id="products-grid" class="products-grid"></div>
     </section>
 
-    <!-- ABOUT -->
-    <section id="about" class="section about-grid">
-      <div>
-        <h2 data-i18n="about_title">About Us</h2>
-        <p data-i18n="about_text">We are a one-person indie studio with a concrete goal: ship 50 apps and games that people actually use and pay for. No fluff. No bloat. Each product is live, monetized, and serves a real need.</p>
-        <p data-i18n="about_text2">Every product is built on the same battle-tested stack — Firebase, Stripe, AdMob, and Capacitor — so each new launch is faster than the last.</p>
+    <!-- MILESTONES -->
+    <section id="milestones" class="section">
+      <div class="section-head">
+        <h2 data-i18n="milestones_title">Milestones & Achievements</h2>
+        <span class="pill" data-i18n="milestones_pill">Since founding</span>
       </div>
-      <div class="stack-card">
-        <h3 data-i18n="stack_title">Our Stack</h3>
-        <ul class="stack-list">
-          <li><span class="stack-dot cyan"></span>Firebase — Auth, DB, Push</li>
-          <li><span class="stack-dot gold"></span>Stripe — Payments</li>
-          <li><span class="stack-dot cyan"></span>AdMob — Monetization</li>
-          <li><span class="stack-dot gold"></span>Capacitor — Android</li>
-          <li><span class="stack-dot cyan"></span>GitHub Actions — CI/CD</li>
-          <li><span class="stack-dot gold"></span>Vanilla JS + Canvas</li>
-        </ul>
+      <div class="milestones-grid">
+        <div class="milestone-card">
+          <span class="milestone-icon">⚡</span>
+          <p class="milestone-stat" data-i18n="ms1_stat">0 → Play Store</p>
+          <p class="milestone-desc" data-i18n="ms1_desc">Full game concept to Google Play approved in under 30 days.</p>
+        </div>
+        <div class="milestone-card">
+          <span class="milestone-icon">🌍</span>
+          <p class="milestone-stat" data-i18n="ms2_stat">85+ users</p>
+          <p class="milestone-desc" data-i18n="ms2_desc">Organic users acquired on launch week. Zero ad spend. Zero influencers.</p>
+        </div>
+        <div class="milestone-card">
+          <span class="milestone-icon">🚀</span>
+          <p class="milestone-stat" data-i18n="ms3_stat">3 platforms</p>
+          <p class="milestone-desc" data-i18n="ms3_desc">Web, Android, and itch.io — all running from a single codebase.</p>
+        </div>
+        <div class="milestone-card">
+          <span class="milestone-icon">🤖</span>
+          <p class="milestone-stat" data-i18n="ms4_stat">20+ AI agents</p>
+          <p class="milestone-desc" data-i18n="ms4_desc">First studio to run a fully parallelized AI development pipeline in production.</p>
+        </div>
+        <div class="milestone-card">
+          <span class="milestone-icon">💰</span>
+          <p class="milestone-stat" data-i18n="ms5_stat">Day-1 revenue</p>
+          <p class="milestone-desc" data-i18n="ms5_desc">Live monetization on launch day via Stripe and AdMob. No waiting period.</p>
+        </div>
+        <div class="milestone-card">
+          <span class="milestone-icon">🔥</span>
+          <p class="milestone-stat" data-i18n="ms6_stat">Sub-48h approval</p>
+          <p class="milestone-desc" data-i18n="ms6_desc">Google Play store review completed in under 48 hours on first submission.</p>
+        </div>
       </div>
     </section>
 
-    <!-- SUPPORT / CONTACT -->
+    <!-- ABOUT -->
+    <section id="about" class="section about-section">
+      <div class="about-main">
+        <h2 data-i18n="about_title">The Studio</h2>
+        <p class="about-lead" data-i18n="about_lead">"We believe the bottleneck in software was never ideas — it was execution speed. We removed it."</p>
+        <p data-i18n="about_text">Deer Rock Studios is a next-generation product studio. We operate at the intersection of human vision and artificial intelligence, running a team of 20+ specialized AI agents to design, code, test, and ship faster than any traditional team could imagine.</p>
+        <p data-i18n="about_text2">Our goal is concrete: 50 products that solve real problems, generate real revenue, and reach real people. No venture capital. No bloated org charts. Just relentless execution.</p>
+      </div>
+      <div class="about-stats">
+        <div class="stat-item">
+          <span class="stat-num cyan" id="stat-products">1</span>
+          <span class="stat-label" data-i18n="stat_products">Products live</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num gold">20+</span>
+          <span class="stat-label" data-i18n="stat_agents">AI agents</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num cyan">50</span>
+          <span class="stat-label" data-i18n="stat_goal">Product goal</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num gold">∞</span>
+          <span class="stat-label" data-i18n="stat_ambition">Ambition</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
     <section id="support" class="section contact-grid">
       <div>
         <h2 data-i18n="support_title">Contact</h2>
-        <p data-i18n="support_text">Support, press, partnerships, or just want to say hi — we read every email.</p>
+        <p data-i18n="support_text">Support, press, partnerships, investment, or just want to say something — we read every message.</p>
         <a class="link" href="mailto:jucapegu02@gmail.com">jucapegu02@gmail.com</a>
       </div>
       <div>
         <h2 data-i18n="press_title">Press & Partners</h2>
-        <p data-i18n="press_text">Media kits, brand assets, and partnership inquiries — mention it in the subject line.</p>
+        <p data-i18n="press_text">Covering the future of AI-native software studios? We're happy to talk. Mention "Press" in the subject.</p>
         <a class="link" href="mailto:jucapegu02@gmail.com?subject=Press%20Inquiry">jucapegu02@gmail.com</a>
       </div>
     </section>
@@ -152,7 +216,7 @@
         <img src="./deer-rock-logo-512.png" alt="Deer Rock Studios logo">
         <span>Deer Rock Studios</span>
       </a>
-      <span class="footer-copy">© <span id="year"></span> Deer Rock Studios. All rights reserved.</span>
+      <span class="footer-copy">© <span id="year"></span> Deer Rock Studios. Built with AI. Shipped by humans.</span>
     </div>
     <div class="footer-links">
       <a href="./privacy-policy.html" data-i18n="footer_privacy">Privacy Policy</a>
