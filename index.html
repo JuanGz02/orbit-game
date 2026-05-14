@@ -3300,14 +3300,15 @@
             }
           });
 
-          // handle redirect result
+          // handle redirect result (silent — redirect is disabled but catch any residual errors)
           auth
             .getRedirectResult()
             .then(function (result) {
               if (result && result.user) console.log("Redirect login ok");
             })
             .catch(function (e) {
-              if (e.code && e.code !== "auth/no-current-user") toast(e.code);
+              // Swallow redirect errors silently — redirect flow is not used
+              console.warn("getRedirectResult:", e.code || e.message);
             });
         } catch (e) {
           console.error("Firebase init error:", e);
@@ -3562,9 +3563,14 @@
             e.code === "auth/popup-blocked" ||
             e.code === "auth/popup-closed-by-user"
           ) {
-            auth.signInWithRedirect(provider);
+            // Do NOT use signInWithRedirect — WebView sessionStorage causes
+            // "missing initial state" error on mobile. Show helpful message instead.
+            toast(
+              lang === "es"
+                ? "Abre el juego en Chrome para iniciar con Google"
+                : "Open in Chrome to use Google Sign-In"
+            );
           } else if (e.code === "auth/unauthorized-domain") {
-            // Show the actual domain so user knows what to add in Firebase
             var dom = location.hostname;
             toast('Firebase: add "' + dom + '" to authorized domains');
             console.warn("Unauthorized domain:", dom);
