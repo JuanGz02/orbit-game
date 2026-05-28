@@ -485,6 +485,84 @@
         animation: milestoneFlash 1.8s ease-out forwards;
         text-align: center;
       }
+
+      /* ── Safe area insets (notch / punch-hole / home bar) ── */
+      #hud {
+        padding-top: max(26px, calc(env(safe-area-inset-top, 0px) + 10px));
+      }
+      #coins-hud {
+        top: max(22px, calc(env(safe-area-inset-top, 0px) + 8px));
+      }
+      #pause-btn {
+        top: max(22px, calc(env(safe-area-inset-top, 0px) + 8px));
+      }
+      #scr-auth, #scr-guest, #scr-home {
+        padding-top: max(24px, env(safe-area-inset-top, 0px));
+        padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
+      }
+      #scr-dead, #scr-pause, #scr-shop, #scr-profile, #scr-leaderboard {
+        padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
+      }
+
+      /* ── Responsive font scaling (clamp = min / preferred / max) ── */
+      #auth-title {
+        font-size: clamp(28px, 11vmin, 46px) !important;
+        letter-spacing: clamp(6px, 3vmin, 12px) !important;
+      }
+      #home-title {
+        font-size: clamp(36px, 14vmin, 60px) !important;
+        letter-spacing: clamp(8px, 4vmin, 16px) !important;
+      }
+      #h-best {
+        font-size: clamp(28px, 9vmin, 40px) !important;
+      }
+      #sc {
+        font-size: clamp(36px, 13vmin, 56px) !important;
+      }
+      #a-tag, #h-hint {
+        font-size: clamp(9px, 2.2vmin, 12px) !important;
+      }
+
+      /* ── Tighter vertical spacing on short screens ── */
+      @media (max-height: 700px) {
+        #a-tag  { margin-bottom: clamp(16px, 4vh, 48px) !important; }
+        #h-hint { margin-bottom: clamp(16px, 4vh, 48px) !important; }
+        #scr-dead { padding-top: 14px !important; }
+        #scr-home .btn-play { padding: 14px !important; }
+      }
+      @media (max-height: 580px) {
+        #auth-title  { font-size: clamp(22px, 9vmin, 36px) !important; }
+        #home-title  { font-size: clamp(26px, 10vmin, 46px) !important; }
+        #a-tag  { margin-bottom: 12px !important; }
+        #h-hint { margin-bottom: 12px !important; }
+      }
+
+      /* ── Leaderboard loading spinner ── */
+      .lb-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 28px 0;
+        gap: 8px;
+        opacity: 0.4;
+        font-size: 11px;
+        letter-spacing: 2px;
+      }
+      .lb-spinner {
+        width: 14px; height: 14px;
+        border: 2px solid currentColor;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* ── Button tap highlight (mobile UX) ── */
+      .btn:active, .social-btn:active, .nt:active, .si:active {
+        opacity: 0.75;
+      }
     </style>
   </head>
   <body>
@@ -501,6 +579,7 @@
     <!-- AUTH -->
     <div class="scr on" id="scr-auth">
       <div
+        id="auth-title"
         style="
           font-size: 46px;
           font-weight: 100;
@@ -681,6 +760,7 @@
     <!-- HOME -->
     <div class="scr" id="scr-home">
       <div
+        id="home-title"
         style="
           font-size: 60px;
           font-weight: 100;
@@ -4400,9 +4480,9 @@
       }
 
       function renderLbFull() {
-        if (!db) {
-          return;
-        }
+        if (!db) { return; }
+        var listEl = document.getElementById("lb-full-list");
+        if (listEl) listEl.innerHTML = '<div class="lb-loading"><div class="lb-spinner"></div><span>LOADING</span></div>';
         var query = db
           .collection("leaderboard")
           .orderBy("score", "desc")
@@ -4515,6 +4595,8 @@
           renderLbData([me]);
           return;
         }
+        var medalsEl = document.getElementById("lb-medals");
+        if (medalsEl) medalsEl.innerHTML = '<div class="lb-loading"><div class="lb-spinner"></div></div>';
         db.collection("leaderboard")
           .orderBy("score", "desc")
           .limit(10)
@@ -4549,7 +4631,11 @@
           });
       }
       function filterByCurrentWeek(data) {
-        return data;
+        // Filter to scores saved in the current week (Mon–Sun)
+        var weekKey = getWeekKey();
+        var filtered = data.filter(function (r) { return !r.week || r.week === weekKey; });
+        // If no one has played this week yet, show all scores as fallback
+        return filtered.length > 0 ? filtered : data;
       }
       function renderLbData(all) {
         var top3 = all.slice(0, 3),
