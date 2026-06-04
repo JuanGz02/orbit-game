@@ -63,8 +63,7 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
 .div-line{display:flex;align-items:center;gap:10px;width:100%;margin:10px 0}
 .div-line::before,.div-line::after{content:'';flex:1;height:1px;background:rgba(128,128,128,.2)}
 .div-line span{font-size:11px;letter-spacing:2px;opacity:.35}
-#scr-auth.on,#scr-guest.on{background:#0a0a14}
-#scr-shop.on,#scr-profile.on,#scr-dead.on,#scr-pause.on{background:var(--scr-bg,#0a0a14)}
+#scr-auth.on,#scr-shop.on,#scr-profile.on,#scr-dead.on,#scr-pause.on,#scr-guest.on{background:var(--scr-bg,#e8e3db)}
 @keyframes bk{0%,100%{opacity:.2}50%{opacity:.5}}
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
 @keyframes tutBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
@@ -72,6 +71,20 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
 @keyframes coinFloat{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-40px)}}
 @keyframes shareSlideUp{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}
 .bk{animation:bk 2s ease-in-out infinite}
+/* v1.2 UI polish */
+.btn{box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.btn-play{box-shadow:0 0 32px rgba(124,58,237,.4),0 4px 24px rgba(0,0,0,.35),0 1px 0 rgba(255,255,255,.08) inset!important}
+.sb{box-shadow:0 2px 12px rgba(0,0,0,.12);transition:transform .15s}
+.si{transition:border .18s,box-shadow .18s,transform .12s}
+.si:active{transform:scale(.97)}
+.card-glow{box-shadow:0 0 0 1px rgba(251,191,36,.15),0 4px 20px rgba(251,191,36,.08)}
+.icon-svg{display:inline-flex;align-items:center;justify-content:center;pointer-events:none;vertical-align:middle}
+.icon-svg svg{display:block}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(128,128,128,.25);border-radius:4px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.scr.on{animation:fadeIn .22s ease-out}
 #tut-overlay{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:15;pointer-events:none}
 #tut-overlay.on{display:flex}
 .tut-arrow{animation:tutBob 1s ease-in-out infinite}
@@ -82,7 +95,7 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
 <canvas id="c"></canvas>
 <div id="hud"><div id="sc">0</div><div id="co"></div></div>
 <div id="coins-hud">★ <span id="cv">0</span></div>
-<button id="pause-btn" onclick="togglePause()">II</button>
+<button id="pause-btn" onclick="togglePause()"><svg width="11" height="13" viewBox="0 0 24 24" fill="currentColor" style="pointer-events:none"><rect x="3" y="2" width="6" height="20" rx="2"/><rect x="15" y="2" width="6" height="20" rx="2"/></svg></button>
 <div id="toast"></div>
 <div id="tut-overlay"></div>
 
@@ -148,14 +161,14 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     </div>
   </div>
   <div style="position:absolute;top:18px;right:16px;display:flex;align-items:center;gap:5px;border-radius:20px;padding:5px 12px">
-    <span style="color:#fbbf24">★</span><span id="h-coins" style="color:#fbbf24;font-size:13px;font-weight:600">0</span>
+    <span class="icon-svg"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fbbf24" style="pointer-events:none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span><span id="h-coins" style="color:#fbbf24;font-size:13px;font-weight:600">0</span>
   </div>
   <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:12px">
     <div id="theme-sw" style="display:flex;gap:6px;background:rgba(128,128,128,.12);border-radius:24px;padding:5px">
-      <div onclick="toggleSound()" id="snd-toggle" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;transition:all .2s;opacity:.6">♫</div>
-      <div onclick="setThemeMode('light')" id="tm-light" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all .2s">☀️</div>
-      <div onclick="setThemeMode('auto')" id="tm-auto" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all .2s">⚡</div>
-      <div onclick="setThemeMode('dark')" id="tm-dark" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all .2s">🌙</div>
+      <div onclick="toggleSound()" id="snd-toggle" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;opacity:.6"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+      <div onclick="setThemeMode('light')" id="tm-light" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></div>
+      <div onclick="setThemeMode('auto')" id="tm-auto" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none"><path d="M12 3v1m0 16v1m-8.66-13 .87.5m14.58 8 .87.5M3 12H4m16 0h1M4.22 19.78l.7-.7m14.16-14.16.7-.7M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7z"/></svg></div>
+      <div onclick="setThemeMode('dark')" id="tm-dark" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
     </div>
     <div class="lang-switch" id="home-lsw">
       <div class="lang-opt on" id="hls-en" onclick="setLang('en')">EN</div>
@@ -170,7 +183,7 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
   <div style="display:flex;gap:10px;margin-bottom:12px">
     <div class="sb" style="min-width:72px;border-radius:14px;padding:12px 16px"><div id="d-score" style="font-size:26px;font-weight:200;color:#fbbf24">0</div><div id="d-sc-lbl" class="sl">SCORE</div></div>
     <div class="sb" style="min-width:72px;border-radius:14px;padding:12px 16px"><div id="d-best" style="font-size:26px;font-weight:200;color:#fbbf24">0</div><div id="d-best-lbl" class="sl">BEST</div></div>
-    <div class="sb" style="min-width:72px;border-radius:14px;padding:12px 16px"><div id="d-earned" style="font-size:26px;font-weight:200;color:#fbbf24">0</div><div style="font-size:10px;letter-spacing:3px;opacity:.4;margin-top:3px">★</div></div>
+    <div class="sb" style="min-width:72px;border-radius:14px;padding:12px 16px"><div id="d-earned" style="font-size:26px;font-weight:200;color:#fbbf24">0</div><div style="display:flex;justify-content:center;margin-top:3px;opacity:.5"><svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24" style="pointer-events:none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div></div>
   </div>
   <div style="width:100%;margin-bottom:14px">
     <div style="display:flex;gap:12px;justify-content:center;margin-bottom:10px" id="lb-medals"></div>
@@ -180,8 +193,8 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     <div id="lb-more-list" style="display:none;margin-bottom:8px"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
       <div class="lang-switch" id="lb-scope-sw" style="font-size:10px">
-        <div class="lang-opt on" id="lbs-global" onclick="setLbScope('global',this)">🌍 GLOBAL</div>
-        <div class="lang-opt" id="lbs-local" onclick="setLbScope('local',this)">📍 LOCAL</div>
+        <div class="lang-opt on" id="lbs-global" onclick="setLbScope('global',this)" style="display:flex;align-items:center;gap:4px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> GLOBAL</div>
+        <div class="lang-opt" id="lbs-local" onclick="setLbScope('local',this)" style="display:flex;align-items:center;gap:4px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none;flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> LOCAL</div>
       </div>
       <div id="lb-reset-lbl" style="font-size:10px;opacity:.4;color:#fbbf24"></div>
     </div>
@@ -193,7 +206,7 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     <button class="btn" id="d-retry" style="padding:16px 48px;font-weight:700;font-size:14px" onclick="startGame()">RETRY</button>
     <button class="btn bsm" id="d-menu" onclick="showScr('home')">MENU</button>
   </div>
-  <button class="btn bsm" id="d-share" onclick="shareScore()" style="margin-bottom:14px;letter-spacing:2px;opacity:.7">↗ SHARE</button>
+  <button class="btn bsm" id="d-share" onclick="shareScore()" style="margin-bottom:14px;letter-spacing:2px;opacity:.7;display:flex;align-items:center;gap:6px;margin-left:auto;margin-right:auto"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg><span id="d-share-lbl">SHARE</span></button>
 </div>
 
 <!-- PAUSE -->
@@ -206,17 +219,17 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
 <!-- SHOP -->
 <div class="scr" id="scr-shop">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;width:100%">
-    <button class="btn bsm" onclick="showScr('home')">←</button>
+    <button class="btn bsm" onclick="showScr('home')" style="display:inline-flex;align-items:center;justify-content:center;padding:10px 16px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="pointer-events:none"><polyline points="15 18 9 12 15 6"/></svg></button>
     <div id="sh-title" style="font-size:16px;font-weight:300;letter-spacing:4px">SHOP</div>
     <div style="margin-left:auto;border-radius:18px;padding:5px 12px;display:flex;align-items:center;gap:5px">
-      <span style="color:#fbbf24">★</span><span id="sh-coins" style="color:#fbbf24;font-size:13px;font-weight:600">0</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="#fbbf24" style="pointer-events:none;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span id="sh-coins" style="color:#fbbf24;font-size:13px;font-weight:600">0</span>
     </div>
   </div>
   <div class="nav" id="sh-nav">
     <div class="nt on" id="sh-t1" onclick="switchShop('trail',this)">TRAILS</div>
     <div class="nt" id="sh-t2" onclick="switchShop('bundles',this)" id-label="shBundles">BUNDLES</div>
     <div class="nt" id="sh-t3" onclick="switchShop('packs',this)">PACKS</div>
-    <div class="nt" id="sh-t4" onclick="openSpin()">⭐</div>
+    <div class="nt" id="sh-t4" onclick="openSpin()" style="display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="pointer-events:none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
   </div>
   <div class="scroll" id="sh-content"></div>
 </div>
@@ -224,7 +237,7 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
 <!-- PROFILE -->
 <div class="scr" id="scr-profile">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;width:100%">
-    <button class="btn bsm" onclick="showScr('home')">←</button>
+    <button class="btn bsm" onclick="showScr('home')" style="display:inline-flex;align-items:center;justify-content:center;padding:10px 16px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="pointer-events:none"><polyline points="15 18 9 12 15 6"/></svg></button>
     <div id="pr-title" style="font-size:16px;font-weight:300;letter-spacing:4px">PROFILE</div>
   </div>
   <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;width:100%">
@@ -235,18 +248,18 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     <div style="flex:1">
       <div style="display:flex;align-items:center;gap:8px">
         <div id="pr-nick" style="font-size:16px;font-weight:400"></div>
-        <button onclick="startEditNick()" id="pr-edit-nick" style="background:none;border:none;cursor:pointer;font-size:14px;opacity:.5;padding:2px 6px">✏️</button>
+        <button onclick="startEditNick()" id="pr-edit-nick" style="background:none;border:none;cursor:pointer;opacity:.5;padding:2px 6px;display:inline-flex;align-items:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
       </div>
       <div id="pr-nick-edit" style="display:none;margin-top:6px">
         <input type="text" id="pr-nick-inp" maxlength="16" style="margin-bottom:6px;padding:8px 12px;font-size:13px">
         <div style="display:flex;gap:6px">
           <button class="btn bsm" id="pr-nick-save" onclick="saveNick()" style="flex:1">SAVE</button>
-          <button class="btn bsm" onclick="cancelEditNick()" style="opacity:.5">✕</button>
+          <button class="btn bsm" onclick="cancelEditNick()" style="opacity:.5;display:inline-flex;align-items:center;justify-content:center;padding:8px 14px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="pointer-events:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
       </div>
       <div id="pr-email" style="font-size:11px;opacity:.4;margin-top:2px"></div>
       <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhoto(this)">
-      <button class="btn bsm" id="photo-btn" onclick="document.getElementById('photo-input').click()" style="margin-top:6px;padding:5px 12px;font-size:10px">📷 PHOTO</button>
+      <button class="btn bsm" id="photo-btn" onclick="document.getElementById('photo-input').click()" style="margin-top:6px;padding:5px 12px;font-size:10px;display:inline-flex;align-items:center;gap:5px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span id="photo-btn-lbl">PHOTO</span></button>
     </div>
   </div>
   <div class="stg" id="pr-stats"></div>
@@ -255,7 +268,7 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     <div class="scroll" id="pr-hist" style="max-height:28vh"></div>
   </div>
   <div style="display:flex;gap:10px;margin-top:14px;width:100%">
-    <button id="pr-notif" onclick="toggleNotifications()" title="Notifications" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 14px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-bottom:8px;width:100%;transition:opacity .2s,border .2s"><svg id="pr-notif-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="12" y1="2" x2="12" y2="3" stroke-width="2"/></svg></button>
+    <button id="pr-notif" onclick="toggleNotifications()" class="btn bsm" style="width:100%;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px"><svg id="pr-notif-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span id="pr-notif-lbl">NOTIFICATIONS</span></button>
     <div style="display:flex;gap:10px;width:100%">
       <button class="btn bsm" id="pr-reset" onclick="resetScore()" style="flex:1;color:#fca5a5;border:1px solid rgba(239,68,68,.28);background:rgba(239,68,68,.08)">RESET SCORE</button>
       <button class="btn bsm" id="pr-logout" onclick="doLogout()" style="flex:1">SIGN OUT</button>
@@ -265,13 +278,13 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
 <!-- LEADERBOARD FULL -->
 <div class="scr" id="scr-leaderboard">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;width:100%">
-    <button class="btn bsm" onclick="showScr('home')">←</button>
-    <div style="font-size:16px;font-weight:300;letter-spacing:4px">🏆 RANKINGS</div>
+    <button class="btn bsm" onclick="showScr('home')" style="display:inline-flex;align-items:center;justify-content:center;padding:10px 16px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="pointer-events:none"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div style="font-size:16px;font-weight:300;letter-spacing:4px;display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none"><path d="M6 9H4a2 2 0 0 1-2-2V4h4M18 9h2a2 2 0 0 0 2-2V4h-4M12 17v4M8 21h8M6 3h12v6a6 6 0 0 1-12 0z"/></svg>RANKINGS</div>
   </div>
   <div style="display:flex;gap:6px;margin-bottom:10px;width:100%">
     <div class="lang-switch" id="lb-full-scope" style="font-size:10px;flex:1">
-      <div class="lang-opt on" id="lbf-global" onclick="setLbFullScope('global',this)">🌍 GLOBAL</div>
-      <div class="lang-opt" id="lbf-local" onclick="setLbFullScope('local',this)">📍 LOCAL</div>
+      <div class="lang-opt on" id="lbf-global" onclick="setLbFullScope('global',this)" style="display:flex;align-items:center;gap:4px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>GLOBAL</div>
+      <div class="lang-opt" id="lbf-local" onclick="setLbFullScope('local',this)" style="display:flex;align-items:center;gap:4px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none;flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>LOCAL</div>
     </div>
   </div>
   <div id="lb-full-country-search" style="display:none;margin-bottom:10px;width:100%">
@@ -288,15 +301,15 @@ input{width:100%;padding:12px 16px;border-radius:12px;border-width:1px;border-st
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
       <div style="width:28px"></div>
       <div id="spin-title" style="font-size:11px;letter-spacing:4px;font-weight:700;opacity:.7">DAILY SPIN</div>
-      <button onclick="closeSpin()" style="background:none;border:none;cursor:pointer;opacity:.4;font-size:18px;padding:0;width:28px;color:inherit">✕</button>
+      <button onclick="closeSpin()" style="background:none;border:none;cursor:pointer;opacity:.4;padding:0;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;color:inherit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="pointer-events:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div id="spin-canvas-wrap">
       <div id="spin-pointer"></div>
       <canvas id="spin-canvas" width="260" height="260"></canvas>
     </div>
     <div id="spin-result" style="font-size:14px;letter-spacing:2px;font-weight:700;min-height:22px;margin-bottom:14px;color:#fbbf24"></div>
-    <button id="spin-btn-free" class="btn" style="width:100%;margin-bottom:8px;animation:spinBtnPulse 2s infinite" onclick="doSpin(false)">⭐ FREE SPIN</button>
-    <button id="spin-btn-ad" class="btn bsm" style="width:100%;opacity:.65" onclick="doSpin(true)">📺 WATCH AD + SPIN</button>
+    <button id="spin-btn-free" class="btn" style="width:100%;margin-bottom:8px;animation:spinBtnPulse 2s infinite;display:flex;align-items:center;justify-content:center;gap:7px" onclick="doSpin(false)"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="pointer-events:none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span id="spin-free-lbl">FREE SPIN</span></button>
+    <button id="spin-btn-ad" class="btn bsm" style="width:100%;opacity:.65;display:flex;align-items:center;justify-content:center;gap:7px" onclick="doSpin(true)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg><span id="spin-ad-lbl">WATCH AD + SPIN</span></button>
   </div>
 </div>
 
@@ -332,7 +345,7 @@ var I18N={
     copied:'Copied!',adUnavail:'Ad unavailable, try again',watchFullAd:'Watch the full ad to revive',
     gravField:'Gravity Field',gravDesc:'Use the button below · 3 per game',gravLimit:'Max 3 per game',gravActive:'🌀 Field activated',
     rankUp:'Rank: ',spinTitle:'DAILY SPIN',spinFree:'FREE SPIN',spinWatch:'WATCH AD + SPIN',spinDone:'Come back tomorrow!',
-    bundleTitle:'BUNDLES',seasonPass:'Season Pass',seasonDesc:'2× coins · Exclusive trail · Monthly',
+    bundleTitle:'BUNDLES',seasonPass:'Season Pass',seasonDesc:'2× coins · Exclusive trail · Weekly',
     rankBoost:'Rank Boost',rankBoostDesc:'Jump to next rank instantly',
     giftCoins:'🎁 GIFT',shBundles:'BUNDLES',shSpin:'⭐ SPIN',
     trailUnlocked:'🎁 Trail unlocked!',dayStreak:'day streak!',},
@@ -356,7 +369,7 @@ var I18N={
     copied:'¡Copiado!',adUnavail:'Anuncio no disponible, intenta de nuevo',watchFullAd:'Ve el anuncio completo para revivir',
     gravField:'Campo Gravitatorio',gravDesc:'Usa el botón de abajo · 3 por partida',gravLimit:'Máx 3 por partida',gravActive:'🌀 Campo activado',
     rankUp:'Rango: ',spinTitle:'GIRO DIARIO',spinFree:'GIRO GRATIS',spinWatch:'VER ANUNCIO + GIRAR',spinDone:'¡Vuelve mañana!',
-    bundleTitle:'PAQUETES',seasonPass:'Pase de Temporada',seasonDesc:'2× monedas · Rastro exclusivo · Mensual',
+    bundleTitle:'PAQUETES',seasonPass:'Pase de Temporada',seasonDesc:'2× monedas · Rastro exclusivo · Semanal',
     rankBoost:'Boost de Rango',rankBoostDesc:'Sube de rango al instante',
     giftCoins:'🎁 REGALO',shBundles:'PAQUETES',shSpin:'⭐ GIRAR',
     trailUnlocked:'🎁 ¡Rastro desbloqueado!',dayStreak:'día(s) de racha!',}
@@ -372,7 +385,7 @@ var TRAILS=[{id:'simple',name:'Classic',icon:'⚪',price:0},{id:'rainbow',name:'
 var PACKS=[{id:'noads',name:'No Ads',desc:'Remove all ads forever',price:'$1.99',col:'#4f46e5'},
   {id:'c3000',name:'3000 ⭐',desc:'Coin starter pack',price:'$0.99',col:'#d97706'},
   {id:'c10000',name:'10000 ⭐',desc:'Best value',price:'$2.99',col:'#b45309'},
-  {id:'season',name:'Season Pass',desc:'2× coins · Exclusive trail · Monthly',price:'$0.99/mo',col:'#8b5cf6'},
+  {id:'season',name:'Season Pass',desc:'2× coins · Exclusive trail · Weekly',price:'$0.99/wk',col:'#8b5cf6'},
   {id:'rankboost',name:'Rank Boost',desc:'Jump to next rank instantly',price:'$0.99',col:'#f59e0b'}];
 var BUNDLES=[
   {id:'space-bundle',name:'Space Bundle',desc:'Ghost + Void + Lightning',trails:['ghost','void','lightning'],price:'$1.99',col:'#6366f1',icon:'🚀'},
@@ -384,9 +397,9 @@ function getPal(){return GAME_PAL;}
 // ══════════════════════════════════════════
 // 2. STATE
 // ══════════════════════════════════════════
-var DEF={user:null,nick:'',lang:'en',coins:0,best:0,noAds:false,themeMode:'dark',tutorial:false,
+var DEF={user:null,nick:'',lang:'en',coins:0,best:0,noAds:false,themeMode:'auto',tutorial:false,
   trail:'simple',ownedTrails:['simple'],hist:[],photo:null,country:'',ownedPowerups:{magnet:0},
-  streak:0,lastPlayDate:'',rank:'rookie',gameMode:'normal',lastSpinDate:'',lastSpinExtra:'',nextGameMultiplier:1,notifEnabled:false};
+  streak:0,lastPlayDate:'',rank:'rookie',gameMode:'normal',lastSpinDate:'',lastSpinExtra:'',nextGameMultiplier:1};
 var S=Object.assign({},DEF);
 function loadState(){try{var d=localStorage.getItem('orb7');if(d)S=Object.assign({},DEF,JSON.parse(d));}catch(e){}}
 function saveState(){localStorage.setItem('orb7',JSON.stringify(S));saveToCloud();}
@@ -575,6 +588,7 @@ function checkMilestone(){
   }
 }
 function showMilestonePop(text,num){
+  playMilestone();
   var el=document.createElement('div');
   el.className='milestone-pop';
   el.innerHTML='<div style="font-size:42px;font-weight:100;color:#fbbf24;letter-spacing:4px">'+num+'</div><div style="font-size:12px;letter-spacing:5px;color:'+T.text+';opacity:.7;margin-top:4px">'+text+'</div>';
@@ -795,138 +809,128 @@ function tutLanded(){
 // Ambient music — chill lo-fi with Web Audio
 var musicNode=null,musicGain=null,musicPlaying=false,menuMusicPlaying=false;
 var soundEnabled=true,masterVolume=0.6;
+function ensureAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();}
+function playClick(){
+  if(!soundEnabled)return;ensureAC();
+  var o=AC.createOscillator(),g=AC.createGain();
+  o.type='sine';o.frequency.value=880;
+  g.gain.setValueAtTime(.12*masterVolume,AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.08);
+  o.connect(g);g.connect(AC.destination);
+  o.start();o.stop(AC.currentTime+.09);
+}
+function playCoin(){
+  if(!soundEnabled||!AC)return;
+  [1047,1319,1568].forEach(function(f,i){
+    var o=AC.createOscillator(),g=AC.createGain();
+    o.type='sine';o.frequency.value=f;
+    var t0=AC.currentTime+i*.07;
+    g.gain.setValueAtTime(0,t0);
+    g.gain.linearRampToValueAtTime(.09*masterVolume,t0+.02);
+    g.gain.exponentialRampToValueAtTime(.001,t0+.18);
+    o.connect(g);g.connect(AC.destination);
+    o.start(t0);o.stop(t0+.2);
+  });
+}
+function playCrash(){
+  if(!soundEnabled||!AC)return;
+  var buf=AC.createBuffer(1,AC.sampleRate*.4,AC.sampleRate);
+  var d=buf.getChannelData(0);
+  for(var i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);
+  var src=AC.createBufferSource(),g=AC.createGain();
+  g.gain.setValueAtTime(.35*masterVolume,AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.4);
+  src.buffer=buf;src.connect(g);g.connect(AC.destination);src.start();
+  var o=AC.createOscillator(),g2=AC.createGain();
+  o.type='sawtooth';o.frequency.setValueAtTime(120,AC.currentTime);
+  o.frequency.exponentialRampToValueAtTime(40,AC.currentTime+.3);
+  g2.gain.setValueAtTime(.15*masterVolume,AC.currentTime);
+  g2.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.35);
+  o.connect(g2);g2.connect(AC.destination);o.start();o.stop(AC.currentTime+.4);
+}
+function playMilestone(){
+  if(!soundEnabled||!AC)return;
+  [523,659,784,1047].forEach(function(f,i){
+    var o=AC.createOscillator(),g=AC.createGain();
+    o.type='triangle';o.frequency.value=f;
+    var t0=AC.currentTime+i*.09;
+    g.gain.setValueAtTime(0,t0);
+    g.gain.linearRampToValueAtTime(.1*masterVolume,t0+.03);
+    g.gain.exponentialRampToValueAtTime(.001,t0+.25);
+    o.connect(g);g.connect(AC.destination);
+    o.start(t0);o.stop(t0+.3);
+  });
+}
+var SVG_MUSIC='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+var SVG_MUTE='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v9"/><path d="M9 5l12-2v8"/><circle cx="6" cy="18" r="3"/></svg>';
 function toggleSound(){
   soundEnabled=!soundEnabled;
   var el=document.getElementById('snd-toggle');
   el.style.opacity=soundEnabled?'.6':'.25';
-  el.textContent=soundEnabled?'♫':'✕';
+  el.innerHTML=soundEnabled?SVG_MUSIC:SVG_MUTE;
   if(!soundEnabled){stopMusic();stopMenuMusic();}
   else if(phase==='idle'||phase==='dead')startMenuMusic();
 }
-// ── ZEN MUSIC ─────────────────────────────────
-function startZenMusic(){
-  if(musicPlaying||!AC||!soundEnabled)return;
-  stopMenuMusic();musicPlaying=true;
-  musicGain=AC.createGain();musicGain.gain.value=0;musicGain.connect(AC.destination);
-  musicGain.gain.linearRampToValueAtTime(0.11,AC.currentTime+4);
-  zenDrone();zenMelody();zenBells();
-}
-function zenDrone(){
-  if(!musicPlaying||!AC)return;
-  // Deep A1 drone with slow vibrato
-  var o=AC.createOscillator(),g=AC.createGain(),lfo=AC.createOscillator(),lfog=AC.createGain();
-  o.type='sine';o.frequency.value=55;
-  lfo.frequency.value=0.18;lfog.gain.value=0.4;
-  lfo.connect(lfog);lfog.connect(o.frequency);lfo.start();lfo.stop(AC.currentTime+22);
-  g.gain.setValueAtTime(0,AC.currentTime);
-  g.gain.linearRampToValueAtTime(0.055*masterVolume,AC.currentTime+5);
-  g.gain.linearRampToValueAtTime(0,AC.currentTime+20);
-  o.connect(g);g.connect(musicGain);o.start();o.stop(AC.currentTime+22);
-  // Octave layer
-  var o2=AC.createOscillator(),g2=AC.createGain();
-  o2.type='sine';o2.frequency.value=110;
-  g2.gain.setValueAtTime(0,AC.currentTime);
-  g2.gain.linearRampToValueAtTime(0.025*masterVolume,AC.currentTime+6);
-  g2.gain.linearRampToValueAtTime(0,AC.currentTime+19);
-  o2.connect(g2);g2.connect(musicGain);o2.start();o2.stop(AC.currentTime+20);
-  setTimeout(function(){zenDrone();},19000);
-}
-function zenMelody(){
-  if(!musicPlaying||!AC)return;
-  // A minor pentatonic: A3 C4 D4 E4 G4 A4
-  var scale=[220,261.63,293.66,329.63,392,440,523.25];
-  var note=scale[Math.floor(Math.random()*scale.length)];
-  var o=AC.createOscillator(),g=AC.createGain();
-  o.type='sine';o.frequency.value=note;
-  var dur=7+Math.random()*5;
-  g.gain.setValueAtTime(0,AC.currentTime);
-  g.gain.linearRampToValueAtTime(0.038*masterVolume,AC.currentTime+dur*.3);
-  g.gain.linearRampToValueAtTime(0,AC.currentTime+dur);
-  o.connect(g);g.connect(musicGain);o.start();o.stop(AC.currentTime+dur+.2);
-  // Harmony fifth
-  if(Math.random()>.5){
-    var o3=AC.createOscillator(),g3=AC.createGain();
-    o3.type='sine';o3.frequency.value=note*1.498;
-    g3.gain.setValueAtTime(0,AC.currentTime);
-    g3.gain.linearRampToValueAtTime(0.016*masterVolume,AC.currentTime+dur*.4);
-    g3.gain.linearRampToValueAtTime(0,AC.currentTime+dur*.9);
-    o3.connect(g3);g3.connect(musicGain);o3.start();o3.stop(AC.currentTime+dur);
-  }
-  setTimeout(function(){zenMelody();},5000+Math.random()*6000);
-}
-function zenBells(){
-  if(!musicPlaying||!AC)return;
-  // Crystal bell hits (high overtones)
-  var bellFreqs=[1046.5,1318.5,1567.98,2093];
-  var f=bellFreqs[Math.floor(Math.random()*bellFreqs.length)];
-  var o=AC.createOscillator(),g=AC.createGain();
-  o.type='sine';o.frequency.value=f;
-  g.gain.setValueAtTime(0.025*masterVolume,AC.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+3.5);
-  o.connect(g);g.connect(musicGain);o.start();o.stop(AC.currentTime+3.6);
-  setTimeout(function(){zenBells();},8000+Math.random()*12000);
-}
-// ── COMPETITIVE MUSIC ──────────────────────────
-var compBeatTimer=null;
 function startMusic(){
   if(musicPlaying||!AC||!soundEnabled)return;
-  stopMenuMusic();musicPlaying=true;
-  musicGain=AC.createGain();musicGain.gain.value=0;musicGain.connect(AC.destination);
-  musicGain.gain.linearRampToValueAtTime(0.14,AC.currentTime+1.5);
-  compBass();compArp();
-  var beat=0;
-  var bInterval=60000/124; // 124 BPM
-  compBeatTimer=setInterval(function(){
-    if(!musicPlaying){clearInterval(compBeatTimer);return;}
-    compKick(beat);beat=(beat+1)%8;
-  },bInterval);
+  stopMenuMusic();
+  musicPlaying=true;
+  musicGain=AC.createGain();
+  musicGain.gain.value=0;
+  musicGain.connect(AC.destination);
+  musicGain.gain.linearRampToValueAtTime(0.12,AC.currentTime+2);
+  playAmbientChord();
 }
-function compKick(beat){
-  if(!AC||!musicGain)return;
-  var now=AC.currentTime;
-  if(beat===0||beat===4){ // kick
-    var o=AC.createOscillator(),g=AC.createGain();
-    o.type='sine';o.frequency.setValueAtTime(140,now);o.frequency.exponentialRampToValueAtTime(38,now+0.12);
-    g.gain.setValueAtTime(0.18*masterVolume,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.22);
-    o.connect(g);g.connect(musicGain);o.start(now);o.stop(now+0.25);
-  }
-  if(beat===2||beat===6){ // snare noise burst
-    var buf=AC.createBuffer(1,Math.floor(AC.sampleRate*.06),AC.sampleRate);
-    var d=buf.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*.5;
-    var src=AC.createBufferSource(),hg=AC.createGain(),hf=AC.createBiquadFilter();
-    hf.type='bandpass';hf.frequency.value=3000;hf.Q.value=0.8;
-    hg.gain.setValueAtTime(0.12*masterVolume,now);hg.gain.exponentialRampToValueAtTime(0.001,now+0.06);
-    src.buffer=buf;src.connect(hf);hf.connect(hg);hg.connect(musicGain);src.start(now);
-  }
+function startZenMusic(){
+  if(musicPlaying||!AC||!soundEnabled)return;
+  stopMenuMusic();
+  musicPlaying=true;
+  musicGain=AC.createGain();
+  musicGain.gain.value=0;
+  musicGain.connect(AC.destination);
+  musicGain.gain.linearRampToValueAtTime(0.10,AC.currentTime+3);
+  playZenChord();
 }
-function compBass(){
+function playZenChord(){
   if(!musicPlaying||!AC)return;
-  var bassSeq=[55,55,65.41,55,73.42,55,65.41,82.41];
-  var note=bassSeq[Math.floor(Math.random()*bassSeq.length)];
+  var zenNotes=[261.63,293.66,329.63,392,440,523.25,587.33];
+  var note=zenNotes[Math.floor(Math.random()*zenNotes.length)];
   var o=AC.createOscillator(),g=AC.createGain();
-  o.type='sawtooth';o.frequency.value=note;
+  o.type='sine';
+  o.frequency.value=note*(Math.random()<.4?0.5:1);
   g.gain.setValueAtTime(0,AC.currentTime);
-  g.gain.linearRampToValueAtTime(0.07*masterVolume,AC.currentTime+0.04);
-  g.gain.linearRampToValueAtTime(0,AC.currentTime+0.45);
-  o.connect(g);g.connect(musicGain);o.start();o.stop(AC.currentTime+0.5);
-  setTimeout(function(){compBass();},480+Math.random()*80);
+  g.gain.linearRampToValueAtTime(.04*masterVolume,AC.currentTime+2.5);
+  g.gain.linearRampToValueAtTime(0,AC.currentTime+9);
+  o.connect(g);g.connect(musicGain);
+  o.start();o.stop(AC.currentTime+9.5);
+  if(Math.random()>.6){
+    var o2=AC.createOscillator(),g2=AC.createGain();
+    o2.type='sine';o2.frequency.value=note*1.5;
+    g2.gain.setValueAtTime(0,AC.currentTime);
+    g2.gain.linearRampToValueAtTime(.015*masterVolume,AC.currentTime+3);
+    g2.gain.linearRampToValueAtTime(0,AC.currentTime+8);
+    o2.connect(g2);g2.connect(musicGain);
+    o2.start();o2.stop(AC.currentTime+8.5);
+  }
+  setTimeout(function(){playZenChord();},4000+Math.random()*4000);
 }
-function compArp(){
+function playAmbientChord(){
   if(!musicPlaying||!AC)return;
-  var arp=[329.63,392,440,523.25,587.33,659.25,784];
-  var note=arp[Math.floor(Math.random()*arp.length)];
+  var notes=[130.81,164.81,196,261.63,329.63,392,246.94];
+  var note=notes[Math.floor(Math.random()*notes.length)];
   var o=AC.createOscillator(),g=AC.createGain();
-  o.type='square';o.frequency.value=note;
+  o.type=Math.random()<.6?'sine':'triangle';
+  o.frequency.value=note*(Math.random()<.3?2:1);
   g.gain.setValueAtTime(0,AC.currentTime);
-  g.gain.linearRampToValueAtTime(0.018*masterVolume,AC.currentTime+0.02);
-  g.gain.linearRampToValueAtTime(0,AC.currentTime+0.22);
-  o.connect(g);g.connect(musicGain);o.start();o.stop(AC.currentTime+0.25);
-  setTimeout(function(){compArp();},240+Math.random()*160);
+  g.gain.linearRampToValueAtTime(.06*masterVolume,AC.currentTime+1.5);
+  g.gain.linearRampToValueAtTime(0,AC.currentTime+6);
+  o.connect(g);g.connect(musicGain);
+  o.start();o.stop(AC.currentTime+6.5);
+  setTimeout(function(){playAmbientChord();},2000+Math.random()*3000);
 }
 function stopMusic(){
   musicPlaying=false;
-  if(compBeatTimer){clearInterval(compBeatTimer);compBeatTimer=null;}
-  if(musicGain){musicGain.gain.linearRampToValueAtTime(0,AC.currentTime+1.5);}
+  if(musicGain){musicGain.gain.linearRampToValueAtTime(0,AC.currentTime+1);}
 }
 // Menu lo-fi music
 var menuGain=null;
@@ -1090,8 +1094,7 @@ function requestNotifPermission(){
       fcmMessaging.getToken({vapidKey:'BI4Ya4XD2j_BMIasIFBDdbB0JgEvy5pg37HabetzarIAqWW4yvAA2w7BDH7ohyiKTk8j3I3ZgCWQpw77eL8fhQQ'}).then(function(token){
         if(token&&db){
           db.collection('users').doc(S.user.uid).set({fcmToken:token},{merge:true});
-          S.notifEnabled=true;saveState();
-          toast(lang==='es'?'Notificaciones activadas':'Notifications enabled');
+          toast('🔔 '+(lang==='es'?'Notificaciones activadas':'Notifications enabled'));
           updateNotifBtn();
         }
       }).catch(function(e){console.log('FCM token error:',e);});
@@ -1104,29 +1107,30 @@ function toggleNotifications(){
   if(!('Notification' in window)){toast(lang==='es'?'No soportado en este navegador':'Not supported in this browser');return;}
   if(S.user&&S.user.isGuest){toast(lang==='es'?'Crea una cuenta para notificaciones':'Create an account for notifications');return;}
   if(!fcmMessaging){initFCM();}
-  if(S.notifEnabled){
-    // Turn off: clear token from Firestore
-    S.notifEnabled=false;
-    saveState();
+  if(Notification.permission==='granted'){
     if(db&&S.user&&S.user.uid){
       db.collection('users').doc(S.user.uid).set({fcmToken:null},{merge:true});
+      toast('🔕 '+(lang==='es'?'Notificaciones desactivadas':'Notifications disabled'));
+      updateNotifBtn();
     }
-    toast(lang==='es'?'Notificaciones desactivadas':'Notifications disabled');
-    updateNotifBtn();
   }else if(Notification.permission==='denied'){
     toast(lang==='es'?'Actívalas en Ajustes del navegador':'Enable in browser Settings → Notifications');
   }else{
     requestNotifPermission();
   }
 }
+var SVG_BELL='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>';
+var SVG_BELL_OFF='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none"><path d="M13.73 21a2 2 0 0 1-3.46 0"/><path d="M18.63 13A17.89 17.89 0 0 1 18 8"/><path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14"/><path d="M18 8a6 6 0 0 0-9.33-5"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 function updateNotifBtn(){
   var btn=document.getElementById('pr-notif');
   if(!btn)return;
-  var on=!!(S.notifEnabled);
-  btn.style.opacity=on?'1':'.5';
-  btn.style.border=on?'1px solid rgba(251,191,36,.5)':'1px solid rgba(255,255,255,.12)';
-  var ic=document.getElementById('pr-notif-icon');
-  if(ic)ic.style.color=on?'#fbbf24':'currentColor';
+  var on=('Notification' in window)&&Notification.permission==='granted';
+  var icon=document.getElementById('pr-notif-icon');
+  var lbl=document.getElementById('pr-notif-lbl');
+  if(icon)icon.outerHTML=(on?SVG_BELL:SVG_BELL_OFF).replace('<svg ','<svg id="pr-notif-icon" ');
+  if(lbl)lbl.textContent=on?'NOTIFICATIONS ON':'NOTIFICATIONS OFF';
+  btn.style.opacity=on?'1':'.55';
+  btn.style.border=on?'1px solid rgba(251,191,36,.4)':'';
 }
 
 function saveToCloud(){
@@ -1165,13 +1169,8 @@ function authGoogle(){
   if(!auth){toast('Loading...');return;}
   var provider=new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).catch(function(e){
-    if(e.code==='auth/popup-blocked'||e.code==='auth/popup-closed-by-user'){
-      auth.signInWithRedirect(provider);
-    } else if(e.code==='auth/unauthorized-domain'){
-      // Show the actual domain so user knows what to add in Firebase
-      var dom=location.hostname;
-      toast('Firebase: add "'+dom+'" to authorized domains');
-      console.warn('Unauthorized domain:',dom);
+    if(e.code==='auth/popup-blocked'){
+      toast(lang==='es'?'Permite ventanas emergentes':'Allow popups for this site');
     } else if(e.code!=='auth/cancelled-popup-request'){
       toast(lang==='es'?'Error de conexión':'Connection error');
     }
@@ -1527,10 +1526,15 @@ function renderLbFull(){
     document.getElementById('lb-full-me').innerHTML='<div style="color:#fbbf24;font-size:14px;font-weight:600">You are #'+myRank+' '+scopeText+'</div>';
   }).catch(function(){});
 }
+var SVG_CHEV_DOWN='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="pointer-events:none;margin-right:4px"><polyline points="6 9 12 15 18 9"/></svg>';
+var SVG_CHEV_UP='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="pointer-events:none;margin-right:4px"><polyline points="18 15 12 9 6 15"/></svg>';
+function lbMoreLabel(open){return open?SVG_CHEV_UP+(lang==='es'?'OCULTAR':'HIDE'):SVG_CHEV_DOWN+(lang==='es'?'VER MÁS':'SEE MORE');}
 function toggleLbMore(){
   lbMoreOpen=!lbMoreOpen;
   document.getElementById('lb-more-list').style.display=lbMoreOpen?'block':'none';
-  document.getElementById('lb-more-btn').textContent=lbMoreOpen?t('seeLess'):t('seeMore');
+  var btn=document.getElementById('lb-more-btn');
+  btn.innerHTML=lbMoreLabel(lbMoreOpen);
+  btn.style.display='inline-flex';btn.style.alignItems='center';btn.style.width='100%';btn.style.justifyContent='center';
 }
 function renderLb(){
   document.getElementById('lb-reset-lbl').textContent='';
@@ -1576,7 +1580,9 @@ function renderLbData(all){
     h2+='<div style="color:#fbbf24;font-size:12px;font-weight:500">'+r.score+'</div></div>';
   });
   document.getElementById('lb-more-list').innerHTML=h2;
-  document.getElementById('lb-more-btn').textContent=lbMoreOpen?t('seeLess'):t('seeMore');
+  var moreBtn=document.getElementById('lb-more-btn');
+  moreBtn.innerHTML=lbMoreLabel(lbMoreOpen);
+  moreBtn.style.display='inline-flex';moreBtn.style.alignItems='center';moreBtn.style.width='100%';moreBtn.style.justifyContent='center';
   document.getElementById('lb-more-list').style.display=lbMoreOpen?'block':'none';
 }
 
@@ -1759,107 +1765,6 @@ window.addEventListener('resize',rsz);rsz();
 var phase='idle',score,combo,sesCoins,revived;
 var currentMode='normal';
 var lastCheckpoint=0;
-
-// ── COSMIC REFLECTIONS ────────────────────────
-// Public domain wisdom (authors 70+ years deceased)
-// Each entry: t=english, es=spanish, a=author
-var ZEN_QUOTES=[
-  {t:'You have power over your mind,\nnot outside events.',es:'Tienes poder sobre tu mente,\nno sobre los eventos externos.',a:'Marco Aurelio'},
-  {t:'The obstacle is the way.',es:'El obstáculo es el camino.',a:'Marco Aurelio'},
-  {t:'Very little is needed\nto make a happy life.',es:'Se necesita muy poco\npara tener una vida feliz.',a:'Marco Aurelio'},
-  {t:'Knowing others is wisdom.\nKnowing yourself is enlightenment.',es:'Conocer a los demás es sabiduría.\nConocerte a ti mismo es iluminación.',a:'Lao Tzu'},
-  {t:'A journey of a thousand miles\nbegins with a single step.',es:'Un viaje de mil millas\ncomienza con un solo paso.',a:'Lao Tzu'},
-  {t:'Nature does not hurry,\nyet everything is accomplished.',es:'La naturaleza no tiene prisa,\ny sin embargo todo se logra.',a:'Lao Tzu'},
-  {t:'You are not a drop in the ocean.\nYou are the entire ocean in a drop.',es:'No eres una gota en el océano.\nEres el océano entero en una gota.',a:'Rumi'},
-  {t:'Wherever you are, be all there.',es:'Dondequiera que estés,\nestá completamente.',a:'Rumi'},
-  {t:'What you seek is seeking you.',es:'Lo que buscas te está buscando.',a:'Rumi'},
-  {t:'The quieter you become,\nthe more you are able to hear.',es:'Cuanto más silencioso te vuelves,\nmás puedes escuchar.',a:'Rumi'},
-  {t:'We suffer more in imagination\nthan in reality.',es:'Sufrimos más en la imaginación\nque en la realidad.',a:'Séneca'},
-  {t:'Begin at once to live,\nand count each day as a separate life.',es:'Comienza a vivir ahora,\ny cuenta cada día como una vida.',a:'Séneca'},
-  {t:'The only constant in life is change.',es:'Lo único constante en la vida\nes el cambio.',a:'Heráclito'},
-  {t:'It does not matter how slowly you go,\nas long as you do not stop.',es:'No importa qué tan lento vayas,\nsiempre que no te detengas.',a:'Confucio'},
-  {t:'Life is really simple, but we insist\non making it complicated.',es:'La vida es realmente simple,\npero insistimos en complicarla.',a:'Confucio'},
-  {t:'Not all those who wander are lost.',es:'No todos los que vagan están perdidos.',a:'J.R.R. Tolkien'},
-  {t:'Go confidently in the direction of your dreams.',es:'Avanza con confianza\nhacia tus sueños.',a:'H.D. Thoreau'},
-  {t:'The mind is everything.\nWhat you think, you become.',es:'La mente lo es todo.\nEn lo que piensas, te conviertes.',a:'Buda'},
-  {t:'In the middle of every difficulty\nlies opportunity.',es:'En el centro de toda dificultad\nyace una oportunidad.',a:'Einstein'},
-  {t:'Simplicity is the ultimate sophistication.',es:'La simplicidad es\nla última sofisticación.',a:'Leonardo da Vinci'},
-  {t:'The present moment always will have been.',es:'El momento presente\nsiempre habrá sido.',a:'Proverbio estoico'},
-  {t:'Be like water — flow, fill, nourish.',es:'Sé como el agua —\nfluye, llena, nutre.',a:'Lao Tzu'},
-  {t:'In three words: life goes on.',es:'En tres palabras: la vida continúa.',a:'Robert Frost'},
-  {t:'Everything you can imagine is real.',es:'Todo lo que puedes imaginar es real.',a:'Picasso'},
-  {t:'The journey itself is the reward.',es:'El viaje en sí es la recompensa.',a:'Proverbio zen'},
-  {t:'Stars can\'t shine without darkness.',es:'Las estrellas no brillan\nsin la oscuridad.',a:'Anónimo'},
-  {t:'Breathe. You are exactly where\nyou need to be.',es:'Respira. Estás exactamente\ndonde necesitas estar.',a:'Proverbio zen'},
-  {t:'The universe is under no obligation\nto make sense to you.',es:'El universo no tiene obligación\nde hacerle sentido.',a:'Neil deGrasse Tyson'},
-  {t:'Look up at the stars, not down at your feet.',es:'Mira las estrellas, no el suelo.',a:'Stephen Hawking'},
-  {t:'We are all made of star stuff.',es:'Todos estamos hechos\nde materia de estrellas.',a:'Carl Sagan'},
-  {t:'Somewhere, something incredible\nis waiting to be known.',es:'En algún lugar, algo increíble\nespera ser descubierto.',a:'Carl Sagan'},
-  {t:'Keep going.',es:'Sigue adelante.',a:''},
-  {t:'Float.',es:'Flota.',a:''}
-];
-var zenQuote={text:'',author:'',alpha:0,phase:'idle',timer:0,used:[],px:0,py:0};
-function triggerZenQuote(){
-  var pool=ZEN_QUOTES.filter(function(_,i){return zenQuote.used.indexOf(i)<0;});
-  if(pool.length===0){zenQuote.used=[];pool=ZEN_QUOTES.slice();}
-  var pick=pool[Math.floor(Math.random()*pool.length)];
-  zenQuote.used.push(ZEN_QUOTES.indexOf(pick));
-  var txt=lang==='es'?(pick.es||pick.t):pick.t;
-  zenQuote.text=txt;
-  zenQuote.author=(pick.a?'— '+pick.a:'');
-  zenQuote.alpha=0;zenQuote.phase='in';zenQuote.timer=0;
-  // Anchor to current planet position — offset above it
-  var ci=circles[orb.on>=0?orb.on:0];
-  if(ci){
-    var ps=toS(ci.wx,ci.wy);
-    var offY=sR(ci.r)+55;
-    zenQuote.px=Math.min(Math.max(ps.x,W*.15),W*.85);
-    zenQuote.py=Math.min(Math.max(ps.y-offY,H*.12),H*.55);
-  }else{
-    zenQuote.px=W/2;zenQuote.py=H*.35;
-  }
-}
-function drawZenQuote(){
-  if(zenQuote.phase==='idle'||currentMode!=='easy')return;
-  var fadeDur=80,holdDur=320; // frames (~5.3s hold at 60fps)
-  zenQuote.timer++;
-  if(zenQuote.phase==='in'){
-    zenQuote.alpha=Math.min(1,zenQuote.timer/fadeDur);
-    if(zenQuote.timer>=fadeDur){zenQuote.phase='hold';zenQuote.timer=0;}
-  }else if(zenQuote.phase==='hold'){
-    zenQuote.alpha=1;
-    if(zenQuote.timer>=holdDur){zenQuote.phase='out';zenQuote.timer=0;}
-  }else if(zenQuote.phase==='out'){
-    zenQuote.alpha=Math.max(0,1-zenQuote.timer/fadeDur);
-    if(zenQuote.timer>=fadeDur){zenQuote.phase='idle';zenQuote.alpha=0;return;}
-  }
-  var lines=zenQuote.text.split('\n');
-  var cx=zenQuote.px,cy=zenQuote.py;
-  // Text color adapts to theme — shadow creates halo readable on any bg
-  var textCol=isNight?'rgba(224,215,255,0.95)':'rgba(20,15,50,0.9)';
-  var shadowCol=isNight?'rgba(0,0,0,0.9)':'rgba(255,255,255,0.95)';
-  var authorCol=isNight?'rgba(167,139,250,0.75)':'rgba(109,40,217,0.7)';
-  ctx.save();
-  ctx.globalAlpha=zenQuote.alpha;
-  ctx.textAlign='center';
-  // Quote text — clean, no frame
-  var lineH=19,fs=lines.length>2?12:13;
-  ctx.font='300 '+fs+'px "Space Grotesk", sans-serif';
-  ctx.shadowColor=shadowCol;ctx.shadowBlur=14;
-  ctx.fillStyle=textCol;
-  for(var li=0;li<lines.length;li++){
-    ctx.fillText(lines[li].trim(),cx,cy+li*lineH);
-  }
-  // Author — italic, smaller, offset
-  if(zenQuote.author){
-    ctx.shadowBlur=10;
-    ctx.globalAlpha=zenQuote.alpha*.7;
-    ctx.font='italic 300 10px "Space Grotesk", sans-serif';
-    ctx.fillStyle=authorCol;
-    ctx.fillText(zenQuote.author,cx,cy+lines.length*lineH+10);
-  }
-  ctx.shadowBlur=0;ctx.restore();
-}
 var sesCoinsFrac=0;
 var revivedThisRun=false;
 var reviveTimer=0;
@@ -1998,7 +1903,6 @@ function init(){
   lastMilestone=0;GAME_PAL=['#a78bfa','#6ee7b7','#f9a8d4'];
   tutStep=0;tutFrozen=false;slowMoTimer=0;slowMoFactor=1;hideTut();
   lastCheckpoint=0;
-  zenQuote.phase='idle';zenQuote.alpha=0;
   if(reviveInterval){clearInterval(reviveInterval);reviveInterval=null;}
   var pal=getPal();
   var c0={wx:0,wy:0,r:88,col:pal[0],spd:.025,ang:0,alpha:1,shockwave:null};
@@ -2102,7 +2006,7 @@ function die(){
     if(navigator.vibrate)navigator.vibrate(15);
     return;
   }
-  phase='dead';snd(false);stopMusic();
+  phase='dead';snd(false);stopMusic();playCrash();
   hideTut();tutStep=0;tutFrozen=false;
   if(navigator.vibrate)navigator.vibrate([50,30,80]);
   if(currentMode!=='easy'){var mult=S.nextGameMultiplier||1;S.coins+=sesCoins*mult;if(mult>1){toast('🚀 2× coins!');S.nextGameMultiplier=1;}}
@@ -2166,7 +2070,7 @@ function update(dt){
   {
     coins_arr.forEach(function(cn){
       if(cn.done)return;
-      if(Math.hypot(orb.wx-cn.wx,orb.wy-cn.wy)<cn.r+20){cn.done=true;var multiplier=1+combo*0.15;var earned=1*multiplier;sesCoinsFrac+=earned;var whole=Math.floor(sesCoinsFrac);if(whole>0){sesCoins+=whole;sesCoinsFrac-=whole;}document.getElementById('cv').textContent=sesCoins;if(earned>1)showCoinPopup('+'+earned.toFixed(1),cn.wx,cn.wy);burst(cn.wx,cn.wy,'#fbbf24',7);}
+      if(Math.hypot(orb.wx-cn.wx,orb.wy-cn.wy)<cn.r+20){cn.done=true;var multiplier=1+combo*0.15;var earned=1*multiplier;sesCoinsFrac+=earned;var whole=Math.floor(sesCoinsFrac);if(whole>0){sesCoins+=whole;sesCoinsFrac-=whole;}document.getElementById('cv').textContent=sesCoins;if(earned>1)showCoinPopup('+'+earned.toFixed(1),cn.wx,cn.wy);burst(cn.wx,cn.wy,'#fbbf24',7);playCoin();}
     });
     coins_arr=coins_arr.filter(function(c){return !c.done;});
   }
@@ -2244,7 +2148,6 @@ function update(dt){
           if(currentMode==='easy'&&score%10===0&&score!==lastCheckpoint){
             lastCheckpoint=score;
             showMilestonePop('CHECKPOINT '+score,score);
-            setTimeout(triggerZenQuote,1200); // quote appears after checkpoint flash
           }
           while(circles.length>3){circles.shift();if(orb.on>0)orb.on--;if(orb.lastLaunched>0)orb.lastLaunched--;i=Math.max(0,i-1);}
           addNext();
@@ -2266,8 +2169,7 @@ function update(dt){
       }
     }
   }
-  var zBoost=(zenQuote.phase!=='idle'&&currentMode==='easy')?0.07*zenQuote.alpha:0;
-  camX+=(tCamX-camX)*.07*dt;camY+=(tCamY-camY)*.07*dt;zoom+=(tZoom+zBoost-zoom)*.06*dt;
+  camX+=(tCamX-camX)*.07*dt;camY+=(tCamY-camY)*.07*dt;zoom+=(tZoom-zoom)*.06*dt;
   orb.trail.push({wx:orb.wx,wy:orb.wy});if(orb.trail.length>40)orb.trail.shift();
   parts.forEach(function(p){p.wx+=p.vx*dt;p.wy+=p.vy*dt;p.vx*=Math.pow(.91,dt);p.vy*=Math.pow(.91,dt);p.vy+=.07*dt;p.life-=.028*dt;});
   parts=parts.filter(function(p){return p.life>0;});
@@ -2374,56 +2276,29 @@ function initBgStars(){
 function drawGalaxyBg(){
   if(!bgInit)initBgStars();
   var time=Date.now()*.001;
-  var isZen=currentMode==='easy';
-  // Nebula clouds — richer in Zen mode
+  // Subtle nebula clouds — very faint opal colors
   var nebulas=isNight?
     [{x:.3,y:.4,col:'rgba(167,139,250,.04)'},{x:.7,y:.6,col:'rgba(110,231,183,.03)'},{x:.5,y:.2,col:'rgba(249,168,212,.03)'}]:
     [{x:.3,y:.4,col:'rgba(100,80,180,.03)'},{x:.7,y:.6,col:'rgba(60,160,120,.025)'},{x:.5,y:.2,col:'rgba(180,100,140,.025)'}];
-  if(isZen){
-    // Extra zen nebula layers — slow aurora
-    nebulas=nebulas.concat([
-      {x:.5,y:.5,col:'rgba(139,92,246,.06)'},
-      {x:.2,y:.7,col:'rgba(99,102,241,.05)'},
-      {x:.8,y:.3,col:'rgba(167,139,250,.05)'},
-      {x:.6,y:.8,col:'rgba(196,181,253,.04)'}
-    ]);
-  }
-  var speedMult=isZen?.4:1;
   for(var n=0;n<nebulas.length;n++){
     var nb=nebulas[n];
-    var nx=nb.x*W+Math.sin(time*.15*speedMult+n*2)*W*(isZen?.12:.08);
-    var ny=nb.y*H+Math.cos(time*.12*speedMult+n*1.7)*H*(isZen?.10:.06);
-    var nr=Math.min(W,H)*(isZen?.5:.35);
+    var nx=nb.x*W+Math.sin(time*.15+n*2)*W*.08;
+    var ny=nb.y*H+Math.cos(time*.12+n*1.7)*H*.06;
+    var nr=Math.min(W,H)*.35;
     var grad=ctx.createRadialGradient(nx,ny,0,nx,ny,nr);
     grad.addColorStop(0,nb.col);
     grad.addColorStop(1,'transparent');
     ctx.fillStyle=grad;
     ctx.fillRect(0,0,W,H);
   }
-  // Aurora wave in zen mode
-  if(isZen){
-    var auroraY=H*.35+Math.sin(time*.2)*H*.08;
-    var ag=ctx.createLinearGradient(0,auroraY-60,0,auroraY+60);
-    ag.addColorStop(0,'transparent');
-    ag.addColorStop(.5,'rgba(139,92,246,0.04)');
-    ag.addColorStop(1,'transparent');
-    ctx.fillStyle=ag;ctx.fillRect(0,auroraY-60,W,120);
-    var auroraY2=H*.65+Math.cos(time*.15)*H*.06;
-    var ag2=ctx.createLinearGradient(0,auroraY2-40,0,auroraY2+40);
-    ag2.addColorStop(0,'transparent');
-    ag2.addColorStop(.5,'rgba(99,102,241,0.03)');
-    ag2.addColorStop(1,'transparent');
-    ctx.fillStyle=ag2;ctx.fillRect(0,auroraY2-40,W,80);
-  }
-  // Stars — slower twinkle in zen
+  // Distant stars — soft twinkle
   for(var s=0;s<bgStars.length;s++){
     var st=bgStars[s];
     var sx=st.x*W,sy=st.y*H;
-    var twinkleSpeed=isZen?.6:1.5;
-    var twinkle=.3+Math.sin(time*twinkleSpeed+st.phase)*.25;
-    ctx.globalAlpha=twinkle*(isNight?(isZen?.8:.6):.25);
-    ctx.beginPath();ctx.arc(sx,sy,st.r*(isZen?1.2:1),0,6.28);
-    ctx.fillStyle=isZen?(Math.random()>.5?'#c4b5fd':'#a5b4fc'):isNight?'#ffffff':'rgba(80,60,120,.8)';
+    var twinkle=.3+Math.sin(time*1.5+st.phase)*.25;
+    ctx.globalAlpha=twinkle*(isNight?.6:.25);
+    ctx.beginPath();ctx.arc(sx,sy,st.r,0,6.28);
+    ctx.fillStyle=isNight?'#ffffff':'rgba(80,60,120,.8)';
     ctx.fill();
   }
   ctx.globalAlpha=1;
@@ -2486,8 +2361,6 @@ function draw(){
   }
   ctx.beginPath();ctx.arc(os2.x,os2.y,or2,0,6.28);ctx.fillStyle=T.orbCol;ctx.fill();
   var pal2=getPal();ctx.beginPath();ctx.arc(os2.x,os2.y,or2*.5,0,6.28);ctx.fillStyle=pal2[score%pal2.length];ctx.fill();
-  // Cosmic Reflections — drawn last so it's always on top
-  drawZenQuote();
 }
 function loop(ts){var dt=Math.min((ts-lastT)/16.67,3);lastT=ts;draw();update(dt);requestAnimationFrame(loop);}
 
@@ -2512,6 +2385,14 @@ lang=S.lang||'en';
 applyLang();applyTheme();updateThemeSwitcher();
 requestAnimationFrame(function(ts){lastT=ts;loop(ts);});
 showScr('auth');
+
+// Global button click sound
+document.addEventListener('click',function(e){
+  var t=e.target;
+  if(t&&(t.tagName==='BUTTON'||t.closest('button')||t.classList.contains('nt')||t.classList.contains('lang-opt'))){
+    playClick();
+  }
+},true);
 
 // Load Firebase after everything else is ready
 window.addEventListener('load',function(){
