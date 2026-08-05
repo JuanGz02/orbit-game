@@ -75,3 +75,25 @@ android/build/
 android/app/build/
 *.keystore
 !debug.keystore
+
+# DRS hardened — signing / secrets (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.jks
+*.keystore
+*.keystore.*
+*keystore*
+!debug.keystore
+keystore.b64.txt
+*.b64
+SECRETS*
+itch_api_key*
+*_api_key.txt
+serviceAccount*.json
+*-firebase-adminsdk*.json
+google-services.json
+credentials.json
+export_credentials.cfg
